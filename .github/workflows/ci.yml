@@ -1,0 +1,231 @@
+name: CI
+
+# The fast checks only (CI-04): the corpora at full cost run in vectors.yml.
+on:
+  # Branches only: the release workflow calls this one for the tagged commit itself.
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_call:
+  workflow_dispatch:
+
+# A newer push to the same branch or pull request makes a running check pointless.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # The gates, every fast test, the isolation tests among them, and the stack check of the Argon2
+  # C code (`cargo xtask check`).
+  checks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      DPRINT: "0.63.0"
+      DPRINT_SHA256: f58b5d7c13ccd613cfa264f1ae82d4e5db1373f8fe20462bc1126051d111b0ce
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+      # dprint formats the Markdown, JSON, TOML and YAML (CORE-21); dprint.json pins its plugins
+      # with their SHA-256.
+      - name: Install dprint, checked against its SHA-256
+        run: |
+          archive="dprint-x86_64-unknown-linux-gnu.zip"
+          curl --fail --silent --show-error --location --proto '=https' \
+            --output "$RUNNER_TEMP/$archive" \
+            "https://github.com/dprint/dprint/releases/download/$DPRINT/$archive"
+          echo "$DPRINT_SHA256  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          unzip -q "$RUNNER_TEMP/$archive" -d "$RUNNER_TEMP/dprint"
+          echo "$RUNNER_TEMP/dprint" >> "$GITHUB_PATH"
+      - name: Run the fast checks
+        run: cargo xtask check
+
+  # The fast tests on each other system the crate runs on natively (the checks job runs them on
+  # x86-64 Linux), with both copies of the Argon2 core on x86-64 and the portable one on ARM64;
+  # Microsoft's compiler on Windows.
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04-arm, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    # Code for one system alone is compiled only on that system, so warnings fail the job.
+    env:
+      RUSTFLAGS: -D warnings
+    steps:
+      # Git on Windows converts line endings by default. The specification's repository, the
+      # submodule tests/spec, has no attributes that stop it, and the tests check its files against
+      # their SHA-256.
+      - name: Keep the line endings of the repositories
+        run: git config --global core.autocrlf false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+      - name: Run the fast tests
+        run: cargo test --locked
+
+  # Windows with MinGW, the toolchain of a Windows program cross-built on Linux.
+  cross:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TARGET: x86_64-pc-windows-gnu
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install the pinned Rust toolchain, the target and MinGW
+        run: |
+          rustup show
+          rustup target add "$TARGET"
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends gcc-mingw-w64-x86-64
+      - name: Lint
+        run: cargo clippy --locked --all-targets --target "$TARGET" -- -D warnings
+      - name: Build the tests
+        run: cargo build --locked --tests --target "$TARGET"
+
+  # Android builds only: running needs a device or an emulator with an app's thread discipline.
+  android:
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [aarch64-linux-android, x86_64-linux-android]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      TARGET: ${{ matrix.target }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install the pinned Rust toolchain and the target
+        run: |
+          rustup show
+          rustup target add "$TARGET"
+      # The NDK of the runner image, with its clang for API level 26 as the C compiler and linker.
+      - name: Use the NDK's clang for API 26
+        run: |
+          bin="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
+          test -x "$bin/${TARGET}26-clang"
+          name="${TARGET//-/_}"
+          {
+            echo "CC_$name=$bin/${TARGET}26-clang"
+            echo "AR_$name=$bin/llvm-ar"
+            echo "CARGO_TARGET_${name^^}_LINKER=$bin/${TARGET}26-clang"
+          } >> "$GITHUB_ENV"
+      - name: Lint
+        run: cargo clippy --locked --all-targets --target "$TARGET" -- -D warnings
+      - name: Build the tests
+        run: cargo build --locked --tests --target "$TARGET"
+
+  # iOS builds only, with Xcode's clang: running needs a device or a simulator. The C code and Rust
+  # target one iOS version, as an Xcode build sets it; the stack probes of the C code's large
+  # frames need iOS 13. The lint also covers the macOS host, whose code no other job lints.
+  ios:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    env:
+      TARGET: aarch64-apple-ios
+      IPHONEOS_DEPLOYMENT_TARGET: "13.0"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install the pinned Rust toolchain and the target
+        run: |
+          rustup show
+          rustup target add "$TARGET"
+      - name: Lint
+        run: |
+          cargo clippy --locked --all-targets --target "$TARGET" -- -D warnings
+          cargo clippy --locked --all-targets -- -D warnings
+      - name: Build the tests
+        run: cargo build --locked --tests --target "$TARGET"
+
+  # WebAssembly has no C and no native engine. The tests run under WASI in a pinned wasmtime, with
+  # the corpora mapped at the path they were built with; the crate-doc example, which is native,
+  # is left out. The checks job lints wasm32.
+  wasm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      WASMTIME: v49.0.2
+      WASMTIME_SHA256: a4d6e9e3a5a60f527cf7793d674c48930c80c2e8977995b8a275cad3254b9322
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install the pinned Rust toolchain and the WASI target
+        run: |
+          rustup show
+          rustup target add wasm32-wasip1
+      - name: Build
+        run: cargo build --locked --target wasm32-unknown-unknown
+      - name: Install wasmtime, checked against its SHA-256
+        run: |
+          archive="wasmtime-$WASMTIME-x86_64-linux.tar.xz"
+          curl --fail --silent --show-error --location --proto '=https' \
+            --output "$RUNNER_TEMP/$archive" \
+            "https://github.com/bytecodealliance/wasmtime/releases/download/$WASMTIME/$archive"
+          echo "$WASMTIME_SHA256  $RUNNER_TEMP/$archive" | sha256sum --check --strict
+          tar --extract --xz --file "$RUNNER_TEMP/$archive" --directory "$RUNNER_TEMP"
+          echo "$RUNNER_TEMP/wasmtime-$WASMTIME-x86_64-linux" >> "$GITHUB_PATH"
+      - name: Run the tests
+        run: |
+          tests="$GITHUB_WORKSPACE/tests"
+          export CARGO_TARGET_WASM32_WASIP1_RUNNER="wasmtime run --dir $tests::$tests"
+          cargo test --locked --target wasm32-wasip1 --tests
+
+  # The oldest Rust the manifest's rust-version accepts.
+  msrv:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Run the fast tests on the minimum Rust
+        run: |
+          msrv="$(sed -n 's/^rust-version = "\(.*\)"$/\1/p' Cargo.toml).0"
+          rustup toolchain install "$msrv" --profile minimal
+          cargo "+$msrv" test --locked
+
+  # The package holds exactly the tracked files of the manifest's include list, and Cargo
+  # accepts it for publication.
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+      - name: Compare the package's files with the expected ones
+        run: |
+          diff <(cargo package --locked --list | LC_ALL=C sort) <(
+            {
+              git ls-files src vendor build.rs LICENSE-MIT LICENSE-APACHE THIRD_PARTY_NOTICES.md README.md CHANGELOG.md
+              # Written by Cargo.
+              printf '%s\n' .cargo_vcs_info.json Cargo.lock Cargo.toml Cargo.toml.orig
+            } | LC_ALL=C sort
+          )
+      - name: Check the package for publication
+        run: cargo publish --locked --dry-run

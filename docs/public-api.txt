@@ -1,0 +1,25 @@
+# The public items of mhfe-core, which `cargo xtask public-api` compares with src/: one line
+# per item, with its kind, its path and the attributes that tell a user of the crate where it
+# exists and whether it may grow. Methods, fields and associated items are not listed.
+struct mhfe_core::Mhfe
+struct mhfe_core::Recovery
+struct mhfe_core::Reading
+struct mhfe_core::Phrase
+struct mhfe_core::Password
+struct mhfe_core::WorkFactor
+enum mhfe_core::Suite #[non_exhaustive]
+enum mhfe_core::Error #[non_exhaustive]
+trait mhfe_core::Argon2Engine
+struct mhfe_core::NativeArgon2 #[cfg(not(target_arch = "wasm32"))]
+struct mhfe_core::protect::Secret
+struct mhfe_core::protect::Isolation #[non_exhaustive]
+fn mhfe_core::protect::write_secret #[cfg(not(target_arch = "wasm32"))]
+struct mhfe_core::wallet_check::Seed
+fn mhfe_core::wallet_check::draw
+struct mhfe_core::repair::Card
+struct mhfe_core::repair::Repaired
+struct mhfe_core::repair::Change
+enum mhfe_core::repair::Error #[non_exhaustive]
+static mhfe_core::password_check::EFF_WORDS
+fn mhfe_core::password_check::check_word
+enum mhfe_core::password_check::Check

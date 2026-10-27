@@ -1,0 +1,40 @@
+name: Test vectors
+
+# The corpora at full cost (tests/full_cost.rs): every transcript and recovery case of both suites
+# through the vendored Argon2id engine, about a thousand calls of 2 or 3 GiB, in two shares that
+# run at once. Hours, so only on request and for every version tag, on its own, beside release.yml,
+# which does not wait for it, as in mhfe; its result shows on the tag and in the README's badge, and
+# the maintainer publishes only after it passed. Never on a push to a branch (CI-04).
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+# A newer request for the same branch or tag makes a running replay pointless.
+concurrency:
+  group: vectors-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  full-cost:
+    strategy:
+      fail-fast: false
+      matrix:
+        share: [0, 1]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 330
+    env:
+      MHFE_VECTOR_SHARE: ${{ matrix.share }}/2
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          submodules: true
+      - name: Install the pinned Rust toolchain
+        run: rustup show
+      - name: Replay the corpora at full cost
+        run: cargo test --locked --release --test full_cost -- --ignored --nocapture

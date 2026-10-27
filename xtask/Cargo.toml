@@ -1,0 +1,25 @@
+[package]
+name = "xtask"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99"
+description = "The tools of the mhfe-core repository: its gates and fast checks, run as `cargo xtask <task>`"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+# The SHA-256 of the vendored files, at the version the crate itself uses.
+sha2 = { version = "0.11", default-features = false }
+
+[lints.rust]
+unsafe_code = "forbid"
+unreachable_pub = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

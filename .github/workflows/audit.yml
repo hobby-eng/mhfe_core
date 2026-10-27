@@ -1,0 +1,40 @@
+name: RustSec audit
+
+# Cargo.lock against the RustSec advisory database, on a change of the dependencies and once a
+# week. Follows mhfe's .github/workflows/audit.yml: a change goes to both.
+on:
+  # Branches only, as for CI: a release tag adds nothing to check.
+  push:
+    branches: ["**"]
+    paths:
+      - Cargo.toml
+      - Cargo.lock
+      - .github/workflows/audit.yml
+  pull_request:
+    paths:
+      - Cargo.toml
+      - Cargo.lock
+      - .github/workflows/audit.yml
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: rustsec-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Audit Cargo.lock against RustSec
+        uses: actions-rust-lang/audit@72c09e02f132669d52284a3323acdb503cfc1a24 # v1.2.7
+        with:
+          createIssues: false

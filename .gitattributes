@@ -1,0 +1,3 @@
+# Check out every file with exactly the bytes it has in the repository. Git on Windows converts
+# line endings by default, which would change vendored files, test vectors and their checksums.
+* -text

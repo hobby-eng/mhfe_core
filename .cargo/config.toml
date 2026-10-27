@@ -1,0 +1,3 @@
+# `cargo xtask <task>` runs the repository's tools (TOOL-01): see xtask/src/main.rs.
+[alias]
+xtask = "run --quiet --locked --package xtask --"

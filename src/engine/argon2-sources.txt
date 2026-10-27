@@ -1,0 +1,24 @@
+# The C files of the Argon2 engine that build.rs and a WebAssembly host's Emscripten build both
+# compile, the one list of them: one file per line as "<part> <path>", the path from the package
+# root. The parts:
+#
+#   common    every build: the vendored code around the Argon2 core
+#   portable  the portable core: native builds off x86-64, and the Emscripten build, where the
+#             SIMD core opt.c gave no speed-up and would exclude runtimes without WebAssembly SIMD
+#   wrap      MHFE's own wrapper: mhfe_argon2_ctx(), the only function Rust calls, and the
+#             fill_segment() that core.c calls
+#
+# The renaming rule: every copy of the core is compiled with
+# -Dfill_segment=mhfe_fill_segment_<copy>, so that the wrapper's fill_segment() is the only one:
+# <copy> is "ref" for the portable core, and "sse2" and "ssse3" for the two copies of
+# vendor/phc-winner-argon2/src/opt.c that build.rs compiles in its place on x86-64.
+#
+# A build takes the files of each part in the order of these lines; another order would change its
+# bytes.
+common vendor/phc-winner-argon2/src/argon2.c
+common vendor/phc-winner-argon2/src/core.c
+common vendor/phc-winner-argon2/src/encoding.c
+common vendor/phc-winner-argon2/src/thread.c
+portable vendor/phc-winner-argon2/src/ref.c
+common vendor/phc-winner-argon2/src/blake2/blake2b.c
+wrap src/engine/argon2_wrap.c

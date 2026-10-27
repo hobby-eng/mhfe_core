@@ -1,0 +1,101 @@
+[package]
+name = "mhfe-core"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99"
+authors = ["Sergei Semenov"]
+description = "Experimental Memory-Hard Feistel Encryption for BIP39 mnemonics: suites 3 and 4 and their profiles"
+repository = "https://github.com/hobby-eng/mhfe_core"
+license = "MIT OR Apache-2.0"
+# Cargo refuses two packages of one `links` name in a build, so two versions of this crate never
+# put the vendored Argon2 C symbols into one program.
+links = "mhfe_argon2"
+# The tests and their corpora stay in the repository.
+include = [
+  "/src/",
+  "/vendor/",
+  "/build.rs",
+  "/LICENSE-MIT",
+  "/LICENSE-APACHE",
+  "/THIRD_PARTY_NOTICES.md",
+  "/README.md",
+  "/CHANGELOG.md",
+]
+
+[dependencies]
+# The English list, the checksum and the BIP39 seed; every call used exists without `alloc`.
+bip39 = { version = "3", default-features = false, features = ["zeroize"] }
+# The round salt.
+blake2 = { version = "0.11", default-features = false, features = ["zeroize"] }
+# The round mask.
+hmac = { version = "0.13", features = ["zeroize"] }
+# The verifier and the wallet-check digest.
+sha2 = { version = "0.11", default-features = false, features = ["zeroize"] }
+# The only requirement that is not a caret: its tables are part of the protocol, and the
+# specification pins Unicode 18.0.0, which 0.1.26 holds and a later 0.1.x may replace.
+unicode-normalization = { version = ">=0.1.26, <0.1.27", default-features = false }
+zeroize = "1.9"
+
+# Pages, locking, dump and fork advice, process protections and the secret writer.
+[target.'cfg(unix)'.dependencies]
+libc = "0.2.191"
+
+# Pages, locking and the working set, error-report exclusion, the access lists of the process and
+# its threads, token integrity and console output.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_System_Memory",
+  "Win32_System_ErrorReporting",
+  "Win32_System_Console",
+  "Win32_System_IO",
+  "Win32_Storage_FileSystem",
+  "Win32_Security",
+  "Win32_Security_Authorization",
+  "Win32_System_Threading",
+  "Win32_System_Diagnostics_ToolHelp",
+] }
+
+[build-dependencies]
+# Compiles the vendored reference Argon2 C code.
+cc = "1.10"
+
+[dev-dependencies]
+# An independent Argon2 implementation, to cross-check the C engine.
+argon2 = { version = "0.6", default-features = false }
+# Reads the test corpora.
+serde_json = "1"
+
+# The tests read the working set of the secret pages (QueryWorkingSetEx).
+[target.'cfg(windows)'.dev-dependencies]
+windows-sys = { version = "0.61", features = ["Win32_System_ProcessStatus"] }
+
+# A `main` of their own: the isolation needs a child process of one thread, and the counting
+# allocator a process without other threads.
+[[test]]
+name = "isolation"
+harness = false
+
+[[test]]
+name = "secret_memory"
+harness = false
+
+# The repository's tools, run as `cargo xtask <task>` (TOOL-01); not part of the package. Each audit
+# harness under docs/audits/ is a crate of its own, with its own lockfile.
+[workspace]
+members = ["xtask"]
+exclude = ["docs/audits"]
+
+[lints.rust]
+unsafe_code = "deny" # "deny", not "forbid": the operating-system modules allow it (RUST-07)
+missing_docs = "deny" # library crates
+unreachable_pub = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07
