@@ -1,0 +1,22 @@
+[package]
+name = "aud002-verify"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "AUD-002 verification of mhfe-core's build and release fixes: gate-skip, macos-lint, version"
+
+# Not part of any workspace: an audit harness is a crate of its own, with its own lockfile. The
+# folder nfkd-shapes/ below is another such crate.
+[workspace]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

@@ -1,0 +1,27 @@
+# AUD-002 documentation checks of mhfe-core: see README.md beside this file.
+[package]
+name = "aud002-doc-claims"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99"
+publish = false
+
+[dependencies]
+# The SHA-256 of the withdrawn package given as input, at the version mhfe-core itself locks.
+sha2 = { version = "=0.11.1", default-features = false }
+
+# A crate of its own: the repository has no workspace at dec9c81 and leaves docs/audits out of its
+# workspace at the release commit.
+[workspace]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

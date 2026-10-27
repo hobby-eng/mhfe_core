@@ -1,0 +1,27 @@
+[package]
+name = "aud002-protocol-adapter"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "AUD-002 audit harness: the public API of mhfe-core behind JSON lines, and its NFKD cost"
+
+# Not a member of the repository's workspace, which leaves docs/audits out.
+[workspace]
+
+[dependencies]
+mhfe-core = { path = "../../../../.." }
+serde_json = "=1.0.154"
+# The stand-in Argon2id engine, a SHA-256 that the Python side reproduces.
+sha2 = "=0.11.1"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15 (the repository's clippy.toml)
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

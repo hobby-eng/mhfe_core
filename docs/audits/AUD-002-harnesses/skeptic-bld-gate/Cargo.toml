@@ -1,0 +1,21 @@
+[package]
+name = "aud002-skeptic-bld-gate"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "AUD-002 skeptic check: whether the code-rules gate of mhfe-core reads docs/audits/"
+
+# Not part of any workspace: each audit harness is a crate of its own, with its own lockfile.
+[workspace]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

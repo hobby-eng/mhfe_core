@@ -1,0 +1,28 @@
+# AUD-002 api harnesses of mhfe-core: the probes and the public surface, one subcommand each. A
+# crate of its own, built against the crate under review by path, with its own Cargo.lock. The
+# copies gate with tests/ read is the crate copies-with-tests/ of this folder.
+[package]
+name = "aud002-api"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+# Not a member of the repository's workspace, which leaves docs/audits out.
+[workspace]
+
+[dependencies]
+mhfe-core = { path = "../../../.." }
+# Reads the rustdoc JSON of the public surface.
+serde_json = "=1.0.154"
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15 (the repository's clippy.toml)
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

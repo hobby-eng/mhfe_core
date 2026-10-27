@@ -1,0 +1,27 @@
+# AUD-002 skeptic check of the stack-floor finding: a control call on the same small threads, the
+# free stack such a thread gives, and a raw pthread as a C host would make one.
+[package]
+name = "aud002-skeptic-api-stack"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+# Not a member of the repository's workspace, which leaves docs/audits out.
+[workspace]
+
+[dependencies]
+mhfe-core = { path = "../../../.." }
+# The thread stack bounds and the C host's threads.
+libc = "=0.2.191"
+
+[lints.rust]
+unsafe_code = "deny" # "deny", not "forbid": the pthread calls allow it at the place
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15 (the repository's clippy.toml)
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

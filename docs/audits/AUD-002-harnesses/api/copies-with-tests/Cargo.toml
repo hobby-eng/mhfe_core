@@ -1,0 +1,24 @@
+# AUD-002 api harness of mhfe-core: the copies gate of the release tree over src/ and tests/ of a
+# tree. A crate of its own, with its own Cargo.lock, apart from the api crate: it compiles the
+# gate's source from xtask/src/, which only the release tree has, while the api probes build at
+# dec9c81 too.
+[package]
+name = "aud002-api-copies-with-tests"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+# Not a member of the repository's workspace, which leaves docs/audits out.
+[workspace]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

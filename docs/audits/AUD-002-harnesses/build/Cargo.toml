@@ -1,0 +1,30 @@
+[package]
+name = "aud002-build"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99"
+publish = false
+description = "The build harnesses of audit AUD-002 of mhfe-core, one subcommand per check"
+
+# Not part of any workspace: the root manifest is a plain package at dec9c81 and leaves
+# docs/audits out of its workspace at the release commit.
+[workspace]
+
+[dependencies]
+# The SHA-256 of packages and downloads, at the version mhfe-core's own lockfile holds.
+sha2 = { version = "=0.11.1", default-features = false }
+# The GitHub tree listing and the registries' answers, at the version of mhfe-core's tests.
+serde_json = { version = "=1.0.154" }
+
+[lints.rust]
+unsafe_code = "forbid"
+unreachable_pub = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

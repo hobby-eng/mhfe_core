@@ -1,0 +1,28 @@
+[package]
+name = "aud002-skeptic-sec-nfkd"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "AUD-002 skeptic check of the NFKD passphrase cost finding in mhfe-core"
+
+# Not a member of the repository's workspace, which leaves docs/audits out.
+[workspace]
+
+[dependencies]
+mhfe-core = { path = "../../../.." }
+# The expected seed, computed without the crate: BIP39's PBKDF2 of the reference NFKD.
+bip39 = { version = "=3.0.0", default-features = false }
+# The reference NFKD.
+unicode-normalization = { version = "=0.1.26", default-features = false }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15 (the repository's clippy.toml)
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

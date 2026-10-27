@@ -1,0 +1,6 @@
+# CORE-15: at most 150 lines of code per function (RUST-01).
+too-many-lines-threshold = 150
+# Tests may unwrap, expect and panic (RUST-01, RUST-05): the gate's unit tests come with its source.
+allow-unwrap-in-tests = true
+allow-expect-in-tests = true
+allow-panic-in-tests = true

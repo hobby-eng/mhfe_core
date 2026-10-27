@@ -1,0 +1,28 @@
+[package]
+name = "aud002-verify-nfkd-shapes"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "AUD-002 verification of the NFKD writer fix in mhfe-core"
+
+# Not part of any workspace: an audit harness is a crate of its own, with its own lockfile.
+[workspace]
+
+[dependencies]
+mhfe-core = { path = "../../../../.." }
+# The expected seed: BIP39's PBKDF2 over the passphrase normalized by unicode-normalization's own
+# iterator, without the crate's NFKD writer. Both are the versions mhfe-core resolves to.
+bip39 = { version = "=3.0.0", default-features = false }
+unicode-normalization = { version = "=0.1.26", default-features = false }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

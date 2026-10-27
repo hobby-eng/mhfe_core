@@ -1,0 +1,24 @@
+# AUD-002 skeptic check of the Windows `no_core_dumps` claim of mhfe-core: see README.md beside
+# this file.
+[package]
+name = "aud002-skeptic-doc-wer"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99"
+publish = false
+
+# A crate of its own: the repository has no workspace at dec9c81 and leaves docs/audits out of its
+# workspace at the release commit.
+[workspace]
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

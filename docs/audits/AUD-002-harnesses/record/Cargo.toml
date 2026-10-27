@@ -1,0 +1,29 @@
+[package]
+name = "aud002-validate-record"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "AUD-002 record check: the audit record before it is committed"
+
+# Not part of any workspace: an audit harness is a crate of its own, with its own lockfile.
+[workspace]
+
+[dependencies]
+# The patterns of the Markdown record and of the schema's "pattern" keywords.
+regex = "=1.13.1"
+# Reads the JSON record and the schema, and writes the result.
+serde_json = "=1.0.151"
+# The SHA-256 of the cited logs, the record and the schema; the version mhfe-core resolves to.
+sha2 = { version = "=0.11.1", default-features = false }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07
