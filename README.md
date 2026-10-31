@@ -2,7 +2,6 @@
 
 [![CI](https://github.com/hobby-eng/mhfe_core/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hobby-eng/mhfe_core/actions/workflows/ci.yml)
 [![Release](https://github.com/hobby-eng/mhfe_core/actions/workflows/release.yml/badge.svg)](https://github.com/hobby-eng/mhfe_core/actions/workflows/release.yml)
-[![Test vectors](https://github.com/hobby-eng/mhfe_core/actions/workflows/vectors.yml/badge.svg?event=push)](https://github.com/hobby-eng/mhfe_core/actions/workflows/vectors.yml)
 [![RustSec audit](https://github.com/hobby-eng/mhfe_core/actions/workflows/audit.yml/badge.svg)](https://github.com/hobby-eng/mhfe_core/actions/workflows/audit.yml)
 [![Build provenance: GitHub attestations](https://img.shields.io/badge/build%20provenance-GitHub%20attestations-2ea44f)](https://github.com/hobby-eng/mhfe_core/attestations)
 [![License: MIT OR Apache-2.0](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](#licence)
