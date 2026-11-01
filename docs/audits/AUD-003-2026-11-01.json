@@ -218,6 +218,27 @@
       "reviewer": "bld"
     },
     {
+      "checkId": "CHECK-UI-001",
+      "outcome": "not-applicable",
+      "method": "No core application pages, viewports or UI files.",
+      "evidence": "All work runs on the pool; the caller's stack and the heap hold no copy (matrix-*.log, first snapshot). Ownership is as SECURITY.md says, with one copy not reached: AUD-003 finding on H0.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-UI-002",
+      "outcome": "not-applicable",
+      "method": "No navigation, input widgets or browser UI state.",
+      "evidence": "All work runs on the pool; the caller's stack and the heap hold no copy (matrix-*.log, first snapshot). Ownership is as SECURITY.md says, with one copy not reached: AUD-003 finding on H0.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-UI-003",
+      "outcome": "not-applicable",
+      "method": "No reveal, help, QR or accessibility UI.",
+      "evidence": "All work runs on the pool; the caller's stack and the heap hold no copy (matrix-*.log, first snapshot). Ownership is as SECURITY.md says, with one copy not reached: AUD-003 finding on H0.",
+      "reviewer": "bld"
+    },
+    {
       "checkId": "CHECK-DOC-001",
       "outcome": "passed",
       "method": "Compared the README, SECURITY.md, the 0.2.0 section of CHANGELOG.md and the crate docs with the code, and re-measured two documented figures.",

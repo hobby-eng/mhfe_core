@@ -58,11 +58,11 @@ impl<E: Argon2Engine> Mhfe<E> {
     /// `on_round(round, 24)` comes before each of rounds 1 to 24, the last twelve those of the
     /// check of step 6. `on_unchecked(container)` comes once, after step 5 and before round 13, so
     /// that a person can write the container down, marked as not yet verified, during the check.
-    /// `Break` from either stops with [`Error::Cancelled`]. Only `Ok` returns the container, after
-    /// the check passed.
+    /// `Break` from either stops there and comes back as the result, which is otherwise
+    /// `Continue` with the container, after the check passed.
     ///
     /// Errors: [`Error::SameLengthNeedsShortPhrase`] before any Argon2id work, those of the engine,
-    /// [`Error::FixedPoint`], [`Error::CreationCheckFailed`], [`Error::Cancelled`].
+    /// [`Error::FixedPoint`], [`Error::CreationCheckFailed`].
     pub fn encrypt(
         &mut self,
         original: &Phrase,
@@ -70,7 +70,7 @@ impl<E: Argon2Engine> Mhfe<E> {
         suite: Suite,
         on_round: &mut dyn FnMut(u32, u32) -> ControlFlow<()>,
         on_unchecked: &mut dyn FnMut(&Phrase) -> ControlFlow<()>,
-    ) -> Result<Phrase, Error> {
+    ) -> Result<ControlFlow<(), Phrase>, Error> {
         stack::cleared(|| {
             let words = original.words();
             if suite == Suite::SameLength && words == STATE_WORDS {
@@ -82,13 +82,16 @@ impl<E: Argon2Engine> Mhfe<E> {
                 // Suite 4 encrypts the entropy itself: there is no room for a verifier.
                 Suite::SameLength => entropy,
             };
-            let y = self
+            let ControlFlow::Continue(y) = self
                 .permutation(password, suite, words)
-                .forward(x.as_bytes(), &mut |round| on_round(round, 2 * ROUNDS))?;
+                .forward(x.as_bytes(), &mut |round| on_round(round, 2 * ROUNDS))?
+            else {
+                return Ok(ControlFlow::Break(()));
+            };
             reject_fixed_point(x.as_bytes(), y.as_bytes())?;
             let container = Phrase::encode(y.as_bytes())?;
             if on_unchecked(&container).is_break() {
-                return Err(Error::Cancelled);
+                return Ok(ControlFlow::Break(()));
             }
             // Step 6 starts from the words, decoded again, which checks their encoding as well as
             // the rounds.
@@ -96,13 +99,16 @@ impl<E: Argon2Engine> Mhfe<E> {
                 .ok()
                 .filter(|decoded| decoded.words() == container.words())
                 .ok_or(Error::CreationCheckFailed)?;
-            let back = self
+            let ControlFlow::Continue(back) = self
                 .permutation(password, suite, words)
                 .inverse(decoded.entropy().as_bytes(), &mut |round| {
                     on_round(ROUNDS + round, 2 * ROUNDS)
-                })?;
+                })?
+            else {
+                return Ok(ControlFlow::Break(()));
+            };
             if back.as_bytes() == x.as_bytes() {
-                Ok(container)
+                Ok(ControlFlow::Continue(container))
             } else {
                 Err(Error::CreationCheckFailed)
             }
@@ -113,11 +119,12 @@ impl<E: Argon2Engine> Mhfe<E> {
     /// selects the suite, for [`Recovery::readings`]. `stated_words` and `suite`, as the user
     /// supplied them with the container, are checked against it before any Argon2id work (the
     /// specification's admission table), so a container is never recovered under another suite.
-    /// `on_round(round, 12)` comes before each round; `Break` stops with [`Error::Cancelled`].
+    /// `on_round(round, 12)` comes before each round; its `Break` stops there and comes back as the
+    /// result.
     ///
     /// Errors, before any Argon2id work: [`Error::SuiteNotAdmitted`], then those of
     /// [`Recovery::readings`] for `stated_words`, [`Error::InvalidWordCount`] and
-    /// [`Error::LengthNotAdmitted`]; then those of the engine and [`Error::Cancelled`].
+    /// [`Error::LengthNotAdmitted`]; then those of the engine.
     #[expect(
         clippy::expect_used,
         reason = "every word count of a phrase selects a suite"
@@ -129,7 +136,7 @@ impl<E: Argon2Engine> Mhfe<E> {
         stated_words: Option<usize>,
         suite: Option<Suite>,
         on_round: &mut dyn FnMut(u32, u32) -> ControlFlow<()>,
-    ) -> Result<Recovery, Error> {
+    ) -> Result<ControlFlow<(), Recovery>, Error> {
         stack::cleared(|| {
             let words = container.words();
             let selected = Suite::of_container(words).expect("a phrase has 12 to 24 words");
@@ -144,7 +151,7 @@ impl<E: Argon2Engine> Mhfe<E> {
                 .inverse(container.entropy().as_bytes(), &mut |round| {
                     on_round(round, ROUNDS)
                 })?;
-            Ok(Recovery::new(selected, x))
+            Ok(x.map_continue(|x| Recovery::new(selected, x)))
         })
     }
 
@@ -215,6 +222,8 @@ mod tests {
                     &mut every_round,
                     &mut unchecked,
                 )
+                .unwrap()
+                .continue_value()
                 .unwrap();
             let expected_words = if suite == Suite::SameLength {
                 words
@@ -231,6 +240,8 @@ mod tests {
                     Some(suite),
                     &mut every_round,
                 )
+                .unwrap()
+                .continue_value()
                 .unwrap();
             assert_eq!(recovery.suite(), suite);
             let readings = recovery.readings(Some(words)).unwrap();
@@ -266,6 +277,8 @@ mod tests {
                     ControlFlow::Continue(())
                 },
             )
+            .unwrap()
+            .continue_value()
             .unwrap();
         let expected: Vec<(u32, u32)> = (1..=24).map(|round| (round, 24)).collect();
         assert_eq!(rounds, expected);
@@ -336,7 +349,7 @@ mod tests {
                 ControlFlow::Continue(())
             },
         );
-        assert_eq!(stopped_at_round_2.unwrap_err(), Error::Cancelled);
+        assert!(stopped_at_round_2.unwrap().is_break());
         assert!(!shown);
 
         let mut last_round = 0;
@@ -350,7 +363,7 @@ mod tests {
             },
             &mut |_| ControlFlow::Break(()),
         );
-        assert_eq!(stopped_when_shown.unwrap_err(), Error::Cancelled);
+        assert!(stopped_when_shown.unwrap().is_break());
         assert_eq!(last_round, 12, "the check never started");
 
         let container = cipher
@@ -361,6 +374,8 @@ mod tests {
                 &mut every_round,
                 &mut unchecked,
             )
+            .unwrap()
+            .continue_value()
             .unwrap();
         let recovery = cipher.decrypt(&container, &password, None, None, &mut |round, _| {
             if round == 5 {
@@ -369,6 +384,6 @@ mod tests {
                 ControlFlow::Continue(())
             }
         });
-        assert_eq!(recovery.err(), Some(Error::Cancelled));
+        assert!(recovery.unwrap().is_break());
     }
 }

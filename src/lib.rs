@@ -56,8 +56,11 @@
 //!     let suite = Suite::TwentyFourWords;
 //!     // The host checks free memory before this ("Resources"): the core only reserves.
 //!     let mut cipher = Mhfe::new(WorkFactor::default())?;
-//!     let container = cipher.encrypt(&phrase, &password, suite,
-//!         &mut |_, _| ControlFlow::Continue(()), &mut |_| ControlFlow::Continue(()))?;
+//!     let ControlFlow::Continue(container) = cipher.encrypt(&phrase, &password, suite,
+//!         &mut |_, _| ControlFlow::Continue(()), &mut |_| ControlFlow::Continue(()))?
+//!     else {
+//!         return Ok(()); // what `Break` from a callback gives; these two never stop
+//!     };
 //!     println!("Suite: {}", suite.id()); // shown at creation
 //!     protect::write_secret(container.as_str())?;
 //!     protect::write_secret("\n")?;

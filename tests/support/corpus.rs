@@ -232,12 +232,16 @@ pub(crate) fn replay(transcript: &Value, suite: Suite, engine: impl Argon2Engine
                 ControlFlow::Continue(())
             },
         )
+        .unwrap()
+        .continue_value()
         .unwrap();
     assert_eq!(container.as_str(), text(transcript, "container"), "{name}");
     assert_eq!(shown, [container.as_str()], "{name}");
 
     let recovery = cipher
         .decrypt(&container, &password, None, None, &mut every_round)
+        .unwrap()
+        .continue_value()
         .unwrap();
     assert_eq!(recovery.suite(), suite, "{name}");
     // Suite 4 records its one reading alone, suite 3 the list the length rules give.
@@ -266,7 +270,7 @@ pub(crate) fn recover(case: &Value, engine: impl Argon2Engine) {
     let mut cipher = Mhfe::with_engine(work_of(case), engine);
     let result = cipher
         .decrypt(&container, &password, stated, None, &mut every_round)
-        .and_then(|recovery| recovery.readings(stated));
+        .and_then(|recovery| recovery.continue_value().unwrap().readings(stated));
     let recorded = case["recovery"].as_array().unwrap();
     let Some(code) = case["error_code"].as_str() else {
         let readings = as_recorded(&result.unwrap());

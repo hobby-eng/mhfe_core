@@ -28,7 +28,8 @@ fits the same backup, and reading or photographing it does not reveal your phras
 
 It still has to stay private: whoever has it can try passwords. That is why every guess is made
 expensive: twelve rounds of Argon2id, 2 GiB of memory and a minute or two each by default. You pay
-that once to recover your phrase; someone guessing pays it for every password they try.
+that once to recover your phrase; someone guessing pays nearly all of it for every password they
+try.
 
 mhfe-core is the Rust library that does this work, and the `mhfe` tool is built on it. It implements
 the published [MHFE specification](https://github.com/hobby-eng/mhfe-spec) 0.7.0, so a recovery does

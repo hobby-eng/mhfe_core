@@ -78,6 +78,9 @@ impl Geometry {
     }
 }
 
+/// The state after the rounds, or the `Break` of their callback.
+type Rounds = Result<ControlFlow<(), Secret>, Error>;
+
 /// The permutation for one password, one work factor and one suite's geometry.
 pub(crate) struct Permutation<'a> {
     pub(crate) engine: &'a mut dyn Argon2Engine,
@@ -87,22 +90,22 @@ pub(crate) struct Permutation<'a> {
 }
 
 impl Permutation<'_> {
-    /// `Y = Perm(X)`: rounds 0 to 11. `on_round` gets 1 to 12 before each round; `Break` stops
-    /// before that round with [`Error::Cancelled`].
+    /// `Y = Perm(X)`: rounds 0 to 11. `on_round` gets 1 to 12 before each round; its `Break` stops
+    /// before that round and comes back as the result.
     pub(crate) fn forward(
         &mut self,
         x: &[u8],
         on_round: &mut dyn FnMut(u32) -> ControlFlow<()>,
-    ) -> Result<Secret, Error> {
+    ) -> Rounds {
         let mut space = Workspace::new(self.geometry, x);
         for round in 0..ROUNDS {
             if on_round(round + 1).is_break() {
-                return Err(Error::Cancelled);
+                return Ok(ControlFlow::Break(()));
             }
             // L_{i+1} = R_i and R_{i+1} = L_i XOR M_i: the left half takes the mask.
             self.round(&mut space, round, Side::Left)?;
         }
-        Ok(space.into_state())
+        Ok(ControlFlow::Continue(space.into_state()))
     }
 
     /// `X = Perm^-1(Y)`: rounds 11 down to 0, while `on_round` still counts from 1 to 12.
@@ -110,17 +113,17 @@ impl Permutation<'_> {
         &mut self,
         y: &[u8],
         on_round: &mut dyn FnMut(u32) -> ControlFlow<()>,
-    ) -> Result<Secret, Error> {
+    ) -> Rounds {
         let mut space = Workspace::new(self.geometry, y);
         for (step, round) in (1..).zip((0..ROUNDS).rev()) {
             if on_round(step).is_break() {
-                return Err(Error::Cancelled);
+                return Ok(ControlFlow::Break(()));
             }
             // R_i = L_{i+1}, so the mask comes from the left half; then L_i = R_{i+1} XOR M_i: the
             // right half takes the mask.
             self.round(&mut space, round, Side::Right)?;
         }
-        Ok(space.into_state())
+        Ok(ControlFlow::Continue(space.into_state()))
     }
 
     /// One round in place, in either direction: the `masked` half takes `RoundMask(i, R)` of the
@@ -298,13 +301,9 @@ mod tests {
         let mut engine = HashEngine;
         let mut permutation = permutation(&mut engine, &password);
         let x: [u8; STATE_BYTES] = std::array::from_fn(|index| index as u8);
-        let y = permutation
-            .forward(&x, &mut every_permutation_round)
-            .unwrap();
+        let y = finished(permutation.forward(&x, &mut every_permutation_round));
         assert_ne!(y.as_bytes(), x);
-        let back = permutation
-            .inverse(y.as_bytes(), &mut every_permutation_round)
-            .unwrap();
+        let back = finished(permutation.inverse(y.as_bytes(), &mut every_permutation_round));
         assert_eq!(back.as_bytes(), x);
     }
 
@@ -322,10 +321,13 @@ mod tests {
         permutation.round(&mut space, 0, Side::Left).unwrap();
         let state = space.into_state();
         assert_eq!(state.as_bytes()[..16], x[16..], "the halves traded places");
-        let y = permutation
-            .forward(&x, &mut every_permutation_round)
-            .unwrap();
+        let y = finished(permutation.forward(&x, &mut every_permutation_round));
         assert_eq!(y.is_locked(), cfg!(any(unix, windows)));
+    }
+
+    /// The state of rounds that no callback stopped.
+    fn finished(rounds: Rounds) -> Secret {
+        rounds.unwrap().continue_value().unwrap()
     }
 
     #[test]
@@ -348,7 +350,7 @@ mod tests {
             } else {
                 permutation.inverse(&[7u8; STATE_BYTES], &mut on_round)
             };
-            assert_eq!(result.unwrap_err(), Error::Cancelled);
+            assert!(result.unwrap().is_break());
             assert_eq!(seen, [1, 2, 3, 4]);
         }
     }
@@ -434,14 +436,10 @@ mod tests {
             let x: Vec<u8> = (0..entropy_of_words(words))
                 .map(|index| index as u8)
                 .collect();
-            let y = permutation
-                .forward(&x, &mut every_permutation_round)
-                .unwrap();
+            let y = finished(permutation.forward(&x, &mut every_permutation_round));
             assert_eq!(y.as_bytes().len(), x.len());
             assert_ne!(y.as_bytes(), x);
-            let back = permutation
-                .inverse(y.as_bytes(), &mut every_permutation_round)
-                .unwrap();
+            let back = finished(permutation.inverse(y.as_bytes(), &mut every_permutation_round));
             assert_eq!(back.as_bytes(), x);
         }
     }
@@ -517,7 +515,8 @@ mod tests {
                     Side::Right => permutation.inverse(&input, &mut every_permutation_round),
                 };
                 let expected = hex(text(record, "output_state_hex"));
-                assert_eq!(output.unwrap().as_bytes(), expected, "{name} {direction}");
+                let output = finished(output);
+                assert_eq!(output.as_bytes(), expected, "{name} {direction}");
             }
         }
     }

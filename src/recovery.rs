@@ -173,10 +173,14 @@ mod tests {
             geometry: Geometry::of(Suite::TwentyFourWords, STATE_WORDS),
         }
         .forward(x, &mut every_permutation_round)
+        .unwrap()
+        .continue_value()
         .unwrap();
         let container = Phrase::from_entropy(y.as_bytes()).unwrap();
         Mhfe::with_engine(WorkFactor::default(), HashEngine)
             .decrypt(&container, &password, None, None, &mut every_round)
+            .unwrap()
+            .continue_value()
             .unwrap()
     }
 

@@ -76,8 +76,6 @@ pub enum Error {
         /// reports too, or the host engine's own code.
         code: i32,
     },
-    /// A callback stopped the operation.
-    Cancelled,
     /// A [`crate::protect::Secret`] has no room for the bytes pushed; nothing was written.
     SecretFull {
         /// Its capacity in bytes.
@@ -138,7 +136,6 @@ impl fmt::Display for Error {
             }
             Self::OutOfMemory => f.write_str("the memory for Argon2id could not be reserved"),
             Self::Argon2Failed { code } => write!(f, "Argon2id failed with code {code}"),
-            Self::Cancelled => f.write_str("the operation was cancelled"),
             Self::SecretFull { capacity } => {
                 write!(f, "a secret buffer of {capacity} bytes is full")
             }

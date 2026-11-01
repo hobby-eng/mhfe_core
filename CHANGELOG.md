@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- A cancelled operation is no longer an error: `Mhfe::encrypt`, `Mhfe::decrypt` and
+  `wallet_check::draw` return `Result<ControlFlow<(), T>, Error>`, and `Break` from a callback comes
+  back as the result. `Error::Cancelled` is gone.
+
 ## 0.2.0 (2026-11-01)
 
 Same specification 0.7.0, same containers, readings, repair words and check words as 0.1.0.

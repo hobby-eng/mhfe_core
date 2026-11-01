@@ -1,0 +1,26 @@
+[package]
+name = "aud004"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "Read-only audit records and bounded public-data probes for AUD-004"
+
+[workspace]
+
+[dependencies]
+mhfe-core = { path = "../../.." }
+regex = "=1.13.1"
+serde_json = "=1.0.154"
+sha2 = { version = "=0.11.1", default-features = false }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny"
+mod_module_files = "deny"
+undocumented_unsafe_blocks = "deny"
