@@ -31,7 +31,7 @@ repository. Never include a real seed phrase, password, private key or wallet fi
 - Argon2id runs on four threads of the engine's own, the lanes and the first and last hash, so
   the caller's stack stays out of it. RustCrypto's `argon2` keeps H0, its hashes and the blocks of
   its compression on those stacks and does not promise to wipe them, so after every call each
-  thread overwrites 128 KiB of its stack. A test on Linux shows that no block of a call stays on
+  thread overwrites 128 KiB of its stack, the one that held H0 from above the frames of the hash. A test on Linux shows that no block of a call stays on
   those stacks; measured on x86-64, the code writes about 11 KiB deep in a release build and 89 KiB
   in an unoptimized one.
 - The Argon2id work area, 2 GiB or more, lies on pages of its own, left out of core dumps on Linux,
@@ -121,9 +121,9 @@ be trusted and offline.
   (`minherit(VM_INHERIT_NONE)`). No call keeps single pages out of a core dump.
 - Isolation, for the whole process: `RLIMIT_CORE` 0; `ptrace(PT_DENY_ATTACH)`, unless a debugger
   already traces the process, which the call would end (`no_memory_reading` is then false; the
-  kernel's answer to the call stands for reading it back, which no public call allows); and the
-  sandbox profile without network.
-- Not covered: root, a process started under a debugger, and file changes.
+  kernel's answer to the call stands for reading it back, which no public call allows); and a
+  sandbox without network or file writes, but for the terminal and `/dev/null`.
+- Not covered: root and a process started under a debugger.
 
 ### iOS
 

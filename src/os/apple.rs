@@ -1,6 +1,6 @@
 //! macOS and iOS: the protections of [`crate::protect::Isolation::enter`], each for the whole
-//! process. macOS refuses a debugger and enters the sandbox profile without network; iOS offers an
-//! app neither, so there only the core-dump limit applies.
+//! process. macOS refuses a debugger and enters a sandbox without network or file writes; iOS offers
+//! an app neither, so there only the core-dump limit applies.
 #![allow(
     unsafe_code,
     reason = "sysctl, ptrace and sandbox_init are foreign functions"
@@ -11,13 +11,15 @@ use crate::protect::Isolation;
 pub(crate) fn enter() -> Isolation {
     let no_core_dumps = super::unix::forbid_core_dumps();
     #[cfg(target_os = "macos")]
-    let (no_memory_reading, no_new_sockets) = (macos::refuse_debuggers(), macos::forbid_network());
+    let (no_memory_reading, (no_new_sockets, no_file_changes)) =
+        (macos::refuse_debuggers(), macos::enter_sandbox());
     #[cfg(not(target_os = "macos"))]
-    let (no_memory_reading, no_new_sockets) = (false, false);
+    let (no_memory_reading, no_new_sockets, no_file_changes) = (false, false, false);
     Isolation {
         no_core_dumps,
         no_memory_reading,
         no_new_sockets,
+        no_file_changes,
         whole_process: true,
         ..Isolation::default()
     }
@@ -30,9 +32,6 @@ mod macos {
     use std::ptr;
 
     unsafe extern "C" {
-        /// The named profile of sandbox.h that forbids all socket-based networking.
-        #[link_name = "kSBXProfileNoNetwork"]
-        static NO_NETWORK: libc::c_char;
         fn sandbox_init(
             profile: *const libc::c_char,
             flags: u64,
@@ -41,8 +40,11 @@ mod macos {
         fn sandbox_free_error(error: *mut libc::c_char);
     }
 
-    /// SANDBOX_NAMED of sandbox.h: the profile is one of the named ones.
-    const SANDBOX_NAMED: u64 = 0x0001;
+    /// The sandbox: no network and no file writes, but for the terminal. Descriptors opened before
+    /// it stay usable.
+    const PROFILE: &std::ffi::CStr = c"(version 1)(allow default)(deny network*)(deny file-write*)\
+        (allow file-write* (literal \"/dev/null\") (literal \"/dev/tty\") \
+        (regex #\"^/dev/ttys[0-9]+$\"))";
     /// P_TRACED of sys/proc.h, as `kern.proc.pid` reports it in `kp_proc.p_flag`.
     const TRACED: i32 = 0x0000_0800;
 
@@ -84,19 +86,30 @@ mod macos {
         (read && size == KINFO_PROC_BYTES).then_some(flags & TRACED != 0)
     }
 
-    /// Enters the sandbox profile without network, for the whole process and for good, and
-    /// returns whether the network reads back as refused.
-    pub(super) fn forbid_network() -> bool {
+    /// Enters the sandbox, for the whole process and for good, and returns whether the network and
+    /// file writes read back as refused.
+    pub(super) fn enter_sandbox() -> (bool, bool) {
         let mut error = ptr::null_mut();
-        // SAFETY: the profile is a NUL-terminated name the system defines; on a failure the call
-        // allocates a message into `error`, freed below.
-        let entered =
-            unsafe { sandbox_init(&raw const NO_NETWORK, SANDBOX_NAMED, &mut error) } == 0;
+        // SAFETY: the profile is a NUL-terminated text; on a failure the call allocates a message
+        // into `error`, freed below.
+        let entered = unsafe { sandbox_init(PROFILE.as_ptr(), 0, &mut error) } == 0;
         if !entered && !error.is_null() {
             // SAFETY: frees the message sandbox_init allocated, once.
             unsafe { sandbox_free_error(error) };
         }
-        network_refused()
+        (network_refused(), file_writes_refused())
+    }
+
+    /// Whether the sandbox refuses a new file in the temporary folder.
+    fn file_writes_refused() -> bool {
+        let path = std::env::temp_dir().join(format!("mhfe-core-{}", std::process::id()));
+        match std::fs::File::create(&path) {
+            Ok(_) => {
+                let _ = std::fs::remove_file(&path);
+                false
+            }
+            Err(error) => error.kind() == io::ErrorKind::PermissionDenied,
+        }
     }
 
     /// Whether the sandbox refuses to bind or connect a UDP socket on the loopback address, which

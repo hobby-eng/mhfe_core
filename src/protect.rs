@@ -188,8 +188,8 @@ impl Isolation {
     ///
     /// macOS, for the whole process: RLIMIT_CORE 0; `ptrace(PT_DENY_ATTACH)`, unless a debugger
     /// already traces the process, which the call would end (`no_memory_reading` is then false;
-    /// otherwise the call's answer stands for a read-back); and the sandbox profile without
-    /// network. Files are not restricted. Not covered: root.
+    /// otherwise the call's answer stands for a read-back); and a sandbox without network or file
+    /// writes, but for the terminal and /dev/null. Not covered: root.
     ///
     /// iOS: RLIMIT_CORE 0 only; an app can neither deny a debugger nor narrow its sandbox, which
     /// already keeps its writes inside its own container.
