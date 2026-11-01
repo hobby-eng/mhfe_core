@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Builds probe-stack under one host profile and scans what the real engine leaves behind.
+#   docs/audits/AUD-003-harnesses/sec/run-matrix.sh <label> [ENV=VALUE ...]
+# Each ENV=VALUE overrides the release profile, such as CARGO_PROFILE_RELEASE_LTO=thin. The build
+# goes to $CARGO_TARGET_DIR/<label>. Exits 1 when a word of a secret stays on a thread's stack.
+set -uo pipefail
+label=$1
+shift
+here=$(cd "$(dirname "$0")" && pwd)
+target="${CARGO_TARGET_DIR:?set CARGO_TARGET_DIR}/$label"
+(cd "$here/probe-stack" && env "$@" CARGO_TARGET_DIR="$target" cargo build --offline --locked --release 2>&1 | tail -1)
+out=$(timeout 300 "$target/release/probe-stack" scan 40 1024 1 20 2>&1)
+found=$(echo "$out" | grep -cE 'thread [0-9]+ stack: ')
+echo "$label scan 40 calls: $(echo "$out" | grep -E 'hits on') / lines of stack hits: $found"
+echo "$out" | grep -E 'thread [0-9]+ stack: ' | sed -E 's/call [0-9]+ thread [0-9]+ stack: //; s/highest at [^,]*, sp [^,]*, //' | sort | uniq -c | sort -rn | head -20
+[ "$found" -eq 0 ]

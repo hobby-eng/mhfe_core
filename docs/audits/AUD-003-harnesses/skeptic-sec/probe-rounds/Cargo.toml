@@ -1,0 +1,24 @@
+[package]
+name = "probe-rounds"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+# A crate of its own, with its own lockfile (docs/audits stays out of the repository's workspace).
+[workspace]
+
+[dependencies]
+mhfe-core = { path = "../../../../.." }
+argon2 = { version = "=0.6.0", default-features = false, features = ["parallel"] }
+rayon = "1.12"
+blake2 = { version = "0.11", default-features = false }
+libc = "0.2.191"
+
+# The profile of mhfe's own release build, without its strip.
+[profile.mhfe]
+inherits = "release"
+codegen-units = 1
+lto = true
+opt-level = 3
+panic = "abort"
+

@@ -1,0 +1,15 @@
+--- a/src/engine/native.rs
++++ b/src/engine/native.rs
+@@ -91,7 +91,11 @@
+         let params = Params::new(memory_kib, passes, LANES, Some(KEY_BYTES)).map_err(refused)?;
+         let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
+         self.threads
+-            .install(|| argon2.hash_password_into_with_memory(password, salt, key, blocks))
++            .install(|| {
++                stack::cleared(|| {
++                    argon2.hash_password_into_with_memory(password, salt, key, blocks)
++                })
++            })
+             .map_err(refused)
+     }
+ 

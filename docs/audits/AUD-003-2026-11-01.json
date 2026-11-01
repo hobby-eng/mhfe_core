@@ -1,0 +1,603 @@
+{
+  "schemaVersion": 1,
+  "auditId": "AUD-003",
+  "auditNumber": 3,
+  "date": "2026-11-01",
+  "title": "Audit of mhfe-core 0.2.0 before publication",
+  "reviewer": {
+    "name": "Claude Code",
+    "model": "claude-opus-5-5",
+    "reasoningEffort": "max"
+  },
+  "snapshot": {
+    "commit": "be64462b21282fc62d704525a109bcfa58d28fa0",
+    "commitComplete": true,
+    "workingTree": "clean",
+    "sourceFingerprint": "tree b50946b1fe5717321afce182074f3ac766a01a6a"
+  },
+  "scope": "Everything changed since v0.1.0, with what it touches; unchanged code stands on AUD-002.",
+  "procedureHashes": {
+    "FULL_AUDIT_GUIDE.md": "e1b2fb641e4a25ebf292548fc1e2ef0c25dbd01faa5c2b580c6ba75df2afcab7",
+    "AUDIT_STANDARD.md": "0c80621acaf5d210f85af76de28a994e545f89f3f660a129026ac0931bb38593",
+    "AUDIT_TEMPLATE.md": "8122777f8093b04119633459b9b2cc50bc6ca9258bfc6184b52136d3b8172210",
+    "audit-report.schema.json": "989bf3de974d581579c1d1c1e143d5ab9fa232dc70cc8c6f84ad00531ae698fb",
+    "audits.instructions.md": "05f13b0c4875ffbd0f0af14d4c6660e0edea980c0d0193dd96d53c41be36117f"
+  },
+  "checks": [
+    {
+      "name": "CI, every job, Linux x86-64 and ARM, Windows, macOS, Android, iOS, cross, wasm, MSRV, package",
+      "outcome": "passed",
+      "notes": "run 41333742754, tree b50946b1fe57"
+    },
+    {
+      "name": "RustSec",
+      "outcome": "passed",
+      "notes": "run 41333742795"
+    },
+    {
+      "name": "Full-cost vectors, two shares",
+      "outcome": "passed",
+      "notes": "run 41333751504, 1 h 21 min"
+    },
+    {
+      "name": "cargo xtask check after the fixes",
+      "outcome": "passed",
+      "notes": "local"
+    },
+    {
+      "name": "mhfe on this version: check.sh, package-check, browsers, parity, self-test --vectors, full_size",
+      "outcome": "passed",
+      "notes": "an exported copy with a path patch; 282, 118, 3 and 4 tests, 49 of xtask; 1,966 browser cases"
+    },
+    {
+      "name": "ulimit -l 64 and 0: self-test, repair-words, a two-word search",
+      "outcome": "passed",
+      "notes": "exit 0 where 0.1.0 ended with SIGBUS"
+    }
+  ],
+  "coverage": [
+    {
+      "checkId": "CHECK-SEC-001",
+      "outcome": "partial",
+      "method": "Traced the password, salt, H0, hashes, blocks and tag from the caller's Secret through compute, install, argon2 0.6.0, blake2 and rayon, on each thread, and scanned all writable mappings and all pool stacks of a real engine from outside.",
+      "evidence": "All work runs on the pool; the caller's stack and the heap hold no copy (matrix-*.log, first snapshot). Ownership is as SECURITY.md says, with one copy not reached: AUD-003 finding on H0.",
+      "reviewer": "sec"
+    },
+    {
+      "checkId": "CHECK-SEC-002",
+      "outcome": "not-applicable",
+      "method": "Scope reading.",
+      "evidence": "The crate has no vault, CSP, sandboxed page or transport, and the change adds none.",
+      "reviewer": "sec"
+    },
+    {
+      "checkId": "CHECK-SEC-003",
+      "outcome": "not-applicable",
+      "method": "Diff of the isolation code since v0.1.0.",
+      "evidence": "The crate opens no network and the filter and Landlock code did not change. How the new threads meet the isolation is under CHECK-SEC-001 and the observations.",
+      "reviewer": "sec"
+    },
+    {
+      "checkId": "CHECK-SEC-004",
+      "outcome": "passed",
+      "method": "Read Params::new's argument order, Algorithm, Version, H0's fields in argon2 lib.rs against RFC 9106, the reference block count and salt path; ran the engine's OpenSSL tags. Traced getrandom in charge_pages.",
+      "evidence": "unit-engine-protect.log: 10 tests pass. The getrandom byte is discarded and zeroed, and never used as randomness; a refusal falls back to anonymous pages. The host's random source is unchanged.",
+      "reviewer": "sec"
+    },
+    {
+      "checkId": "CHECK-SEC-005",
+      "outcome": "failed",
+      "method": "Success, refusal, partly refused pool and panic paths read in native.rs, rayon-core and argon2. External stack scans in 3 kept and about 16 further build profiles, 1 MiB at 1 and 3 passes, 20 and 1024 byte passwords, 1 to 16 processors, with a tried fix.",
+      "evidence": "Failed by the H0 finding under thin LTO (matrix-thin.log). Refusals clear and wipe. The stack test ran 200 release and 40 debug times per CPU set without a failure (stack-test-few-cpus.log). Panic path: see observations.",
+      "reviewer": "sec"
+    },
+    {
+      "checkId": "CHECK-SEC-006",
+      "outcome": "not-applicable",
+      "method": "Scope reading.",
+      "evidence": "No browser injection, persistence or sensitive browser API in this crate or this change.",
+      "reviewer": "sec"
+    },
+    {
+      "checkId": "CHECK-SEC-007",
+      "outcome": "passed",
+      "method": "Read the bounds of memory, passes and threads; forced refused threads with prlimit, lock limits from 0 to 128 KiB in and out of isolation, small thread stacks, RAYON_NUM_THREADS.",
+      "evidence": "threads-refused.log: -33 with some of the four started, no hang. limits.log: no SIGBUS at any limit, is_locked as the limit allows, four threads whatever RAYON_NUM_THREADS says. RUST_MIN_STACK is an observation. No failure becomes a tag: a refusal returns Err after the clearing.",
+      "reviewer": "sec"
+    },
+    {
+      "checkId": "CHECK-FUN-001",
+      "outcome": "passed",
+      "method": "As far as the change reaches: production code of the seed and the check is unchanged since v0.1.0 (the diff of src/wallet_check.rs is inside its test module). Read the old and new tests side by side; ran them; changed each JSON value in turn in a scratch copy; ran mutants of the check.",
+      "evidence": "Logs fast-tests (profiles 8, suite3 5, suite4 3, passwords 3, all pass), unit-tests (6 pass), vector-sweep, mutants. The whole T of all four cases and of the control comes from the published JSON, entropy and phrase of each case are compared, and T without BE32(256) is caught. One gap remains and is not new: see the observation on surviving mutants.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-FUN-006",
+      "outcome": "partial",
+      "method": "Results of the MHFE container format across the engine swap. The same program ran on the C engine of v0.1.0 and on this commit: 3,330 lines over memory of 32 KiB to 64 MiB, 18 of those values not multiples of 16 or otherwise off the usual sizes, passes 1 to 12, passwords of 0 to 1,024 bytes around every BLAKE2b block edge, zero, all-ones and random salts, and the whole of Mhfe for every suite and length at reduced Argon2id with an NFKD password. Also one tag at real cost on each engine, and the three OpenSSL tags recomputed. Read argon2 0.6.0 against RFC 9106.",
+      "evidence": "Logs differential-c, differential-rust, differential-cmp (identical; also identical in a debug build with overflow checks, not logged by run-logged: fun/harness-new-debug.out), tag-2gib-c and tag-2gib-rust (both 80ffc8d9...0fdca at 2 GiB and 12 passes), openssl-tags (OpenSSL 3.5.5 gives all three tags of native.rs). Partial because the full-cost corpus is CI's run, which the coordinator reads.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-API-001",
+      "outcome": "failed",
+      "method": "Traced host -> Mhfe::new / NativeArgon2::new -> pool -> argon2 -> tag and error; units (KiB, 1 KiB Block), refusals, ownership, the real path through with_engine. Ran refusals on both versions, the refused-thread path under RLIMIT_NPROC, a 4 GiB password, the auto traits, and the engine under RUST_MIN_STACK. Compared pub items of v0.1.0 and HEAD, and grepped mhfe's use of every new precondition.",
+      "evidence": "Two low findings, both reproduced. Everything else holds: the same pub items; logs nproc1-published and nproc1-audited (both -33); long-password-c (-5) and long-password-rust (-25), so AUD-002-API001 did not come back; refusals-c and refusals-rust agree with the changelog's -12, -14 and -5 moving to -25. The public-api gate passed in bld/gate-public-api.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-API-004",
+      "outcome": "passed",
+      "method": "As far as the change reaches: the hex and JSON reading of the vectors in tests/support/corpus.rs, the SHA256SUMS check before each read, and the literal fixtures against the code under test.",
+      "evidence": "sha256sum -c of vectors/profiles passes. vector-sweep: 286 single changes with the sum refreshed, of which only labels and the optional container_vector key survive. No production encoding changed.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-FUN-002",
+      "outcome": "not-applicable",
+      "method": "Scope",
+      "evidence": "mhfe-core has no HD derivation or coin profiles.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-FUN-003",
+      "outcome": "not-applicable",
+      "method": "Scope",
+      "evidence": "No BIP85, BIP38, message signing or Silent Payments in this crate.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-FUN-004",
+      "outcome": "not-applicable",
+      "method": "Scope",
+      "evidence": "No scripts, descriptors, Miniscript or multisig in this crate.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-FUN-005",
+      "outcome": "not-applicable",
+      "method": "Scope",
+      "evidence": "No transactions or PSBT in this crate.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-FUN-007",
+      "outcome": "not-applicable",
+      "method": "Scope",
+      "evidence": "No discovery, providers or accounting in this crate.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-API-002",
+      "outcome": "not-applicable",
+      "method": "Scope",
+      "evidence": "The API is synchronous, with callbacks between rounds; those paths did not change. The pool's own concurrency is the security reviewer's.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-API-003",
+      "outcome": "not-applicable",
+      "method": "Scope",
+      "evidence": "No export schema or monetary values in this crate.",
+      "reviewer": "fun"
+    },
+    {
+      "checkId": "CHECK-BLD-001",
+      "outcome": "passed",
+      "method": "Read Cargo.toml, build.rs and the normalised manifest of the verified package, and ran cargo tree per target. Also built wasm32-unknown-unknown.",
+      "evidence": "The crate has no features, and the normalised manifest has no `links` and no build dependency. argon2 =0.6.0 with default features off and `parallel`, and rayon ^1.12, sit under cfg(not(target_arch = \"wasm32\")). wasm32-unknown-unknown and wasm32-wasip1 pull no argon2, rayon, crossbeam, either or base64ct, and the wasm32 build exits 0. xtask refuses an unknown task and extra arguments with its usage line, exit 1; the removed argon2-stack task is refused the same way. No requirement pushes rust-version: the highest among the crates is sha2's 1.88, against 1.99. Logs in docs/audits/AUD-003-evidence/bld: tree-native-linux, tree-wasm32-unknown, tree-wasm32-wasip1, tree-windows, tree-duplicates, build-wasm32.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-BLD-002",
+      "outcome": "not-applicable",
+      "method": "Scope reading",
+      "evidence": "The crate has no Cargo features and no matrix planner. What is built on each platform is covered under CHECK-BLD-005.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-BLD-003",
+      "outcome": "passed",
+      "method": "cargo audit against the local database, a script over Cargo.lock and the registry, public registry metadata, and a byte comparison with upstream.",
+      "evidence": "All 43 registry entries in Cargo.lock's 45 packages match the SHA-256 of their cached .crate. The eight new crates match the live index, none is yanked, and each is its latest version. cargo audit --no-fetch on database 2295466 (2026-10-30) reports nothing on 45 crates. RUSTSEC-2026-0204 on crossbeam-epoch is patched from 0.9.20 and the lock has 0.9.21. argon2's eight src files equal upstream commit b1e0ad6 byte for byte. Install-time code: rayon-core's build.rs only prints a rerun line, and the three crossbeam build scripts read TARGET and emit cfg flags; there is no proc macro among the new crates and no `cc` anywhere. Every version and licence in THIRD_PARTY_NOTICES.md matches Cargo.lock and each crate's manifest. Pins follow CORE-25 as the project decided it, and code-rules holds. Log: cargo-audit-no-fetch. One weakness of the gate on the pins is in observations.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-BLD-004",
+      "outcome": "not-applicable",
+      "method": "Scope reading",
+      "evidence": "This repository commits no WebAssembly bytes and no Docker build; mhfe's browser Argon2 is built in mhfe.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-BLD-005",
+      "outcome": "partial",
+      "method": "Static review of all four workflows against CI-01 to CI-04 and against the diff since v0.1.0, plus local reproduction of the package steps.",
+      "evidence": "Action pins match the CI-01 table, and permissions, concurrency, persist-credentials and interpolation are sound. `draft` needs `checks`. No CC_, AR_ or IPHONEOS_DEPLOYMENT_TARGET line remains, and MinGW and the NDK clang stay as linkers. Reproduced locally: the package list of 36 files equals CI's expected list; `cargo publish --locked --dry-run` exits 0 and verifies the build; `cargo pkgid` gives 0.2.0; the awk step extracts 36 lines under the heading `## 0.2.0 (unreleased)`. Partial because the jobs on other systems were read, not run: their results are the coordinator's. Logs: package-list, publish-dry-run, notes-extract.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-DOC-001",
+      "outcome": "passed",
+      "method": "Compared the README, SECURITY.md, the 0.2.0 section of CHANGELOG.md and the crate docs with the code, and re-measured two documented figures.",
+      "evidence": "Stack depth reproduced on an exported copy with one probe test: 11,168 bytes in release and 88,912 in debug, against SECURITY.md's about 11 and 89 KiB. Debug cost at 256 MiB and 2 passes: about 14 times release, and about 3 times with opt-level 3 for argon2, close to the documented 16 and 4. Other changelog facts hold: the argon2.h numbers -5, -12, -14, -25 and -33; 5.42 s against 5.83 s in the benchmark results; mhfe commits 67e0b4c and 3b58a02 differ in README.md only; unsafe code sits in the places SECURITY.md names. Two wording notes are in observations. Logs: stack-depth, debug-cost.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-DOC-002",
+      "outcome": "passed",
+      "method": "Checked commands and paths in AGENTS.md, the README and the workflows against the tools, plus a script over relative links and anchors in eight Markdown files.",
+      "evidence": "Commands, gate names, tool versions and workflow triggers in AGENTS.md and the README match. tests/spec is at tag v0.7.0, 4535e3d, its .gitattributes is `* -text`, and tests/suite3.rs:27 checks the version. All relative links and anchors resolve. Licence text and notices match the package, which holds only the EFF list as third-party material. The vulnerability-reporting channel is unchanged since AUD-002 and was not rechecked.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-DOC-003",
+      "outcome": "not-applicable",
+      "method": "Scope reading",
+      "evidence": "This audit's record is the coordinator's. Only docs/audits/README.md was read: AUD-002's snapshot commit, its nine findings and their statuses agree with the JSON record.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-ARC-001",
+      "outcome": "not-applicable",
+      "method": "Scope reading",
+      "evidence": "Not assigned to this role.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-ARC-002",
+      "outcome": "failed",
+      "method": "Searched all tracked files for leftovers of the C, read each gate after the deletions, and ran failure probes on an exported copy.",
+      "evidence": "No leftover of the C remains outside the changelog's history: no file, no Cargo.lock entry, and no gate rule or list. Every gate passes, and xtask's 58 unit tests pass. One defect: the \"is missing\" branch of xtask/src/vendored.rs is dead in production, finding 1 of this review. Logs: gate-vendored, gate-code-rules, gate-copies, gate-public-api, gate-dprint, gate-fmt, xtask-unit-tests, vendored-missing-file, code-rules-pins.",
+      "reviewer": "bld"
+    },
+    {
+      "checkId": "CHECK-ARC-003",
+      "outcome": "failed",
+      "method": "Reviewed comments and suppressions in the changed manifests, workflows and tools, and traced the gates' unit tests to production paths.",
+      "evidence": "Two defects: the unit test of vendored.rs exercises a path production cannot reach (finding 1), and vectors.yml:6 names a removed badge (finding 2). No TODO, FIXME or HACK marker exists. The new lint exception in native.rs carries its reason. Log: badge-stale.",
+      "reviewer": "bld"
+    }
+  ],
+  "findings": [
+    {
+      "id": "AUD-003-SEC001",
+      "category": "SEC",
+      "kind": "finding",
+      "title": "Under lto = \"thin\", bytes 40 to 55 of H0 stay on a pool thread's stack after argon2id returns, above the frame the overwrite starts from",
+      "severity": "low",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "subsystem": "Secret lifecycle: native Argon2id engine (src/engine/native.rs, src/stack.rs)",
+      "ruleIds": [
+        "CORE-24",
+        "RUST-13",
+        "CORE-28",
+        "CHECK-SEC-005"
+      ],
+      "affected": "At 0daa611 (the tree of be64462 is identical): src/engine/native.rs:93-94 (the hash runs directly in the job frame) and :119-122 (the only clearing); src/stack.rs:29-37 (`overwrite` clears only below its own frame). Claims it breaks: src/engine/native.rs:1-2, :29-30, :72-74, :119-121, :249-252 and SECURITY.md:31-36. Builds: measured on Linux x86-64 with rustc 1.99.1. Residue with the host profile lto = \"thin\" at opt-level 3 (at 40 to 55 bytes above the sleeping stack pointer) and at opt-level 2 (at 104 to 119 bytes above it), default codegen units. No residue found at: default release, mhfe's profile (fat LTO, one codegen unit, panic=abort, opt-level 3), lto=true alone, panic=abort alone, codegen-units 1 and 4, opt-level 0, 1, 2, s and z without LTO, thin LTO with codegen-units=1, with panic=abort or with opt-level s, fat LTO with target-cpu=native, and overflow checks on. A crate is built with each host's profile, so this cannot be settled by the crate's own profile. The real mhfe binary was not built (the brief forbids it).",
+      "evidence": "Reproduction run on Linux 7.0.0-42, kernel x86-64, rustc 1.99.1. Logs in docs/audits/AUD-003-evidence/sec/ (SHA-256 prefix in brackets): matrix-thin.log [5038371f], matrix-thin-opt2.log [d9fc6e01], matrix-default.log [9da69f50], matrix-mhfe-profile.log [8210cbfd], matrix-unoptimized.log [803da536], gdb-residue-frames.log [a16bceac], unit-stack-test-thin.log [02d5bac7], fix-stack-cleared-thin.log [da4ac4c1], fix-zeroize-feature-thin.log [214c5eae], fix-stack-test-few-cpus.log; depth.log [490ec81e] for the 128 KiB reach. Harness: docs/audits/AUD-003-harnesses/sec/ (probe-stack, run-matrix.sh, README.md). A control in the same probe finds the 38 own hits in every run, and the fix removes the 72 others, which shows the search has power. The other profiles of the list were scanned once each without a kept log; notes in tmp/core-next/aud003/sec/notes.md.",
+      "reproduction": "Carried out. From the repository root, with CARGO_TARGET_DIR set to a build folder: `docs/audits/AUD-003-harnesses/sec/run-matrix.sh thin CARGO_PROFILE_RELEASE_LTO=thin`. The probe depends on the real crate, calls the public NativeArgon2::new and argon2id at 1 MiB, one pass, a 20-byte password, waits until the four threads sleep, reads their stacks through /proc/self/mem from the main thread, and searches every byte offset for every 8-byte window of the password, H0 and the tag and for the block words. It prints 38 hits when nothing is left (its own heap copies of the password and tag) and exits 0. Add CARGO_PROFILE_RELEASE_OPT_LEVEL=2 for the second position. `probe-stack hold 400 1024 1 20` under docs/audits/AUD-003-harnesses/sec/gdb-hold.txt stops with the words on the stack.",
+      "expected": "native.rs:1-2: the engine has four threads of its own, \"which it leaves clean after every call\". native.rs:119-121: RustCrypto leaves H0, the hashes and the blocks on the stacks, and since a pool thread lives on, nothing else ever clears them, so the overwrite does. SECURITY.md:31-36 says the same. CORE-24: a secret is wiped when its work ends. H0 is secret: it is a hash of the password and the salt, and everything after it follows from it.",
+      "observed": "Exit 1 with `thin scan 40 calls: 110 hits`: in 8 of 20 scans, nine 8-byte windows of H0 (offsets 40 to 48, so bytes 40 to 55) stand at 40 to 55 bytes above the sleeping stack pointer of one pool thread; opt-level 2 gives the same bytes in 7 of 20 scans. No password, tag or block word was found. gdb shows the frames at that moment as syscall, Sleep::sleep, wait_until_cold, ThreadBuilder::run, so the bytes lie in slots of Sleep::sleep's live frame that nothing writes. The real engine changes the stack down to about 128 KiB below the sleeping stack pointer, so `overwrite`'s array starts close to that pointer, and the words lie above it. Cause: the compute job and the broadcast job start at the same depth, in wait_until_cold. Frames of the broadcast, of `overwrite` and of the idle loop cover the top of the compute's frames without writing every byte, and `overwrite` clears only below itself. Default release is clean only because H0 lands deeper there. The stack test passes in the same profile (unit-stack-test-thin), since it reads only below its own frame and searches only block words, so the comment at native.rs:249-250 that these words stand for all that RustCrypto leaves does not hold.",
+      "impact": "Sixteen bytes of H0 of the last call stay in ordinary unlocked stack memory while the thread sleeps, which can be for the rest of the engine's life, for instance while mhfe shows a phrase. That memory can reach swap, a hibernation image or a core dump of a host that did not isolate itself, and root can read it directly, unlike a Secret in secret memory. Prerequisites: a host built with thin LTO, and someone reading that memory. Limits: no direct secret compromise is shown. The last call of encrypt, decrypt or rekey is round 0, whose salt comes from a half of the secret state, so these bytes alone give no cheap password test. A snapshot taken right after a forward round 11, whose half stands in the container, would give a test at BLAKE2b speed without any Argon2 work. In the one `hold` run the words were gone at those addresses after the engine was dropped. mhfe's own profile showed none in the probe.",
+      "recommendedFix": "Keep the reviewer's change in compute: `self.threads.install(|| stack::cleared(|| argon2.hash_password_into_with_memory(password, salt, key, blocks))).map_err(refused)`. The broadcast stays for the other three threads.\n\nChange the stack test in the same commit, because the thread of the hash now clears itself. Run it at 8192 KiB instead of 1024, require `>= LANES as usize - 2`, and keep `assert!(worked)`. In the first release-mode test run, the copy passes 0 of 400 failed across 1 to 16 CPUs, and the no-broadcast mutant still fails. Debug runs of the 8 MiB test take about 1.5 s; the 8 MiB plus LANES-2 combination was run in release only. The tried diff is docs/audits/AUD-003-harnesses/skeptic-sec/sec001-fix-with-stack-test.diff.\n\nAdjust the comments at native.rs:72-74, :119-121, :249-250 and :261-262, and stack.rs:13-16. No test for the H0 bytes is proposed: a default build shows none, so such a test could not fail; the fix holds by construction.",
+      "requiredVerification": "`docs/audits/AUD-003-harnesses/sec/run-matrix.sh thin CARGO_PROFILE_RELEASE_LTO=thin`, and the same with CARGO_PROFILE_RELEASE_OPT_LEVEL=2, exit 0 with 38 hits. Done on the copy: 4 runs of 60 calls each and 3 runs at opt-level 2 show 38 hits, the tag is unchanged and the five engine unit tests pass. The stack test needs a look: with the fix unchanged it passes on two or more processors (100 of 100 release, 30 of 30 debug), but in release on one processor it fails at `worked` (100 of 100), because the thread of the hash now clears itself; before the fix one processor passes only because the injected job rotates among the threads. CORE-33 asks for a test seen failing: reading some KiB above `frame` and adding H0's words, run once under thin LTO, would be one; this was not tried.",
+      "relatedFindings": [],
+      "challenge": "The defect reproduces at this commit (be64462, same tree b50946b as 0daa611), so it stands, but it grades low, not medium, and the proposed fix needs a test change.\n\nReproduced: with my own build folder, run-matrix thin exits 1 with H0+40 to H0+48 at +40 to +48 above the sleeping stack pointer in 16 of 20 scans (matrix-thin). Opt-level 2 gives the same bytes at +104 to +119 in 10 of 20 scans (matrix-thin-opt2). The rate moves with load, and the finding reported 8 of 20 and 7 of 20.\n\nMechanism: gdb on the thin build shows rsp 0x..768 on entry to overwrite, called from the broadcast's StackJob::execute in wait_until_cold. The sleeping sp in the reviewer's log for that stack is 0x..748, so the words at 0x..770 to 0x..77f sit just above overwrite's return address. The below subcommand gives 128.0 KiB deep, which puts the array's top at about sp. The stack test reads only below its own frame and searches only block words (native.rs:228-239), so it cannot see these bytes.\n\nThe refutation grounds do not apply:\n- No trusted part fails: an ordinary Cargo setting exposes a gap in the design (CORE-54 does not apply).\n- Cargo ignores a dependency's profile, so a host does choose this.\n- native.rs:1-2 ('leaves clean after every call') and :249-250 ('stand for all that RustCrypto leaves') are false in this build, and native.rs:119-120 and SECURITY.md:33-34 name H0 as the reason for the overwrite.\n- The brief's rule is to clear residue with own wrappers, and the fix is a few lines.\n\nCited rules: CORE-24, the project's documents and CHECK-SEC-005 fit. RUST-13 and CORE-28 only loosely apply: a third party's local cannot live in a Secret, and CORE-28 is about known answers.\n\nSeverity: low.\n- SECURITY.md:31-36, NativeArgon2's doc (native.rs:27-30) and CHANGELOG.md:15 are true to the letter even with the residue. mod native is private (engine.rs:11), so the false sentences are internal comments.\n- My probe (docs/audits/AUD-003-harnesses/skeptic-sec/probe-rounds, real engine, whole sequences with distinct salts, thin LTO) found 785 of 1500 decrypt runs at 1 MiB leaving a window. Round 0 was left in 761 runs, rounds 1 to 3 in 28, 10 and 3, rounds 4 to 8 once each, round 11 never. At 64 MiB, 90 runs left 27 hits, all round 0.\n- Those salts come from the secret state, so after a finished operation the bytes give no cheap password test. Only a snapshot at that moment, or an operation cut short right after round 11, would. The cancelled path is reachable (on_round Break after decrypt's first call), but it still needs thin LTO and a read of process memory.\n- Default and mhfe-like profiles: 0 of 1000 runs, 0 of 400 at 4-byte windows, 0 of 200 encrypt runs. The real mhfe binary and other targets were not measured.\n- Reading the bytes needs swap, a hibernation image, a dump or root, where the larger work area is already the documented exposure.\n- The medium row's 'build-composition' wording was weighed, but severity follows impact. Precedents grade such gaps low: AUD-037-SEC005 (entropy in unwiped HMAC state in every build, comment overstating cleanup) and AUD-018-SEC001. AUD-012-SEC001 was medium for a whole public quorum.\n\nThe fix is still worth folding in before the tag, since a published version cannot change. No 2 GiB run is needed: the offsets are the same at 64 MiB.\n\nFix checked in a private copy under thin LTO: 0 of 1500 decrypt runs, 0 of 300 at 4-byte windows, 0 of 300 encrypt runs, 0 of 30 at 64 MiB. But the fix as written breaks the stack test: 60 of 60 fail on one CPU in release, 1 of 60 on two CPUs (at most one thread holds a word after 100 tries on one CPU, so LANES-2 alone does not help). At 8 MiB with LANES-2, 0 of 400 fail across 1 to 16 CPUs, and the no-broadcast mutant fails 20 of 20 on one CPU and on four.\n\nEvidence is in docs/audits/AUD-003-evidence/skeptic-sec/: matrix-thin, matrix-thin-opt2, rounds-*, below-thin, fix-stack-test-* (home paths in these logs were rewritten after the runs and their digests recomputed)."
+    },
+    {
+      "id": "AUD-003-API001",
+      "category": "API",
+      "kind": "finding",
+      "title": "A low RUST_MIN_STACK ends the process on a pool thread of NativeArgon2, which sets no stack size of its own",
+      "severity": "low",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "subsystem": "Runtime contracts / native engine threads",
+      "ruleIds": [
+        "CHECK-API-001",
+        "RUST-14",
+        "CORE-54"
+      ],
+      "affected": "src/engine/native.rs:58-60 (ThreadPoolBuilder without stack_size) and :121 (broadcast of stack::overwrite); src/stack.rs:11 and :33 (the array of 128 KiB). The texts that leave the engine out of the stack need: src/lib.rs:24-27, README.md:65-69, SECURITY.md:27-30. Every native target, at 0daa611. 0.1.0 is not affected.",
+      "evidence": "Reproduced. Logs in docs/audits/AUD-003-evidence/fun: stack-65536-published (exit 0), stack-65536-audited (exit 134), stack-131072-published (exit 0), stack-131072-audited (exit 134), stack-147456-published and stack-147456-audited (exit 0). Harness: docs/audits/AUD-003-harnesses/fun. rayon-core 1.13.0 registry.rs:92-93 sets a stack size only when the builder has one; otherwise std's default applies, which RUST_MIN_STACK replaces. Grep: the variable is named nowhere in src, tests, README.md, SECURITY.md or CHANGELOG.md.",
+      "reproduction": "Carried out. From the repository root, with <target> a Cargo target folder outside it: CARGO_TARGET_DIR=<target> cargo build --release --locked --offline --manifest-path docs/audits/AUD-003-harnesses/fun/Cargo.toml; then RUST_MIN_STACK=131072 <target>/release/aud003-fun-engines call audited, and the same with `call published`.",
+      "expected": "The same results as the program replaced (RUST-14): 0.1.0 prints the tag under this variable. src/lib.rs:24-27 leaves the engine's calls out of the 140 KiB a call needs, and NativeArgon2::new's doc (src/engine/native.rs:37-39) names what a thread can do: one the system refuses is Error::Argon2Failed. The comment at src/engine/native.rs:56-57 says an explicit number keeps RAYON_NUM_THREADS from steering the pool. RUST_MIN_STACK has the same reach over the pool's stacks and is not handled.",
+      "observed": "At RUST_MIN_STACK=65536 and 131072 the audited engine prints \"thread '<unknown>' has overflowed its stack\" and \"fatal runtime error: stack overflow, aborting\", exit 134, at the first call. The published 0.1.0 prints its tag, exit 0, at the same values. At 147456 both print the tag e0e8eba3..., which fits the documented 140 KiB, here needed on a thread the host does not make.",
+      "impact": "A person or launcher that sets the variable low gets an abort instead of a result or an Error. In mhfe it would hit the Argon2 check at start, before a secret is read. No wrong tag comes out, and an isolated process writes no core dump. In a process without isolation the abort comes in the overwrite, with the area not yet wiped, so a core dump, if the system keeps one, could hold it. Needs an unusual setting, hence low.",
+      "recommendedFix": "In NativeArgon2::new give the pool its own stack: `.stack_size(THREAD_STACK_BYTES)` on the builder, with one named constant of 2 MiB, std's default, and extend the comment at native.rs:56-57 to say RUST_MIN_STACK has no say either. One call and one constant; no new check or error.",
+      "requiredVerification": "`RUST_MIN_STACK=65536 <target>/release/aud003-fun-engines call audited` prints a tag starting e0 e8 eb a3 with exit 0; the engine's unit tests and `cargo xtask check` pass.",
+      "relatedFindings": [
+        "AUD-002-API002"
+      ],
+      "challenge": "The checkout's HEAD is now be64462, whose tree b50946b is identical to 0daa611 (only commit messages were reworded), so all file:line references hold.\n\nReproduced with the fun harness: RUST_MIN_STACK=65536 and 131072 give exit 134 and the stack-overflow message on the audited engine, and exit 0 with the tag on 0.1.0. At 139264 and above, and with the variable unset, both print the tag, so the real threshold lies between 128 and 136 KiB. rayon-core 1.13.0 registry.rs:92-93 reads as claimed: with no size on the builder, std's default applies, and the variable replaces it.\n\nThe refutation attempts fail. The cause is a person's setting, not a trusted part failing. The crate alone makes these threads and a host has no way to size them. 0.1.0 gives the tag in the same environment. The comment at native.rs:56-57 already treats an environment variable steering this pool as something to shut out. The remedy is one builder call, not a guard.\n\nFix tried on an exported copy: the tag is the OpenSSL one from native.rs (e0e8eba3...5df2) at RUST_MIN_STACK 4096, 16384, 65536, 131072, 147456 and unset. With separate target dirs, the five engine::native unit tests under 131072 exit 0 on the fixed binary and abort with exit 134 on the unfixed one, at 1 and at 4 test threads. Clippy, rustfmt and the code-rules, copies, public-api and vendored gates pass on the copy.\n\nOne correction to Impact: the clause that a core dump could hold the area is true only on macOS and iOS. src/os/unix.rs:94-100 advises MADV_DONTDUMP on Linux and Android, and SECURITY.md says Windows leaves the area out too. On those systems a core could hold the pool stacks that the overwrite did not clear. The mhfe claim was read, not run (prepare, then startup::check, then the known-answer call).\n\nEvidence is in docs/audits/AUD-003-evidence/skeptic-rbd: stack-*, f0-fix-*, f0-clean-*. Two logs there are invalid and must not be cited. f0-fix-lib-tests-lowstack-direct.log ran an unfixed binary because I built both copies in one target dir. f0-unfixed-lib-tests-lowstack.log shows rustc itself overflowing under the variable. Both are recorded in skeptic-rbd/notes.md.\n\nLow stands: it needs an unusual setting and no wrong tag comes out."
+    },
+    {
+      "id": "AUD-003-API002",
+      "category": "API",
+      "kind": "finding",
+      "title": "NativeArgon2 and Mhfe<NativeArgon2> lost UnwindSafe and RefUnwindSafe, and the changelog does not say so",
+      "severity": "low",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "subsystem": "Public API / auto traits",
+      "ruleIds": [
+        "CHECK-API-001",
+        "CORE-45"
+      ],
+      "affected": "src/engine/native.rs:33 (the field `threads: ThreadPool`); CHANGELOG.md:3-33 (the 0.2.0 section). docs/public-api.txt lists items by name, so its gate cannot see this. Every native target, at 0daa611.",
+      "evidence": "Reproduced. docs/audits/AUD-003-evidence/fun/traits.log; catch-unwind-published.log (exit 0); catch-unwind-audited.log (exit 101, E0277). Grep of CHANGELOG.md and README.md: neither names UnwindSafe. Harness: docs/audits/AUD-003-harnesses/fun.",
+      "reproduction": "Carried out. `<target>/release/aud003-fun-engines traits` from docs/audits/AUD-003-harnesses/fun prints the auto traits of both versions. A host of three lines also shows it: `let engine = NativeArgon2::new(64).unwrap(); let locked = std::panic::catch_unwind(|| engine.is_locked()); println!(\"{locked:?}\");` built against 0.1.0 and against this commit (tmp probes probe-old and probe-new, bin catch).",
+      "expected": "The 0.2.0 section is the record of what a host must know (\"What changed:\", CHANGELOG.md:5-7), and the commit behind it says every public item stays. cargo-semver-checks rates a lost auto trait as a major change (lint auto_trait_impl_removed: \"A public type has stopped implementing one or more auto traits\"; read in its repository). The change may ship in 0.2.0, but it should be recorded.",
+      "observed": "0.1.0: Send, Sync, Unpin, UnwindSafe and RefUnwindSafe are all true for both types. This commit: UnwindSafe=false and RefUnwindSafe=false for both, the other three true. The three-line host builds against 0.1.0 (exit 0) and fails against this commit (exit 101, error[E0277] on `dyn Fn(...)` types inside rayon-core, which the host's code does not name).",
+      "impact": "Compile time only: host code that holds an engine or a Mhfe<NativeArgon2> across catch_unwind stops building at 0.2.0, with an error that points into rayon. No result changes. mhfe is not affected: its only catch_unwind is a test helper in src/word_wishes.rs:1020, away from the engine. Version 0.2.0 stays right, and this is one more reason a patch release could not carry the change.",
+      "recommendedFix": "One sentence in the thread bullet of the 0.2.0 section (CHANGELOG.md:15-23): `NativeArgon2` and `Mhfe<NativeArgon2>` are no longer `UnwindSafe` or `RefUnwindSafe`, since rayon's `ThreadPool` is neither; a host that needs it wraps its closure in `AssertUnwindSafe`. No code changes.",
+      "requiredVerification": "The sentence is in the 0.2.0 section, dprint passes, and the harness's `traits` still prints what the sentence says.",
+      "relatedFindings": [],
+      "challenge": "This is the closest call of the four.\n\nThe technical claims all hold. The traits harness prints the stated table. My own host builds against 0.1.0 and fails with E0277 against the audited commit. rayon::ThreadPool alone lacks both traits (f1-build-pool-traits), so the cause is the field at native.rs:33. Only src/word_wishes.rs:1020-1022 in mhfe uses catch_unwind, in a test helper. git grep finds no 'unwind' in CHANGELOG.md, README.md, SECURITY.md or src. The cargo-semver-checks lint, read in its repository, says what is quoted: 'A public type has stopped implementing one or more auto traits', required_update Major, covering UnwindSafe and RefUnwindSafe.\n\nI tried to refute it on the citations, and they are weak. CHECK-API-001 and CORE-45 name neither auto traits nor a changelog. 'Every public item stays' in 0daa611's message is not contradicted, because an auto trait is not an item in docs/public-api.txt, and that sentence no longer appears in the reworded messages at be64462. Taken alone these would not carry it.\n\nIt survives on the section's own yardstick. 0daa611's message says the section names what 'asks something of a program or of a person building the crate', and this asks a host to change code that built at 0.1.0. CHANGELOG.md is also in the published package, and DOC-06 and the standard's DOC category ('missing instructions') fit. It is better filed as DOC than API: the pool is settled and only the record is missing.\n\nThe proposed remedy works: a host with catch_unwind(AssertUnwindSafe(|| engine.is_locked())) builds and prints Ok(true). The version stays right, no result changes, and low stands."
+    },
+    {
+      "id": "AUD-003-BLD001",
+      "category": "BLD",
+      "kind": "finding",
+      "title": "`cargo xtask vendored` passes with exit 0 when the one vendored file is missing and its folder remains, and its \"is missing\" branch can no longer be reached",
+      "severity": "low",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "subsystem": "Gates / xtask vendored",
+      "ruleIds": [
+        "CHECK-ARC-002",
+        "CHECK-ARC-003",
+        "CHECK-BLD-003"
+      ],
+      "affected": "xtask/src/vendored.rs:1-3 (the promise), 38-40 (a pass at a count of 0), 51-58 (recorded_digests), 95-97 (the unreachable branch), 181-193 (the unit test that reaches it only through a hand-built map), at 0daa611. It concerns the repository's tool only; the tool is not in the package.",
+      "evidence": "Reproduction actually run: docs/audits/AUD-003-harnesses/run-logged.sh docs/audits/AUD-003-evidence/bld vendored-missing-file <probe script>; log docs/audits/AUD-003-evidence/bld/vendored-missing-file.log with its .command.json. The probe script is /home/user/Documents/bip_tools/tmp/core-next/aud003/bld/vendored-probe.sh. On the unmodified commit the gate passes correctly: gate-vendored.log.",
+      "reproduction": "Carried out on an exported copy, never on the checkout: `git archive HEAD | tar -x -C <scratch>`, then in the scratch copy delete vendor/eff-large-wordlist/eff_large_wordlist.txt and leave its folder, then run `cargo xtask vendored`. The same script also tries a changed byte, an added file, a damaged SHA-256 row, a missing folder and the restored file.",
+      "expected": "xtask/src/vendored.rs:1-3: \"A file changed, added or missing fails.\" The brief: a check's ability to fail must stay. CHECK-ARC-002: a helper formerly needed must take part in the active path or be removed. CHECK-ARC-003: test-only seams must not give a false impression that production was exercised.",
+      "observed": "With the file gone and the folder present the gate prints \"The 0 vendored files are the recorded ones.\" and exits 0. recorded_digests returns a map only when the folder holds exactly one file, and that map holds that same path, so `recorded` can never name a path absent from `digests`. Since 4055e75 deleted the sha256sum list, which was the only source of such a path, the loop at lines 95-97 cannot run in production; only a_file_changed_added_or_missing_is_refused reaches it, with a hand-built map of two files. The other four cases behave: changed exit 1, added exit 1, damaged row exit 1, folder missing exit 1 by the read_dir error.",
+      "impact": "Low. No wrong bytes can ship: build.rs stops on a missing list, so `cargo xtask check` still fails at its next build step, and a fresh clone has no folder at all, which fails at read_dir. The defect is that the gate and its test claim a refusal the gate does not make, and the multi-file shape (TREES, the recursion in digests_of, the maps) is left over from the deleted Argon2 tree.",
+      "recommendedFix": "Name the file with its tree, and let the row give the record whatever the folder holds: `const TREES: &[(&str, &str)] = &[(\"eff-large-wordlist\", \"eff_large_wordlist.txt\")];`, `for (tree, file) in TREES` in `run`, and `fn recorded_digests(document: &str, file: &str) -> BTreeMap<String, String> { document.split('\\n').find_map(table_row).map(|digest| BTreeMap::from([(file.to_owned(), digest.to_owned())])).unwrap_or_default() }`. The `paths` logic goes, and `differences` reports changed, added and missing as written. Also reword the doc comment at lines 49-50, and in the_table_row_gives_the_digest_of_a_tree_of_one_file_only drop the two-file case and rename the test, since 'one file only' no longer describes it.",
+      "requiredVerification": "Add a unit test that sends an empty file map and a row through recorded_digests and differences and expects \"vendor/list/words.txt is missing\". Rerun the probe: the empty-folder case must exit 1 and the other five cases must keep their results. Then `cargo xtask check`.",
+      "relatedFindings": [],
+      "challenge": "Read at this commit: recorded_digests (51-58) takes its path only from the folder's own listing, so `recorded` can never name a path absent from `digests`. The loop at 95-97 therefore cannot run in production, and only the test at 182 reaches it, through a hand-built map.\n\nRan a nine-case matrix on an exported copy: with the file gone and the folder left, the gate prints 'The 0 vendored files are the recorded ones.' and exits 0. Changed byte, added file, damaged row and missing folder all exit 1, as the finding says.\n\nThe same root cause goes further than the finding: the list under another name with the same bytes, or moved into a subfolder, also passes with exit 0, printing 'The 1 vendored files are the recorded ones.'\n\nOne precision on history: the false pass on this tree predates 4055e75, since v0.1.0 has the same match for the EFF tree. What 4055e75 did was delete the sha256sum list, the only thing that kept the 'missing' branch reachable. The change touched this code, so it is in scope.\n\nImpact verified: with the list gone, a build stops at build.rs:24 with exit 101, so no wrong bytes ship, and CI cannot reach the state because Git keeps no empty folder. The module promise at lines 1-3 is still false for this case, the unit test implies a refusal the gate does not make, and the brief requires a check's ability to fail to stay. Removing the defect also removes code.\n\nFix applied as written on a copy: all nine cases give the right result, including missing and moved. The vendored unit tests, Clippy, rustfmt and the four gates pass, and the diff is 14 lines in, 17 out. Evidence: f2-vendored-matrix-unfixed, f2-vendored-matrix-fixed, f2-impact, f2-xtask-tests, fix-clippy, fix-gates. Low stands."
+    },
+    {
+      "id": "AUD-003-DOC001",
+      "category": "DOC",
+      "kind": "finding",
+      "title": "vectors.yml says the replay's result shows in the README's badge, which commit 6808f92 removed",
+      "severity": "low",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "subsystem": "CI / workflow comments",
+      "ruleIds": [
+        "CHECK-ARC-003",
+        "DOC-06"
+      ],
+      "affected": ".github/workflows/vectors.yml:6 at 0daa611, against README.md:3-7. All builds are unaffected: it is a comment.",
+      "evidence": "Reproduction actually run: docs/audits/AUD-003-evidence/bld/badge-stale.log with its .command.json.",
+      "reproduction": "Run `git grep -n badge HEAD -- .github/workflows/vectors.yml` and `git grep -c 'workflows/vectors.yml/badge' HEAD -- README.md`, then `git show --stat 6808f92 -- README.md`.",
+      "expected": "DOC-06: a change that alters behaviour on purpose updates its documents in the same change. CHECK-ARC-003 asks for stale comments. README.md has no Test vectors badge since 6808f92, by the decision that the vectors live in the specification's repository alone.",
+      "observed": "vectors.yml:6 still reads \"its result shows on the tag and in the README's badge\". The README has no badge for vectors.yml: the second grep counts nothing and exits 1. Commit 4055e75 edited the same comment block and left this clause.",
+      "impact": "A maintainer who decides on publication by this comment looks for a badge that does not exist. The result remains visible on the tag's run, so no check is lost and the package is unaffected.",
+      "recommendedFix": "On vectors.yml:6 delete \" and in the README's badge\", so that it reads \"its result shows on the tag, and\" and continues on the next line as it does now.",
+      "requiredVerification": "`git grep badge -- .github/workflows/vectors.yml` finds nothing, and `dprint check` passes.",
+      "relatedFindings": [],
+      "challenge": "Ran the reproduction: vectors.yml:6 still has the clause, and `git grep -c 'workflows/vectors.yml/badge' HEAD -- README.md` counts nothing and exits 1. README.md:3-7 holds only the CI, Release, RustSec audit, build provenance and licence badges. `git show 6808f92 -- README.md` shows the Test vectors badge deleted, and its message gives the decision. The diff of 4055e75 changes line 4 of the same comment and leaves line 6. A case-insensitive grep of the tree, outside tests/spec, docs/audits and the README's own badge lines, finds no other mention of a badge apart from two data files.\n\nThis is not taste: it is a false statement of fact in the comment that sits beside the publication rule, pointing a maintainer at something that does not exist. CHECK-ARC-003 asks for stale comments, and DOC-06 fits since the removal was on purpose. Nothing is lost, because the result still shows on the tag's run, and the package is unaffected, so low stands.\n\nHash note: 6808f92 and 4055e75 are in 0daa611's history. On the branch at be64462 the same commits are 6ae1513 and e5a435b."
+    }
+  ],
+  "observations": [],
+  "informationalObservations": [
+    {
+      "title": "The branch was rewritten during the review",
+      "detail": "HEAD moved from 0daa611 to be64462 while this review ran (reflog: short messages). `git diff 0daa611 HEAD` is empty, so every citation holds. This reviewer did not do it. Commit hashes named in the plan and journal no longer match, and the engine commit's message, which held the proofs, is shorter now.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "Answers on the stack test",
+      "detail": "It can pass while the clearing is incomplete: it reads only below its own frame and searches only block words, so H0 above the overwrite passes it (see the finding). It is limited to Linux and to the build it runs in. It did not fail by chance: 200 release and 40 debug runs on each of 1, 2, 4 and 16 processors, no failure. A chance match of a word is about 2e-10 per run. On one processor it passes because the injected job rotates, not because several threads run lanes.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "The block view is sound",
+      "detail": "blocks() in native.rs holds: pages meet the alignment of 64; `count` blocks fit; Block is [u64; 128] behind repr(align(64)), size 1024, so every bit pattern is valid and the pinned =0.6.0 keeps that; the result reborrows the only &mut of the pages. In argon2's memory.rs, MemoryInner derives its pointer from the &mut, the views of one slice touch disjoint blocks, and reference_area_size excludes the other lanes' current segment, so get_block's asserts cannot fire for any m >= 32 and t >= 1. Read, not run under Miri, which is not installed.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "rayon's threads: start, inheritance, end",
+      "detail": "Registry::new spawns all four from the calling thread inside build(), so they start in NativeArgon2::new and inherit its seccomp filter, Landlock domain, no_new_privs and signal mask. A refused spawn terminates those started and gives -33, tested with some started and with none. Broadcast jobs run from each worker's own queue at idle level on all four; the argon2 call and all its joins are finished by then. Drop drops the work area first, with no job running, then signals the threads, which end without being joined, as native.rs:48 says. An explicit num_threads leaves RAYON_NUM_THREADS out, confirmed. RUST_MIN_STACK is not left out (next item).",
+      "reviewer": "sec"
+    },
+    {
+      "title": "RUST_MIN_STACK below about 140 KB ends the process",
+      "detail": "The pool takes std's default stack, so the variable applies. Below about 136 KB the first overwrite hits the guard page: `fatal runtime error: stack overflow`, exit 134 (limits.log). It is an abort, no secret stays; in mhfe it comes at the start check, before a secret is read. SECURITY.md:28-30 states the need for 140 KiB in general. `.stack_size()` on the builder would remove the variable's say, as native.rs:56-57 does for the thread count.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "Isolation and the threads",
+      "detail": "Linux: strace in a process isolated whole shows clone3 of the four threads, no refused or ENOSYS call from them; glibc's guard madvise, prctl for the stack's name, rseq, futex and sigaltstack all pass. mhfe's order is enter, Ctrl+C thread, start checks, then reserve_memory, so the lanes are inside the isolation for every isolated command; the start menu is not isolated but its check uses public data and commands run in child processes. Android, macOS and Windows were read only: the filter is inherited through pthread_create and the lanes make no ioctl; the sandbox is whole-process; on Windows restrict_default precedes restrict_threads, so threads started before and after enter both get the list, and rayon uses no handle-based call on itself. CI covers the Windows path; nothing covers Android.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "CLEARED_BYTES is enough on the measured targets",
+      "detail": "Deepest write below the sleeping stack pointer: 11.4 KiB default release, 19.7 KiB mhfe's profile, 22 KiB at most in any profile tried, 86.7 KiB unoptimized; it did not change with 1 to 16 processors, passes, memory or password length (depth.log). Nothing changes below 128.2 KiB in the real engine. Frames from assembly in a debug build agree within 1%: Blake2bVarCore::compress 46128 bytes on x86-64 Linux, 46256 on aarch64-apple-darwin and aarch64-linux-android, 46168 on x86_64-pc-windows-gnu; Argon2::compress 8.2 to 8.6 KiB on all. SECURITY.md's 11 and 89 KiB are the crate's own default profiles.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "The SIGBUS fix holds where it could be tested",
+      "detail": "Secret of two pages and a byte at limits 0 to 128 KiB, in and out of a whole-process isolation: no signal, read back equal, is_locked true from 3 pages. Read in the kernel copy: secretmem_fault charges at first fault and a kernel-mode fault is fixed up to EFAULT on x86-64 and arm64; every page of the mapping is visited, including a partial last page, for any page size; a charged page never faults for a charge again; a refusal unmaps, and closing the file gives the charge back; the page ends zeroed and stays off the direct map as a user fault leaves it. Older kernels and AArch64 rest on reading (from memory for older kernels: mmap refuses first).",
+      "reviewer": "sec"
+    },
+    {
+      "title": "Panic path",
+      "detail": "A panic inside `compute` would skip the broadcast and the wipe, and Pages::drop only unmaps. No input reaches one: argon2's asserts and expects cannot fire for accepted parameters, and allocation failure aborts. CORE-54 puts it out of scope, and mhfe builds with panic=abort. Recorded for CHECK-SEC-005.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "What the clearing does not reach by design",
+      "detail": "Registers are not cleared: after a call the xmm and ymm registers of the pool threads hold block data, and the tag's last copy may stay in one, until the thread next uses them. Nothing claims otherwise. H0 stays on the stack for the whole call, in unlocked memory, where the C engine wiped it after the first blocks; the plan left argon2's `zeroize` feature off, which is a stated decision, and the unlocked area holds material as useful, so this is an idea, not a defect.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "Tests that do not exist",
+      "detail": "No committed test covers -33 (proved by hand; a changed code would pass every test). No Linux test runs Argon2 after a whole-process isolation, which is mhfe's real order: tests/isolation.rs runs it in the isolated-thread role on Linux and whole-process only on Windows. This review's strace covers that case once. tests/isolation.rs is unchanged since v0.1.0.",
+      "reviewer": "sec"
+    },
+    {
+      "title": "The engine gives the C engine's results, byte for byte, as far as could be run",
+      "detail": "Read against RFC 9106 and the reference code's logic: H0's fields in order (p, T, m as given, t, v, y, then P, S, K, X, each with its length), m' = 4p*floor(m/4p), the address block (pass, lane, slice, m', t, y), the index mapping, XOR from the second pass at 0x13, and the final XOR and H'. The Mhfe call has version 0x13, Argon2id, 4 lanes, 32 bytes, no secret and no associated data. Limits: every m(MEM) is a multiple of 2^20, so rounding never applies through Mhfe; level 21 (3 << 30 KiB) and 12,288 passes pass Params::new by reading. Run: 3,330 identical lines against v0.1.0, including memory that does need rounding, and the 2 GiB, 12-pass tag on both engines.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "Would a mutant get through: no for each Argon2 parameter, yes for four properties that do not change a tag",
+      "detail": "In a scratch copy (log mutants), gives_the_openssl_tags_at_small_costs kills Argon2i, Argon2d, version 0x10, two lanes, passes + 1, passes ignored, memory taken from the area, the password cut to 1,023 bytes, the salt cut to 15, and a secret set. The memory check >= and code -26 die too. Survivors: Some(KEY_BYTES) -> None is equivalent, since H0 reads the output's length. ARGON2_THREAD_FAIL changed to -1 survives: no automated test pins -33, only the manual prlimit run, repeated in nproc1-audited. A pool of 8 threads, or one per processor, survives: the stack test asks for at least 3 threads holding blocks, not exactly 4, so the case the comment at native.rs:55-56 warns about is not pinned. Memory below 32 KiB raised to 32 survives, unreachable through Mhfe. CHECK_BITS = 8 survives, in 0.1.0's tests as well: no published vector has a T that starts with one zero byte and then a non-zero one, so 8 and 16 bits read the same. Killing it needs such a case in the specification's vectors, since the crate keeps none of its own. Rounding is pinned by no tag, which only matters outside Mhfe. A full-cost run kills what a capped mutant would hide from the fast tags.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "The tests on JSON check everything the Markdown parsing checked, and no vector is skipped",
+      "detail": "Compared old and new tests one by one. Still checked: the counts (4 wallet-check cases, 1 control, 4 repair cases, 3 repairs, 4 check-word cases, 1 erasure), every card size, each container against the transcript it names, the control as the first case without BE32(256). New: SHA256SUMS before each read, each case's entropy and phrase, and the whole digests. Every SHA256SUMS line of suites 3 and 4 is read, and the counts of 17 and 10 transcripts are asserted; validation-cases.json is unlisted in the specification's manifests but is read and counted. Sweep: 286 changes, 37 survivors, all of them id or description labels, or the removal of an optional container_vector key, whose `if let` in tests/profiles.rs:89 then skips the comparison; the file's SHA256SUMS is the guard there. This matches the commit's own account.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "What changed in src/wallet_check.rs and why",
+      "detail": "Only its #[cfg(test)] module. The unit test the_digests_are_the_profile_vectors moved from the Markdown tables to wallet-check.json: it now compares the whole T of all four cases and of the control, where the failing cases and the control were compared by 4 bytes, and takes the phrase from the vector instead of rebuilding it from the counter; tests/profiles.rs ties counter, entropy and phrase together. No production line changed.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "Two direct engine calls behave differently from 0.1.0 and the changelog does not list them",
+      "detail": "Neither is reachable through Mhfe, and the new behaviour fits new's doc, so these are not findings. On a 64 KiB engine, memory of 65 to 79 KiB was accepted by the C code, which compared the area with the rounded size; it is now OutOfMemory. A call with too much memory and zero passes was -12 and is now OutOfMemory, since the memory check comes first. Logs refusals-c and refusals-rust.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "mhfe meets every new precondition; three of its texts will need words at the switch",
+      "detail": "src/bin/mhfe/main.rs prepare() enters isolation before the handler thread and the Argon2 check, on the main thread; every isolated command makes its engine on that thread through reserve(). The menu is not isolated, holds no secret and runs each command as a child process. Serve makes no engine. Argon2Failed from new reaches MhfeError::Argon2 through error_of in reserve() and reserved_call. It reads none of the crate's removed C and no DEP_ variable of the removed `links`. To update when it moves: src/engine/known_answers.rs:173-176 says the check starts four threads and joins them; src/engine/native.rs:1 says reference C code; src/error.rs:465-467 words the native failure as the reference code's.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "0.2.0 is the right version; the changelog's facts check out",
+      "detail": "Pub items are the same as at v0.1.0, but behaviour a host relies on moved: when threads start, a new failure of new, two lost auto traits. That is a breaking change, and 0.1.x could not take it. Lockfile: no existing crate moved; cc, find-msvc-tools and shlex left; rayon, rayon-core, crossbeam-* and either came. Verified: tests/spec is at tag v0.7.0, 4535e3d; bench figures 5.42 and 5.83 s are in tmp/argon2-bench/results.md; in mhfe, 67e0b4c and 3b58a02 share parent 8be3442, differ only in README.md, have one src tree, and 67e0b4c is on no branch. Measured here at 256 MiB and 3 passes under load: debug about 14 times release, with opt-level 3 for argon2 about 3 times, in line with the README's 16 and 4.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "The specification's text will lag behind this release",
+      "detail": "tests/spec/vectors/profiles/README.md:13 says mhfe-core's tests compute the repair words and repairs from the tables; from this version they read the JSON. The specification's README names v0.1.0 as the crate's release. Both are for the next specification version, which alone records the crate's releases, and are not defects of this commit.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "README's Linux bullet is looser now that the fallback is a live path",
+      "detail": "README.md:77-78 says that without secret memory the pages are locked. Past the lock limit on a current kernel the fallback gives anonymous pages that may not be locked. The changelog and src/lib.rs (where the system allows it) are right, and Secret::is_locked tells the truth. The same words stood in 0.1.0, so this is a note for the documentation reviewer.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "Mhfe::new runs in no test at any cost",
+      "detail": "It appears only in the no_run example of src/lib.rs:58; the full-cost test and mhfe both use with_engine. Its logic is unchanged since 0.1.0, one line, and only its doc changed here.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "My own mistake: a scratch copy touched the shared target for about 16 minutes, now cleaned",
+      "detail": "My scratch copy, a root package at another path, got the same cargo hash as the real checkout. From about 18:05Z, debug artifacts of mhfe-core in the shared target came from the copy, the last mutant included, and cargo in the real checkout took them as fresh. I saw it at 18:21Z when my own test run failed on a wallet_check digest. `cargo clean -p mhfe-core` on the shared target at 18:21:28Z removed them, in every profile, so other reviewers rebuild once. Rerun from the real checkout: all pass, and those are the logs kept. The copy now builds only in fun/target-copy. No recorded evidence looks affected: in that window only commands rooted in the real checkout could take those artifacts, and the logged ones are xtask gates and xtask unit tests, a wasm32 build, and BLD's and SEC's probes, which have their own package or target. If a reviewer ran an unlogged `cargo test` from the checkout in that window, it should be repeated.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "HEAD moved during the audit, with the same tree",
+      "detail": "next-version went from 0daa611 to be64462 at 18:21:43Z (reflog: \"short messages\"), not by this reviewer. The tree is the same, b50946b1, as snapshot.json records, so every file:line here holds. The long commit messages, which the brief calls the home of the proofs, were read before the rewrite and live on only in 0daa611's history. Commit hashes in the brief no longer match the branch.",
+      "reviewer": "fun"
+    },
+    {
+      "title": "The release notes carry a reference that has nothing to point at",
+      "detail": "release.yml extracts only the 0.2.0 section, so the GitHub release will read \"A correction to 0.1.0, whose section below stays as it was published\" (CHANGELOG.md:35) with no section below it. It reads correctly in CHANGELOG.md, and the draft can be edited, so nothing irreversible ships. Deleting the word \"below\" fixes it. Evidence: notes-extract.log.",
+      "reviewer": "bld"
+    },
+    {
+      "title": "The code-rules gate allows the two pins that are not carets but does not require them",
+      "detail": "On an exported copy, changing argon2 to \"0.6\" or unicode-normalization to \"0.1\" passes the gate with exit 0, while rayon = \"=1.12.0\" is refused. Cargo.toml says argon2 is exact because every tag comes from it, and unicode-normalization's tables are part of the protocol; only review keeps these pins. The gate's documented contract is met, and the shape is the same as at v0.1.0, so this is not a defect. Evidence: code-rules-pins.log.",
+      "reviewer": "bld"
+    },
+    {
+      "title": "\"No C compiler\" means the crate compiles no C, not that a build needs no C toolchain",
+      "detail": "README.md:139 and CHANGELOG.md:8 say a native build needs no C compiler. On Linux rustc still calls `cc` as its linker: a PATH holding only Cargo's bin folder stops with \"linker `cc` not found\", as any Rust crate with a build script would, and ci.yml correctly calls clang and MinGW linkers. A reader may read the sentence as more than it means. Evidence: no-cc-on-path.log.",
+      "reviewer": "bld"
+    },
+    {
+      "title": "New dependencies: who owns them",
+      "detail": "Read from crates.io, read-only. argon2: newpavlov and the RustCrypto kdfs team. base64ct: tarcieri and the RustCrypto formats team. rayon and rayon-core: cuviper and nikomatsakis. crossbeam-deque, -epoch and -utils: jeehoonkang, Amanieu, taiki-e and the crossbeam-rs admins. either: bluss, cuviper and jswrenn. These are established maintainers; nothing here is a finding. rayon-core sets `links = \"rayon-core\"`, which only keeps one rayon-core in a program.",
+      "reviewer": "bld"
+    },
+    {
+      "title": "THIRD_PARTY_NOTICES.md has no gate tying it to Cargo.lock",
+      "detail": "It matches the lock exactly at this commit, but a dependency update can make its versions stale with every check still passing. This is the same as at v0.1.0.",
+      "reviewer": "bld"
+    },
+    {
+      "title": "Network use in this review",
+      "detail": "Only read-only requests: the crates.io index through `cargo publish --dry-run`, which the brief allows, then crates.io owner lists, index entries and argon2's source files on raw.githubusercontent.com. No personal data was sent.",
+      "reviewer": "bld"
+    }
+  ],
+  "remediation": [
+    {
+      "id": "AUD-003-SEC001",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "cargo xtask check; CI of the branch."
+    },
+    {
+      "id": "AUD-003-API001",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "cargo xtask check; CI of the branch."
+    },
+    {
+      "id": "AUD-003-API002",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "cargo xtask check; CI of the branch."
+    },
+    {
+      "id": "AUD-003-BLD001",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "cargo xtask check; CI of the branch."
+    },
+    {
+      "id": "AUD-003-DOC001",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "cargo xtask check; CI of the branch."
+    }
+  ],
+  "limitations": [
+    "Not run: an older kernel, a processor without AVX2. macOS file writes are read back on CI only.",
+    "sec: Nothing was run on AArch64, macOS, iOS, Windows or Android: stack scans and thread behaviour there rest on reading and on frame sizes from assembly. Whether the H0 residue appears on those targets in any profile is unknown. CI results were not read.",
+    "sec: No kernel other than 7.0.0-42 was run: older kernels, 16 and 64 KiB pages rest on reading.",
+    "sec: The real mhfe binary was not built against this version; mhfe's profile was reproduced in the probe only, and its fat LTO could inline differently there.",
+    "sec: Only rustc 1.99.1 was tried. Stack layout, and so the residue, can change with any compiler, or with later blake2, rayon or crossbeam versions, which are carets for a host.",
+    "sec: The plain, non-AVX2 compress path was not run: this machine has AVX2 and no switch forces the other path.",
+    "sec: No scan at full cost (2 GiB): frames do not depend on memory or passes, as depth runs at 1 and 16 MiB showed. Registers were not read.",
+    "sec: No Miri or ThreadSanitizer run: neither is available on this stable toolchain.",
+    "sec: The search patterns cover the password, H0, tag, the XOR of the last blocks and block words. Other values, such as compress temporaries, were covered only by a listing of high-entropy words by stack offset in three profiles and in thin LTO.",
+    "sec: rayon's `join`, `sleep` and crossbeam internals were read only where the broadcast and start paths need them. params.rs beyond line 330 and argon2's PHC code were not read, as the engine does not use them.",
+    "fun: The full-cost corpus: not run here. CI runs it and the coordinator reads the result; here only one tag at 2 GiB and 12 passes ran on each engine, none at 3 GiB and no transcript.",
+    "fun: Memory levels above 1 and high PIMs: checked by reading argon2 0.6.0 only (no overflow at 3 << 30 KiB or 12,288 passes), never run.",
+    "fun: The plain, non-AVX2 path on x86-64: this machine runs AVX2; the same source runs plain on CI's ARM64 per the commit, which was not read here.",
+    "fun: AArch64, macOS, Windows, iOS and Android: nothing ran there. Thread creation under Windows' isolation with rayon rests on the documents.",
+    "fun: A host of several threads that makes its engine on another thread: read in native.rs and rayon's spawn path, not run.",
+    "fun: A host's own blake2 version: Cargo.lock pins it here, while a program's build may move it within 0.11.",
+    "fun: rayon, rayon-core and crossbeam internals beyond the builder and spawn lines; argon2 0.6.0's clearing and stacks are the security reviewer's.",
+    "fun: Code unchanged since v0.1.0, which AUD-002 covers, beyond where the change touches it. README.md's statement about needing no C compiler is left to the build reviewer.",
+    "bld: The CI jobs on Android, iOS, macOS, Windows, ARM64 Linux, WASI and MSRV were reviewed statically and not run here; their results are the coordinator's. In particular, the iOS link without IPHONEOS_DEPLOYMENT_TARGET has never been tried outside CI, so that job's result is the only proof.",
+    "bld: The full-cost vectors were not run.",
+    "bld: The upstream comparison covers argon2's src files only. The other new crates were checked by checksum, index, build scripts and manifests, not against their repositories, and the internals of rayon and crossbeam were not audited.",
+    "bld: Yank state is live for the eight new crates. For the other crates it comes from the local index cache, of unknown age per crate.",
+    "bld: cargo audit used the local advisory database of 2026-10-30 and did not fetch a newer one.",
+    "bld: The private vulnerability-reporting setting was not rechecked; it is unchanged since AUD-002.",
+    "bld: docs/public-api.txt was checked by its gate only, and the AUD-002 harnesses and report were not reread."
+  ]
+}

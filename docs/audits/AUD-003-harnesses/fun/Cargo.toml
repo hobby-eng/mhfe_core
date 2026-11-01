@@ -1,0 +1,27 @@
+[package]
+name = "aud003-fun-engines"
+version = "0.0.0"
+edition = "2024"
+publish = false
+description = "AUD-003: the engine of the published mhfe-core 0.1.0 and of the audited commit, side by side"
+
+# Not part of any workspace: an audit harness is a crate of its own, with its own lockfile.
+[workspace]
+
+[dependencies]
+# The audited commit, this repository.
+core-audited = { package = "mhfe-core", path = "../../../.." }
+# The published 0.1.0, on the C engine.
+core-published = { package = "mhfe-core", version = "=0.1.0" }
+
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny" # at 150 lines, CORE-15
+mod_module_files = "deny" # RUST-03
+undocumented_unsafe_blocks = "deny" # RUST-07

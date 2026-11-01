@@ -1,0 +1,43 @@
+--- a/src/engine/native.rs
++++ b/src/engine/native.rs
+@@ -91,7 +91,11 @@
+         let params = Params::new(memory_kib, passes, LANES, Some(KEY_BYTES)).map_err(refused)?;
+         let argon2 = Argon2::new(Algorithm::Argon2id, Version::V0x13, params);
+         self.threads
+-            .install(|| argon2.hash_password_into_with_memory(password, salt, key, blocks))
++            .install(|| {
++                stack::cleared(|| {
++                    argon2.hash_password_into_with_memory(password, salt, key, blocks)
++                })
++            })
+             .map_err(refused)
+     }
+ 
+@@ -253,19 +257,20 @@
+     #[cfg(target_os = "linux")]
+     #[test]
+     fn the_threads_do_the_work_and_keep_no_block_on_their_stacks() {
+-        let mut engine = NativeArgon2::new(1024).unwrap();
++        let mut engine = NativeArgon2::new(8192).unwrap();
+         let mut key = [0u8; KEY_BYTES];
+-        engine.compute(PASSWORD, SALT, 1024, 1, &mut key).unwrap();
++        engine.compute(PASSWORD, SALT, 8192, 1, &mut key).unwrap();
+         let area = blocks(&mut engine.work_area);
+         let words = area.iter().flat_map(Block::as_ref).copied().collect();
+-        // The last hash may overwrite what the thread that ran it kept, and a thread that wakes
+-        // late may miss a call, though not a hundred.
++        // The thread that ran the hash clears its own stack, and a thread that wakes late may
++        // miss a call, though not a hundred. On one CPU a call must last long enough for a second
++        // thread to run: hence 8 MiB.
+         let worked = (0..100).any(|_| {
+-            engine.compute(PASSWORD, SALT, 1024, 1, &mut key).unwrap();
+-            threads_holding(&engine, &words) >= LANES as usize - 1
++            engine.compute(PASSWORD, SALT, 8192, 1, &mut key).unwrap();
++            threads_holding(&engine, &words) >= LANES as usize - 2
+         });
+         assert!(worked);
+-        engine.argon2id(PASSWORD, SALT, 1024, 1, &mut key).unwrap();
++        engine.argon2id(PASSWORD, SALT, 8192, 1, &mut key).unwrap();
+         assert_eq!(threads_holding(&engine, &words), 0);
+     }
+ }

@@ -1,0 +1,2 @@
+# CORE-15: at most 150 lines of code per function (RUST-01).
+too-many-lines-threshold = 150

@@ -1,0 +1,5 @@
+set pagination off
+set print thread-events off
+break probe_stop
+run hold 400 1024 1 20
+thread apply all bt 16
