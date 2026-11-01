@@ -19,18 +19,18 @@ round's halves, message, salt, Argon2id key and mask, a BIP39 passphrase in NFKD
 the word numbers of a repair and what it changed, the word indexes of a password check, and the
 entropy of each trial of a draw.
 
-The NFKD of a password or a passphrase is written straight into its `Secret`, and a test shows that
-neither takes memory from the heap. A typed word is read into an 8-byte array on the stack, which is
-wiped, and a longer token is refused without a copy. Repair words are computed in arrays on the
-stack.
+A password or passphrase is normalized (NFKD) directly into its `Secret`, so no copy of it reaches
+ordinary memory: `tests/secret_memory.rs` counts the heap allocations while this happens and finds
+none. Each typed word is read into an 8-byte buffer on the stack, which is wiped afterwards, and a
+longer word is refused without being copied. Repair words are computed on the stack too.
 
-The hash and MAC states of `blake2`, `hmac` and `sha2` are wiped when they are dropped, but the
-`bip39` crate leaves its parsing, encoding and PBKDF2 states on the stack. So every round, and every
-public function that computes with a secret, overwrites 128 KiB of the stack below its frame when it
-is done. The exceptions are `Repaired::changes` and the functions of `protect` and the engine. How
-deep these calls write has not been measured, so this is best effort. Such a call needs about 140
-KiB of free stack: on a smaller thread stack, such as musl's default of 128 KiB, it ends the
-process.
+The `blake2`, `hmac` and `sha2` libraries wipe their internal state when they finish. The `bip39`
+library does not: when it reads or writes a phrase or computes a seed, its intermediate values stay
+on the stack. So every round, and every public function that computes with a secret, overwrites 128
+KiB of the stack below its frame when it is done. The exceptions are `Repaired::changes` and the
+functions of `protect` and the engine. How deep these calls write has not been measured, so this is
+best effort. Such a call needs about 140 KiB of free stack: on a smaller thread stack, such as
+musl's default of 128 KiB, it ends the process.
 
 Argon2id runs on four threads of the engine's own, the lanes and the first and last hash, so the
 caller's stack stays out of it. RustCrypto's `argon2` keeps H0, its hashes and the blocks of its
