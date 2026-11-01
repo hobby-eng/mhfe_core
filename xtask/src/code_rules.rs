@@ -6,7 +6,7 @@
 //!   first line.
 //! - TOOL-02: a shell script starts with `#!/usr/bin/env bash` and `set -euo pipefail`.
 //! - A reason on every lint exception: Rust's `allow` and `expect` carry `reason = "..."`.
-//! - CORE-25 as the owner decided it for this crate: every Cargo requirement is a caret, so that a
+//! - CORE-25 for this crate: every Cargo requirement is a caret, so that a
 //!   user resolves the fixes of the dependencies, but the exceptions of CARGO_EXCEPTIONS; Cargo.lock
 //!   is the one lockfile (TOOL-05). RUST-01: every Cargo.toml has its lints table.
 //! - TOOL-01: the repository's tools are `cargo xtask` tasks, so it holds no Node.js script and no
@@ -71,7 +71,7 @@ const STRICT_MODE: &str = "set -euo pipefail";
 type Pattern = fn(&[u8]) -> Option<usize>;
 /// Names of a program built on the crate and of its files, and audit identifiers.
 const FOREIGN_WORDS: [Pattern; 4] = [audit_id, program_name, program_files, front_end];
-/// The Cargo requirements that are not carets, each with the owner's reason.
+/// The Cargo requirements that are not carets, each with its reason.
 const CARGO_EXCEPTIONS: [(&str, &str); 2] = [
     // Its tables are part of the protocol, and the specification pins Unicode 18.0.0.
     ("unicode-normalization", ">=0.1.26, <0.1.27"),

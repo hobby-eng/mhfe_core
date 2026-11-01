@@ -25,12 +25,12 @@ records this crate's releases. `tests/fixtures/unicode18-ucd/` is Unicode's
   (`code-rules`), copies (`copies`), public API (`public-api`) and vendored files (`vendored`).
 - The public API is `docs/public-api.txt`: a change of a public item changes it in the same
   commit.
-- Full cost, announced first and run by the owner:
+- Full cost, announced first and run by hand:
   `cargo test --locked --release --test full_cost -- --ignored --nocapture`, shared among
   processes with `MHFE_VECTOR_SHARE=k/n`.
 - Workflows: `.github/workflows/ci.yml` (every push), `vectors.yml` (on request and on version
   tags), `release.yml` (version tags; it calls ci.yml and drafts the release), `audit.yml` (RustSec,
   when Cargo.toml or Cargo.lock changes, weekly and on request).
 
-On the owner's computer, builds, tests and Clippy run through his memory guard,
+On the development computer, builds, tests and Clippy run through a memory guard,
 `../tmp/memguard.sh <command>`: a local tool, not part of this repository.

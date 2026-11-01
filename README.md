@@ -58,65 +58,11 @@ free memory.
 
 ## Secrets in memory and in the process
 
-Every secret the crate holds, from the encoded password and the phrases to the round keys, seeds
-and repair words, lives in a `protect::Secret`, which has memory pages of its own and is wiped when
-it is dropped. A program can keep its own secrets, such as a typed line, in one too.
-`protect::write_secret` writes a secret to standard output without leaving a copy in the standard
-library's output buffer. The Argon2id work area is wiped after every round. After each call that
-computes with a secret, other than calls to `Repaired::changes`, `protect` and the engine, the
-crate overwrites 128 KiB of the stack below the caller's frame. Such a call therefore needs about
-140 KiB of free stack; on a smaller thread stack, such as musl's default of 128 KiB, it ends the
-process.
-
-`protect::Isolation::enter()`, called before a secret is read, applies the protections the
-operating system offers against a secret leaving the process. It reads each protection back and
-reports which ones hold: a refusal shows as `false`, never as an error. On every system, whatever
-the process opened before the call, such as a socket or a file open for writing, stays usable.
-What each system allows:
-
-- **Linux:** secret pages come from the kernel's secret memory on x86-64 and AArch64 where the
-  kernel offers it; otherwise they are locked and left out of core dumps. Other processes, root's
-  included, cannot read the secret memory directly through `/proc/PID/mem`, `process_vm_readv` or
-  `PTRACE_PEEKDATA`, and while it exists the computer cannot hibernate. Isolation forbids core
-  dumps and keeps other programs of the user from reading the process's memory. On x86-64 and
-  little-endian AArch64, its filter refuses new sockets, io_uring, `ptrace`, `process_vm_writev`,
-  `pidfd_getfd` and every change to files. On other architectures, where the kernel has Landlock,
-  it refuses writing, creating, renaming and removing files; on newer kernels also truncating them
-  and device `ioctl`s, and from Linux 6.7 also TCP bind and connect. These refusals cover the
-  calling thread and the threads it starts, the four of its `NativeArgon2::new` among them. When
-  isolation is entered while the process has one thread, so before that call, they cover the whole
-  process; where user namespaces are allowed, the process then also gets a network of its own with
-  no interface up. Root, or a program with `CAP_SYS_PTRACE`, can still read the process's memory,
-  the work area included, and so can a program that opened `/proc/PID/mem` or attached as a tracer
-  before the call, such as a debugger the program was started under.
-- **Android:** secret pages are locked and left out of core dumps. Isolation forbids core dumps and
-  memory reading as on Linux, and applies the same filter to the calling thread only, which must be
-  a native thread of its own. For the whole process, the app's only barrier against the network is
-  going without the `INTERNET` permission. After a crash, Android's crash handler reads the
-  process, and its report holds memory near the registers.
-- **macOS:** secret pages are locked, and a child process does not get them. Isolation, for the
-  whole process, forbids core dumps, refuses debuggers unless one already traces the process, and
-  enters the sandbox without network. Files are not restricted, and root is not kept out.
-- **iOS:** secret pages are locked where the system allows it; isolation can only forbid core
-  dumps.
-- **Windows:** secret pages are locked and left out of error reports. Isolation, for the whole
-  process, leaves the heap out of error reports, which still hold the threads' stacks and
-  registers. It keeps programs of the same user from opening the process or its threads to read or
-  change them, and lowers the process to low integrity, which refuses writes to the user's files
-  but not to volumes without access control, such as FAT and exFAT USB sticks and SD cards.
-  Every object the process, or a program it starts, creates afterwards without an access list of
-  its own, such as threads and pipes, gets the threads' access list. Even the process itself can
-  then open such an object by name or ID for little more than waiting for it, so the process
-  cannot, for instance, start a program with piped standard streams. Programs of the same user can
-  still suspend a program the process starts. Sockets are not restricted, and administrators are
-  not kept out.
-- **WebAssembly:** a secret is an ordinary buffer that is only wiped, and isolation applies
-  nothing.
-
-The Argon2id work area, 2 GiB at the default memory level, is locked only where the limit on
-locked memory holds all of it, which on Linux it usually does not (8 MiB). Where it is not locked,
-the system may write it to swap, so use encrypted swap or none. [SECURITY.md](SECURITY.md) gives
-the details and what stays exposed.
+Every secret the crate holds lies in a `protect::Secret`, on memory pages of its own, and is wiped
+when it is dropped. `protect::write_secret` writes one to standard output without a copy in a buffer.
+`protect::Isolation::enter()`, called before a secret is read, applies what the operating system
+offers against a secret leaving the process and reports what holds. A call that computes with a
+secret needs about 140 KiB of free stack. [SECURITY.md](SECURITY.md) says what holds on each system.
 
 ## The API at a glance
 
