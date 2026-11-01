@@ -1,5 +1,4 @@
-//! The vendored trees hold exactly the files their documents record, byte for byte:
-//! vendor/phc-winner-argon2/ the `sha256sum` list of vendor/phc-winner-argon2.md, and
+//! The vendored tree holds exactly the file its document records, byte for byte:
 //! vendor/eff-large-wordlist/ its one file, whose SHA-256 the table of vendor/eff-large-wordlist.md
 //! gives. A file changed, added or missing fails.
 //!
@@ -15,7 +14,7 @@ use crate::Failure;
 
 /// The folder of the vendored trees, each beside its document, `vendor/<tree>.md`.
 const VENDOR: &str = "vendor";
-const TREES: &[&str] = &["phc-winner-argon2", "eff-large-wordlist"];
+const TREES: &[(&str, &str)] = &[("eff-large-wordlist", "eff_large_wordlist.txt")];
 /// The digits of a SHA-256 in hexadecimal: 32 bytes of two digits each.
 const DIGEST_DIGITS: usize = 64;
 /// The start of the row of a document's table that gives the SHA-256 of the tree's one file,
@@ -25,11 +24,11 @@ const SHA256_ROW: &str = "| SHA-256 ";
 pub(crate) fn run(root: &Path) -> Result<(), Failure> {
     let mut problems = Vec::new();
     let mut checked = 0;
-    for tree in TREES {
+    for (tree, file) in TREES {
         let mut digests = BTreeMap::new();
         digests_of(&root.join(VENDOR).join(tree), "", &mut digests)?;
         let document = read(&root.join(VENDOR).join(format!("{tree}.md")))?;
-        let recorded = recorded_digests(&String::from_utf8_lossy(&document), &digests);
+        let recorded = recorded_digests(&String::from_utf8_lossy(&document), file);
         problems.extend(differences(tree, &digests, &recorded));
         checked += digests
             .iter()
@@ -47,26 +46,14 @@ pub(crate) fn run(root: &Path) -> Result<(), Failure> {
     )))
 }
 
-/// The SHA-256 that `document` records for each file of its tree, by path: its `sha256sum` list,
-/// or else the SHA-256 row of its table, for a tree whose `files` are one file.
-fn recorded_digests(document: &str, files: &BTreeMap<String, String>) -> BTreeMap<String, String> {
-    let listed: BTreeMap<String, String> = document.split('\n').filter_map(listed_file).collect();
-    if !listed.is_empty() {
-        return listed;
-    }
-    let row = document.split('\n').find_map(table_row);
-    let mut paths = files.keys();
-    match (row, paths.next(), paths.next()) {
-        (Some(digest), Some(path), None) => BTreeMap::from([(path.clone(), digest.to_owned())]),
-        _ => BTreeMap::new(),
-    }
-}
-
-/// The path and the digest of a line of a `sha256sum` list: the digest, two spaces and the path.
-fn listed_file(line: &str) -> Option<(String, String)> {
-    let (digest, path) = line.split_once("  ")?;
-    let one_path = !path.is_empty() && !path.contains(char::is_whitespace);
-    (is_digest(digest) && one_path).then(|| (path.to_owned(), digest.to_owned()))
+/// The SHA-256 that `document` records for `file`, the one file of its tree: the SHA-256 row of its
+/// table.
+fn recorded_digests(document: &str, file: &str) -> BTreeMap<String, String> {
+    document
+        .split('\n')
+        .find_map(table_row)
+        .map(|digest| BTreeMap::from([(file.to_owned(), digest.to_owned())]))
+        .unwrap_or_default()
 }
 
 /// The digest of the table row ``| SHA-256   | `<digest>`   |``, its cells padded with spaces.
@@ -174,43 +161,30 @@ mod tests {
     }
 
     #[test]
-    fn a_sha256sum_list_is_read_and_other_lines_are_not() {
-        let upper = ABC.to_uppercase();
-        let document = format!(
-            "## SHA-256 of every vendored file\n\n```text\n{ABC}  LICENSE\n{EMPTY}  src/core.c\n\
-             {EMPTY}   three-spaces.c\n{upper}  upper.c\n{EMPTY}  two words.c\n```\n"
-        );
-        let expected = digests(&[("LICENSE", ABC), ("src/core.c", EMPTY)]);
-        assert_eq!(recorded_digests(&document, &BTreeMap::new()), expected);
-    }
-
-    #[test]
-    fn the_table_row_gives_the_digest_of_a_tree_of_one_file_only() {
+    fn the_table_row_gives_the_digest_of_the_one_file() {
         let document = format!("| Field     | Value |\n| SHA-256   | `{ABC}`   |\n");
         let one = digests(&[("words.txt", ABC)]);
-        assert_eq!(recorded_digests(&document, &one), one);
-        let two = digests(&[("words.txt", ABC), ("more.txt", EMPTY)]);
-        assert_eq!(recorded_digests(&document, &two), BTreeMap::new());
+        assert_eq!(recorded_digests(&document, "words.txt"), one);
         let unpadded = format!("| SHA-256 | `{ABC}`|\n");
-        assert_eq!(recorded_digests(&unpadded, &one), BTreeMap::new());
+        assert_eq!(recorded_digests(&unpadded, "words.txt"), BTreeMap::new());
     }
 
     #[test]
     fn the_recorded_files_pass() {
-        let files = digests(&[("LICENSE", ABC), ("src/core.c", EMPTY)]);
-        assert_eq!(differences("argon2", &files, &files), Vec::<String>::new());
+        let files = digests(&[("LICENSE", ABC), ("words.txt", EMPTY)]);
+        assert_eq!(differences("list", &files, &files), Vec::<String>::new());
     }
 
     #[test]
     fn a_file_changed_added_or_missing_is_refused() {
-        let files = digests(&[("LICENSE", EMPTY), ("src/added.c", ABC)]);
-        let recorded = digests(&[("LICENSE", ABC), ("src/core.c", EMPTY)]);
+        let files = digests(&[("LICENSE", EMPTY), ("added.txt", ABC)]);
+        let recorded = digests(&[("LICENSE", ABC), ("words.txt", EMPTY)]);
         assert_eq!(
-            differences("argon2", &files, &recorded),
+            differences("list", &files, &recorded),
             [
-                "vendor/argon2/LICENSE changed",
-                "vendor/argon2/src/added.c is not recorded",
-                "vendor/argon2/src/core.c is missing",
+                "vendor/list/LICENSE changed",
+                "vendor/list/added.txt is not recorded",
+                "vendor/list/words.txt is missing",
             ]
         );
     }

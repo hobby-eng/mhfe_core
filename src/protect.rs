@@ -163,8 +163,8 @@ impl Isolation {
     /// the filter reads and a later kernel's call cannot get past it; and Landlock where the kernel
     /// has it, which refuses writing, creating, removing and renaming files, truncating them from
     /// Linux 6.2, TCP bind and connect from Linux 6.7 and device `ioctl`s from Linux 6.10. They
-    /// hold for the calling thread and the threads it starts afterwards, such as the lanes of
-    /// Argon2id. Called while the process has one thread, they hold for the whole process, which
+    /// hold for the calling thread and the threads it starts afterwards, such as its engine's
+    /// lanes. Called while the process has one thread, they hold for the whole process, which
     /// also enters a network namespace of its own where the system allows it: no ID map is written,
     /// so `getuid()` and `getgid()` read 65534 for the rest of the process, which holds every
     /// capability inside its new user namespace and none over the system's files. On other

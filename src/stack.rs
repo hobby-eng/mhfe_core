@@ -7,8 +7,8 @@ use std::hint::black_box;
 
 use zeroize::Zeroize;
 
-/// The stack below the caller's frame that [`cleared`] overwrites after the body.
-const CLEARED_BYTES: usize = 128 * 1024;
+/// The stack below the caller's frame that [`overwrite`] clears, after the body in [`cleared`].
+pub(crate) const CLEARED_BYTES: usize = 128 * 1024;
 
 /// Runs `body` in a frame of its own, then overwrites [`CLEARED_BYTES`] of the stack below the
 /// caller's frame, where that frame and the ones it called lay. Every public function that computes
@@ -26,8 +26,10 @@ fn run<T>(body: impl FnOnce() -> T) -> T {
     body()
 }
 
+/// Overwrites [`CLEARED_BYTES`] of the stack below the caller's frame: after the body in
+/// [`cleared`], and on each thread of the Argon2id engine after a call.
 #[inline(never)]
-fn overwrite() {
+pub(crate) fn overwrite() {
     let mut stack = [0u8; CLEARED_BYTES];
     // Volatile writes; `black_box` keeps the array, and so the writes, where the body's frames were.
     stack.zeroize();

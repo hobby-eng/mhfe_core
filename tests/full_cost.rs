@@ -1,6 +1,6 @@
-//! The corpora at full cost: every transcript of both suites through `Mhfe` on the vendored
-//! Argon2id engine at its recorded settings, 2 or 3 GiB per call, with each salt and key compared
-//! with the recorded ones, then every recovery case on the same engine.
+//! The corpora at full cost: every transcript of both suites through `Mhfe` on the native Argon2id
+//! engine at its recorded settings, 2 or 3 GiB per call, with each salt and key compared with the
+//! recorded ones, then every recovery case on the same engine.
 //!
 //! Expensive, hours for both suites: run at a release or on request with
 //! `cargo test --locked --release --test full_cost -- --ignored --nocapture`, shared among
@@ -27,7 +27,7 @@ const SUITES: [(&str, Suite); 2] = [
     ("spec/vectors/suite4", Suite::SameLength),
 ];
 
-/// The vendored engine, whose every key must be the one the transcript records for its salt.
+/// The native engine, whose every key must be the one the transcript records for its salt.
 struct Compared {
     native: NativeArgon2,
     recorded: RecordedKeys,

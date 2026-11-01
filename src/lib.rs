@@ -12,10 +12,10 @@
 //! new 24-word phrase drawn to pass a check of its BIP39 seed; [`repair`], repair words for a
 //! container; and [`password_check`], a password of EFF words with a check word.
 //!
-//! Native builds compute Argon2id with the vendored reference C code, [`NativeArgon2`], at every
-//! memory level from 0 to 21, and only on 64-bit targets. A WebAssembly build has no engine of its
-//! own: the host implements [`Argon2Engine`] and refuses the levels it cannot reach when it is
-//! made, as a 32-bit WebAssembly host does above level 0.
+//! Native builds compute Argon2id with RustCrypto's `argon2` on four threads of their own,
+//! [`NativeArgon2`], at every memory level from 0 to 21, and only on 64-bit targets. A WebAssembly
+//! build has no engine of its own: the host implements [`Argon2Engine`] and refuses the levels it
+//! cannot reach when it is made, as a 32-bit WebAssembly host does above level 0.
 //!
 //! The crate reads no input. Every secret it holds lives in a [`protect::Secret`]: memory pages of
 //! its own, locked and kept out of core dumps where the system allows it, and wiped when dropped.
@@ -29,9 +29,9 @@
 //! The construction is experimental and has not been independently reviewed. Do not use it to
 //! protect real funds.
 //!
-//! A host isolates itself before it reads a secret, and does the creation duties the crate leaves
-//! to it: it reads the password twice, warns about other lengths, checks free memory where the
-//! example marks it, and shows the suite:
+//! A host isolates itself before it reads a secret or makes a native engine, whose threads inherit
+//! the isolation, and does the creation duties the crate leaves to it: it reads the password twice,
+//! warns about other lengths, checks free memory where the example marks it, and shows the suite:
 //!
 //! ```no_run
 //! use std::ops::ControlFlow;
@@ -65,8 +65,8 @@
 //! }
 //! ```
 
-// Unsafe code is allowed in the operating-system modules, `os.rs` and `os/*.rs`, and in the
-// binding of the C code, `engine/ffi.rs`, only.
+// Unsafe code is allowed in the operating-system modules, `os.rs` and `os/*.rs`, and for the view
+// of the work area as Argon2 blocks in `engine/native.rs`, only.
 #![deny(unsafe_code)]
 
 mod cipher;

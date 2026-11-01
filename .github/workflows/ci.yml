@@ -18,8 +18,7 @@ permissions:
   contents: read
 
 jobs:
-  # The gates, every fast test, the isolation tests among them, and the stack check of the Argon2
-  # C code (`cargo xtask check`).
+  # The gates and every fast test, the isolation tests among them (`cargo xtask check`).
   checks:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -48,8 +47,7 @@ jobs:
         run: cargo xtask check
 
   # The fast tests on each other system the crate runs on natively (the checks job runs them on
-  # x86-64 Linux), with both copies of the Argon2 core on x86-64 and the portable one on ARM64;
-  # Microsoft's compiler on Windows.
+  # x86-64 Linux).
   native:
     strategy:
       fail-fast: false
@@ -111,31 +109,25 @@ jobs:
         run: |
           rustup show
           rustup target add "$TARGET"
-      # The NDK of the runner image, with its clang for API level 26 as the C compiler and linker.
+      # The NDK of the runner image, with its clang for API level 26 as the linker.
       - name: Use the NDK's clang for API 26
         run: |
           bin="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin"
           test -x "$bin/${TARGET}26-clang"
           name="${TARGET//-/_}"
-          {
-            echo "CC_$name=$bin/${TARGET}26-clang"
-            echo "AR_$name=$bin/llvm-ar"
-            echo "CARGO_TARGET_${name^^}_LINKER=$bin/${TARGET}26-clang"
-          } >> "$GITHUB_ENV"
+          echo "CARGO_TARGET_${name^^}_LINKER=$bin/${TARGET}26-clang" >> "$GITHUB_ENV"
       - name: Lint
         run: cargo clippy --locked --all-targets --target "$TARGET" -- -D warnings
       - name: Build the tests
         run: cargo build --locked --tests --target "$TARGET"
 
-  # iOS builds only, with Xcode's clang: running needs a device or a simulator. The C code and Rust
-  # target one iOS version, as an Xcode build sets it; the stack probes of the C code's large
-  # frames need iOS 13. The lint also covers the macOS host, whose code no other job lints.
+  # iOS builds only, with Xcode's clang as the linker: running needs a device or a simulator. The
+  # lint also covers the macOS host, whose code no other job lints.
   ios:
     runs-on: macos-latest
     timeout-minutes: 30
     env:
       TARGET: aarch64-apple-ios
-      IPHONEOS_DEPLOYMENT_TARGET: "13.0"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -152,9 +144,9 @@ jobs:
       - name: Build the tests
         run: cargo build --locked --tests --target "$TARGET"
 
-  # WebAssembly has no C and no native engine. The tests run under WASI in a pinned wasmtime, with
-  # the corpora mapped at the path they were built with; the crate-doc example, which is native,
-  # is left out. The checks job lints wasm32.
+  # WebAssembly has no native engine. The tests run under WASI in a pinned wasmtime, with the
+  # corpora mapped at the path they were built with; the crate-doc example, which is native, is
+  # left out. The checks job lints wasm32.
   wasm:
     runs-on: ubuntu-24.04
     timeout-minutes: 30

@@ -2,17 +2,15 @@
 //! <task>`:
 //!
 //! - `check`: the fast checks that CI's `checks` job runs on every push (CORE-43): every gate
-//!   below, dprint, rustfmt, Clippy, rustdoc, the tests and the Argon2 stack check.
+//!   below, dprint, rustfmt, Clippy, rustdoc and the tests.
 //! - `code-rules`: the rules of the coding guide that the compiler, Clippy and the formatters
 //!   cannot see.
 //! - `copies [--tokens N]`: code copied from one place to another (CORE-10).
 //! - `public-api`: the public items against `docs/public-api.txt`.
-//! - `vendored`: the vendored trees against the files their documents record.
-//! - `argon2-stack`: the stack the Argon2 C code leaves written, on Linux.
+//! - `vendored`: the vendored tree against the file its document records.
 //!
 //! A gate prints what it checked and exits 0, or prints what it refused and exits 1.
 
-mod argon2_stack;
 mod check;
 mod code_rules;
 mod copies;
@@ -42,8 +40,8 @@ impl From<std::io::Error> for Failure {
     }
 }
 
-const USAGE: &str = "usage: cargo xtask <check | code-rules | copies [--tokens N] | public-api | \
-                     vendored | argon2-stack>";
+const USAGE: &str =
+    "usage: cargo xtask <check | code-rules | copies [--tokens N] | public-api | vendored>";
 
 /// The repository's root: the folder above this crate's.
 pub(crate) fn root() -> PathBuf {
@@ -60,7 +58,6 @@ pub(crate) fn run(task: &str, arguments: &[String]) -> Result<(), Failure> {
         ("copies", arguments) => copies::run(&root, arguments),
         ("public-api", []) => public_api::run(&root),
         ("vendored", []) => vendored::run(&root),
-        ("argon2-stack", []) => argon2_stack::run(&root),
         _ => Err(Failure(USAGE.to_owned())),
     }
 }

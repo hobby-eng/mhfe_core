@@ -2,13 +2,11 @@
 //! associated data, and a 32-byte tag. Only the memory and the passes change, and the core passes
 //! both with every call.
 //!
-//! Native builds have [`NativeArgon2`], the vendored reference C code; a WebAssembly host supplies
-//! its own engine.
+//! Native builds have [`NativeArgon2`], on RustCrypto's `argon2`; a WebAssembly host supplies its
+//! own engine.
 
 use crate::Error;
 
-#[cfg(not(target_arch = "wasm32"))]
-mod ffi;
 #[cfg(not(target_arch = "wasm32"))]
 mod native;
 

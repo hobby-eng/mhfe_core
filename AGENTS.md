@@ -22,8 +22,7 @@ records this crate's releases. `tests/fixtures/unicode18-ucd/` is Unicode's
   `cargo clippy --locked --workspace --all-targets -- -D warnings`, and for the crate alone
   `cargo clippy --locked -p mhfe-core --all-targets --target wasm32-unknown-unknown -- -D warnings`;
   `cargo fmt --all --check`; `dprint check`; `cargo xtask <gate>` for the code rules
-  (`code-rules`), copies (`copies`), public API (`public-api`), vendored files (`vendored`) and the
-  Argon2 stack (`argon2-stack`).
+  (`code-rules`), copies (`copies`), public API (`public-api`) and vendored files (`vendored`).
 - The public API is `docs/public-api.txt`: a change of a public item changes it in the same
   commit.
 - Full cost, announced first and run by the owner:

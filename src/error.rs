@@ -72,7 +72,8 @@ pub enum Error {
     OutOfMemory,
     /// The Argon2id engine failed.
     Argon2Failed {
-        /// The return value of the reference implementation, or the host engine's own code.
+        /// A return value of the reference implementation, whose numbering the native engine
+        /// reports too, or the host engine's own code.
         code: i32,
     },
     /// A callback stopped the operation.

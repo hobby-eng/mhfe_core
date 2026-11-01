@@ -1,9 +1,9 @@
 name: Test vectors
 
 # The corpora at full cost (tests/full_cost.rs): every transcript and recovery case of both suites
-# through the vendored Argon2id engine, about a thousand calls of 2 or 3 GiB, in two shares that
+# through the native Argon2id engine, about a thousand calls of 2 or 3 GiB, in two shares that
 # run at once. Hours, so only on request and for every version tag, on its own, beside release.yml,
-# which does not wait for it, as in mhfe; its result shows on the tag and in the README's badge, and
+# which does not wait for it, as in mhfe; its result shows on the tag, and
 # the maintainer publishes only after it passed. Never on a push to a branch (CI-04).
 on:
   workflow_dispatch:

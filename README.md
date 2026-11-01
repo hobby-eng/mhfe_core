@@ -83,12 +83,12 @@ What each system allows:
   `pidfd_getfd` and every change to files. On other architectures, where the kernel has Landlock,
   it refuses writing, creating, renaming and removing files; on newer kernels also truncating them
   and device `ioctl`s, and from Linux 6.7 also TCP bind and connect. These refusals cover the
-  calling thread and the threads it starts. When isolation is entered while the process has one
-  thread, they cover the whole process; where user namespaces are allowed, the process then also
-  gets a network of its own with no interface up. Root, or a program with `CAP_SYS_PTRACE`, can
-  still read the process's memory, the work area included, and so can a program that opened
-  `/proc/PID/mem` or attached as a tracer before the call, such as a debugger the program was
-  started under.
+  calling thread and the threads it starts, the four of its `NativeArgon2::new` among them. When
+  isolation is entered while the process has one thread, so before that call, they cover the whole
+  process; where user namespaces are allowed, the process then also gets a network of its own with
+  no interface up. Root, or a program with `CAP_SYS_PTRACE`, can still read the process's memory,
+  the work area included, and so can a program that opened `/proc/PID/mem` or attached as a tracer
+  before the call, such as a debugger the program was started under.
 - **Android:** secret pages are locked and left out of core dumps. Isolation forbids core dumps and
   memory reading as on Linux, and applies the same filter to the calling thread only, which must be
   a native thread of its own. For the whole process, the app's only barrier against the network is
@@ -98,9 +98,7 @@ What each system allows:
   whole process, forbids core dumps, refuses debuggers unless one already traces the process, and
   enters the sandbox without network. Files are not restricted, and root is not kept out.
 - **iOS:** secret pages are locked where the system allows it; isolation can only forbid core
-  dumps. Build with `IPHONEOS_DEPLOYMENT_TARGET` set to 13.0 or later, as Xcode sets it, so that
-  the C code and Rust target the same version: the stack probes of the C code's large frames need
-  iOS 13.
+  dumps.
 - **Windows:** secret pages are locked and left out of error reports. Isolation, for the whole
   process, leaves the heap out of error reports, which still hold the threads' stacks and
   registers. It keeps programs of the same user from opening the process or its threads to read or
@@ -124,10 +122,10 @@ the details and what stays exposed.
 
 - `Phrase` reads a phrase as a person types it, or makes one from entropy; `Password` encodes a
   password; `WorkFactor` holds the PIM and the memory level; `Suite` names a suite.
-- `Mhfe` creates and recovers containers with an `Argon2Engine`: `NativeArgon2` (the vendored
-  reference C code) on native targets, or the host's own engine in WebAssembly. A recovery is a
-  `Recovery`, whose readings are `Reading`s. `Error` lists the refusals, and `Error::Cancelled`
-  reports that a callback returned `ControlFlow::Break`.
+- `Mhfe` creates and recovers containers with an `Argon2Engine`: `NativeArgon2` (RustCrypto's
+  `argon2` on four threads of its own) on native targets, or the host's own engine in WebAssembly.
+  A recovery is a `Recovery`, whose readings are `Reading`s. `Error` lists the refusals, and
+  `Error::Cancelled` reports that a callback returned `ControlFlow::Break`.
 - `protect`: `Secret`, `Isolation` and, on native targets, `write_secret`.
 - `wallet_check`: `Seed` and `draw`. `repair`: `Card`, `Repaired`, `Change` and their `Error`.
   `password_check`: `EFF_WORDS`, `check_word` and `Check`.
@@ -137,10 +135,12 @@ its calls.
 
 ## Building
 
-The crate needs Rust 1.99 or later and has no Cargo features. A native build compiles the vendored
-Argon2 C code and needs a 64-bit target and a C compiler that the `cc` crate finds (GCC or Clang,
-Microsoft's compiler, the Android NDK's or Xcode's Clang). `wasm32-unknown-unknown` needs no C
-compiler: there the host implements `Argon2Engine`.
+The crate needs Rust 1.99 or later and has no Cargo features. A native build needs a 64-bit target
+and no C compiler. On `wasm32-unknown-unknown` the host implements `Argon2Engine`.
+
+Cargo compiles Argon2id without optimization in a debug build, where an operation takes about 16
+times as long as in a release build. A program can ask for `opt-level = 3` in
+`[profile.dev.package.argon2]`, which brings that down to about 4 times.
 
 ## Testing
 
@@ -150,14 +150,13 @@ submodule `tests/spec`. Clone with `git clone --recurse-submodules`, or run
 
 - `cargo test --locked` runs the fast tests. They replay the specification's test vectors of both
   suites and of the profiles with the Argon2id keys the vectors record, so that no test needs
-  gigabytes of memory. They also test the native engine against an independent Argon2
-  implementation at small costs, and check the secret pages and the isolation as the system
-  reports them.
+  gigabytes of memory. They also test the native engine against tags from OpenSSL at small costs,
+  and check the secret pages and the isolation as the system reports them.
 - `cargo xtask check` runs the checks of CI's `checks` job: the tests, Clippy, rustfmt, dprint,
-  the documentation, the code rules, the copy, public API and vendored-file checks, and a check of
-  the stack that the Argon2 C code leaves. The tools are in the repository's `xtask` crate, which
-  is not part of the package; dprint 0.63.0 formats the Markdown, JSON, TOML and YAML. CI's other
-  jobs build and test the crate on other systems and on Rust 1.99, and check the package.
+  the documentation, and the code rules, the copy, public API and vendored-file checks. The tools
+  are in the repository's `xtask` crate, which is not part of the package; dprint 0.63.0 formats
+  the Markdown, JSON, TOML and YAML. CI's other jobs build and test the crate on other systems and
+  on Rust 1.99, and check the package.
 - `cargo test --locked --release --test full_cost -- --ignored --nocapture` replays both suites'
   vectors at full cost, which takes hours, with 2 or 3 GiB of memory per call.
   `MHFE_VECTOR_SHARE=k/n` splits the work among n processes.
@@ -167,5 +166,5 @@ submodule `tests/spec`. Clone with `git clone --recurse-submodules`, or run
 MIT OR Apache-2.0, at your option: see [LICENSE-MIT](LICENSE-MIT) and
 [LICENSE-APACHE](LICENSE-APACHE). Unless you say otherwise, a contribution you submit for inclusion
 in this crate, as the Apache-2.0 licence defines it, is offered under both licences, without other
-terms. The vendored Argon2 code and the EFF word list keep their own licences: see
+terms. The EFF word list and the crates this one depends on keep their own licences: see
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

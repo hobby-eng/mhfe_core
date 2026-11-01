@@ -1,14 +1,14 @@
 //! The fast checks of the repository, which CI's `checks` job runs on every push (CORE-43), run as
-//! `cargo xtask check`: the gates, every fast test (the isolation and secret-memory tests and the
-//! unit tests of this crate's gates among them) and the stack check of the Argon2 C code, in that
-//! order, stopping at the first failure. Needs the pinned Rust toolchain with its wasm32 target, a
-//! C compiler and dprint, which formats the Markdown, JSON, TOML and YAML with the plugins that
-//! dprint.json pins. No full-cost Argon2id runs here: vectors.yml runs tests/full_cost.rs.
+//! `cargo xtask check`: the gates, then every fast test (the isolation and secret-memory tests and
+//! the unit tests of this crate's gates among them), stopping at the first failure. Needs the
+//! pinned Rust toolchain with its wasm32 target and dprint, which formats the Markdown, JSON, TOML
+//! and YAML with the plugins that dprint.json pins. No full-cost Argon2id runs here: vectors.yml
+//! runs tests/full_cost.rs.
 
 use std::env;
 use std::ffi::OsString;
 use std::path::Path;
-use std::process::{Child, Command};
+use std::process::Command;
 
 use crate::Failure;
 
@@ -49,31 +49,29 @@ pub(crate) fn run(root: &Path) -> Result<(), Failure> {
             .env("RUSTDOCFLAGS", "-D warnings"),
     )?;
     step(cargo(root).args(["test", "--locked", "--workspace"]))?;
-    gate("argon2-stack", || crate::argon2_stack::run(root))?;
     println!("All fast checks passed.");
     Ok(())
 }
 
 /// Cargo in the repository's root: the one that `cargo run` started this tool with, which it names
 /// in `CARGO`, so that every step uses the toolchain of rust-toolchain.toml; `cargo` otherwise.
-pub(crate) fn cargo(root: &Path) -> Command {
+fn cargo(root: &Path) -> Command {
     let mut command = Command::new(env::var_os("CARGO").unwrap_or_else(|| OsString::from("cargo")));
     command.current_dir(root);
     command
 }
 
-/// Runs `command` and returns what it wrote to its standard output where the caller piped it; a
-/// command that does not start, or does not exit 0, is a failure named by its command line.
-pub(crate) fn run_tool(command: &mut Command) -> Result<Vec<u8>, Failure> {
+/// Runs `command`; one that does not start, or does not exit 0, is a failure named by its command
+/// line.
+fn run_tool(command: &mut Command) -> Result<(), Failure> {
     let description = describe(command);
-    let output = command
-        .spawn()
-        .and_then(Child::wait_with_output)
+    let status = command
+        .status()
         .map_err(|error| Failure(format!("{description} could not run: {error}")))?;
-    if output.status.success() {
-        Ok(output.stdout)
+    if status.success() {
+        Ok(())
     } else {
-        Err(Failure(format!("{description} failed ({})", output.status)))
+        Err(Failure(format!("{description} failed ({status})")))
     }
 }
 
@@ -86,8 +84,7 @@ fn gate(task: &str, gate: impl FnOnce() -> Result<(), Failure>) -> Result<(), Fa
 /// Runs `command` under its command line.
 fn step(command: &mut Command) -> Result<(), Failure> {
     header(&describe(command));
-    run_tool(command)?;
-    Ok(())
+    run_tool(command)
 }
 
 fn header(command_line: &str) {
@@ -131,13 +128,9 @@ mod tests {
     }
 
     #[test]
-    fn a_tool_that_exits_0_returns_what_it_wrote() {
-        let output = run_tool(
-            cargo(&crate::root())
-                .arg("--version")
-                .stdout(Stdio::piped()),
-        );
-        assert!(output.is_ok_and(|output| output.starts_with(b"cargo ")));
+    fn a_tool_that_exits_0_passes() {
+        let run = run_tool(cargo(&crate::root()).arg("--version").stdout(Stdio::null()));
+        assert!(run.is_ok());
     }
 
     #[test]

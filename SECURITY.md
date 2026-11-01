@@ -28,20 +28,22 @@ repository. Never include a real seed phrase, password, private key or wallet fi
   frame when it is done. How deep these calls write is not measured: this is best effort. Such a
   call therefore needs about 140 KiB of free stack: on a smaller thread stack, such as musl's
   default of 128 KiB, it ends the process.
-- MHFE's wrapper around the vendored Argon2 C code overwrites 16 KiB of the stack after every
-  segment on each lane thread and after every call on the calling thread.
-  `cargo xtask argon2-stack` measures on Linux that the vendored code writes about 6 KiB deep
-  and that no byte it wrote stays.
+- Argon2id runs on four threads of the engine's own, the lanes and the first and last hash, so
+  the caller's stack stays out of it. RustCrypto's `argon2` keeps H0, its hashes and the blocks of
+  its compression on those stacks and does not promise to wipe them, so after every call each
+  thread overwrites 128 KiB of its stack. A test on Linux shows that no block of a call stays on
+  those stacks; measured on x86-64, the code writes about 11 KiB deep in a release build and 89 KiB
+  in an unoptimized one.
 - The Argon2id work area, 2 GiB or more, lies on pages of its own, left out of core dumps on Linux,
-  Android and Windows and out of a child process on Linux, Android, macOS and iOS. The C code wipes
-  it at the end of every successful call, and the crate after a failed one. It is locked only where
-  the limit on locked memory holds all of it (`RLIMIT_MEMLOCK` on Unix, 8 MiB by default on Linux
-  since 5.16; a working set Windows lets grow by its size); `NativeArgon2::is_locked` says whether.
+  Android and Windows and out of a child process on Linux, Android, macOS and iOS. The engine wipes
+  it after every call, whether the call succeeded or not. It is locked only where the limit on
+  locked memory holds all of it (`RLIMIT_MEMLOCK` on Unix, 8 MiB by default on Linux since 5.16; a
+  working set Windows lets grow by its size); `NativeArgon2::is_locked` says whether.
   Its blocks let anyone who reads them test a password guess cheaply, so a swap area that can hold
   them must be encrypted.
 - No secret leaves the crate but the results a program asks for. Every type that holds a secret
   prints as hidden in `Debug` and has no `Display`; errors carry counts, positions, settings and
-  the reference code's return values, never text that was passed in.
+  codes in the reference implementation's numbering, never text that was passed in.
 
 What the crate cannot protect:
 
@@ -84,7 +86,7 @@ be trusted and offline.
   answers `ENOSYS` to `openat2` and to every call newer than Linux 7.0; and Landlock where the
   kernel has it (5.13 and later), which refuses writing, creating, removing and renaming files, on
   newer kernels truncating them and device `ioctl`s, and from Linux 6.7 TCP bind and connect. They
-  hold for the calling thread and the threads it starts, such as the Argon2id lanes. Called while
+  hold for the calling thread and the threads it starts, such as its engine's lanes. Called while
   the process has one thread, they hold for the whole process, which also enters a user and network
   namespace of its own where the system allows it: no ID map is written, so `getuid()` and
   `getgid()` read 65534 afterwards.
@@ -165,19 +167,10 @@ be trusted and offline.
 A `Secret` is an ordinary heap buffer, wiped when it is dropped; isolation applies nothing, and
 every field of its report is false. The host's own Argon2id engine and its memory are the host's.
 
-## The C code and unsafe Rust
+## Unsafe Rust
 
-- Argon2 is the reference C implementation, vendored unchanged (see
-  [`vendor/phc-winner-argon2.md`](vendor/phc-winner-argon2.md); `cargo xtask vendored` checks
-  every file's SHA-256). MHFE's own C is `src/engine/argon2_wrap.c` with its header: Rust
-  calls only its `mhfe_argon2_ctx()`, and its `fill_segment()` runs the renamed vendored one.
-  The manifest's `links = "mhfe_argon2"` keeps two versions of this crate, and so two copies of
-  these C symbols, out of one program.
-- The library denies unsafe code (`#![deny(unsafe_code)]`) but in `src/engine/ffi.rs`, the binding
-  of the C code, and in `src/os.rs` and `src/os/*.rs`, the system calls; each `unsafe` block says
-  why it is sound. The binding's copy of `argon2_context` is checked field by field at compile
-  time, and a test shows that every field reaches the C code.
-- Every pointer handed to C refers to a live buffer of the stated length that outlives the call.
-  The work area reaches C through the allocation callback; `argon2_ctx` joins its four lane threads
-  before it returns. A refused allocation is `Error::OutOfMemory`, and any other failure
-  `Error::Argon2Failed` with the reference code's return value.
+- The library denies unsafe code (`#![deny(unsafe_code)]`) but in `src/os.rs` and `src/os/*.rs`, the
+  system calls, and in the one function of `src/engine/native.rs` that shows the work area to
+  `argon2` as its blocks; each `unsafe` block says why it is sound.
+- A refused reservation, or a call beyond it, is `Error::OutOfMemory`, and any other failure
+  `Error::Argon2Failed` with a code in the numbering of the reference implementation's `argon2.h`.

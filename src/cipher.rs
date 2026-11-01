@@ -22,7 +22,8 @@ pub struct Mhfe<E: Argon2Engine> {
 impl Mhfe<NativeArgon2> {
     /// `Mhfe::with_engine(work, NativeArgon2::new(work.memory_kib())?)`: reserves the memory of
     /// `work` once, for every round. Encode the password and check free memory first, as for
-    /// [`NativeArgon2::new`]. Errors: [`Error::OutOfMemory`].
+    /// [`NativeArgon2::new`], which also says what comes before it. Errors:
+    /// [`Error::OutOfMemory`] and [`Error::Argon2Failed`].
     pub fn new(work: WorkFactor) -> Result<Self, Error> {
         Ok(Self::with_engine(
             work,

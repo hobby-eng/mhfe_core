@@ -11,8 +11,8 @@
 //!   is the one lockfile (TOOL-05). RUST-01: every Cargo.toml has its lints table.
 //! - TOOL-01: the repository's tools are `cargo xtask` tasks, so it holds no Node.js script and no
 //!   Node.js tooling (package.json, its lockfiles, .node-version).
-//! - CORE-19 for this crate: the library and the C code describe this crate, never a program built
-//!   on it or an audit.
+//! - CORE-19 for this crate: the library describes this crate, never a program built on it or an
+//!   audit.
 //! - DOC-01, the `markdown` gate: no blank line inside a Markdown list. The multi-chain wallet
 //!   tools (tooling/verify-project-facts.mjs) and MnemoCode (scripts/verify-markdown.mjs) check the
 //!   same rule: a change goes to all three.
@@ -29,14 +29,13 @@ use crate::Failure;
 
 /// Folders not read: Git's, the builds', the corpora, the specification's repository and the
 /// vendored trees, which are data here, and the audit records, which are frozen.
-const SKIPPED: [&str; 8] = [
+const SKIPPED: [&str; 7] = [
     ".git",
     "node_modules",
     "target",
     "docs/audits",
     "tests/fixtures",
     "tests/spec",
-    "vendor/phc-winner-argon2",
     "vendor/eff-large-wordlist",
 ];
 const MOST_LINES: usize = 800;
@@ -60,10 +59,8 @@ enum Comments {
 }
 
 /// The comment syntax of each file ending that CORE-15 counts.
-const COMMENTS: [(&str, Comments); 5] = [
+const COMMENTS: [(&str, Comments); 3] = [
     (".rs", Comments::Slash),
-    (".c", Comments::Slash),
-    (".h", Comments::Slash),
     (".sh", Comments::Hash),
     (".yml", Comments::Hash),
 ];
@@ -75,9 +72,11 @@ type Pattern = fn(&[u8]) -> Option<usize>;
 /// Names of a program built on the crate and of its files, and audit identifiers.
 const FOREIGN_WORDS: [Pattern; 4] = [audit_id, program_name, program_files, front_end];
 /// The Cargo requirements that are not carets, each with the owner's reason.
-const CARGO_EXCEPTIONS: [(&str, &str); 1] = [
+const CARGO_EXCEPTIONS: [(&str, &str); 2] = [
     // Its tables are part of the protocol, and the specification pins Unicode 18.0.0.
     ("unicode-normalization", ">=0.1.26, <0.1.27"),
+    // Every tag comes from it, and the engine's clearing rests on what it leaves on the stack.
+    ("argon2", "=0.6.0"),
 ];
 /// The lints tables of RUST-01.
 const LINTS_TABLES: [&str; 2] = ["[lints.rust]", "[lints.clippy]"];
@@ -205,15 +204,9 @@ fn is_counted(path: &str) -> bool {
     })
 }
 
-/// The library and the C code, which CORE-19 reads for this crate:
-/// `^(?:build\.rs$|src\/|tests\/[^/]+\.c$)`.
+/// The library, which CORE-19 reads for this crate: `^(?:build\.rs$|src\/)`.
 fn is_crate_code(path: &str) -> bool {
-    let test_c = path
-        .strip_prefix("tests/")
-        .and_then(|name| name.strip_suffix(".c"));
-    path == "build.rs"
-        || path.starts_with("src/")
-        || test_c.is_some_and(|name| !name.is_empty() && !name.contains('/'))
+    path == "build.rs" || path.starts_with("src/")
 }
 
 /// CORE-15 for one file.
@@ -357,7 +350,7 @@ fn is_word(byte: u8) -> bool {
     byte.is_ascii_alphanumeric() || byte == b'_'
 }
 
-/// CORE-19 for this crate, for one file of the library or the C code.
+/// CORE-19 for this crate, for one file of the library.
 fn check_foreign_words(path: &str, text: &str, problems: &mut Vec<String>) {
     for (index, line) in text.split('\n').enumerate() {
         for word in FOREIGN_WORDS
@@ -615,7 +608,7 @@ mod tests {
         assert!(problems_of("src/a.rs", &commented).is_empty());
         assert!(problems_of("src/a.rs", &with_tests).is_empty());
         // Outside Rust the test module is code like any other.
-        assert_eq!(problems_of("src/a.c", &with_tests).len(), 1);
+        assert_eq!(problems_of(".github/workflows/a.yml", &with_tests).len(), 1);
     }
 
     #[test]
@@ -718,7 +711,6 @@ mod tests {
                 refused(2, "Front-Ends")
             ]
         );
-        assert_eq!(problems_of("tests/stack.c", "a frontend").len(), 1);
         assert_eq!(problems_of("build.rs", "BROWSER").len(), 1);
     }
 
@@ -728,7 +720,6 @@ mod tests {
         let audit = concat!("mhfe AUD", "-1");
         assert!(problems_of("src/a.rs", text).is_empty());
         assert!(problems_of("tests/suite3.rs", audit).is_empty());
-        assert!(problems_of("tests/support/a.c", "mhfe").is_empty());
         assert!(problems_of("xtask/src/a.rs", audit).is_empty());
     }
 
