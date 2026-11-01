@@ -13,8 +13,8 @@
 //! statement, `pub use` and `pub(crate) use` included, are left out: two files that use the same
 //! modules share no code. A `use` inside a type, as in `impl Trait + use<'a>`, is code and is read.
 //!
-//! The same rule as mhfe's scripts/verify-no-copies.mjs and MnemoCode's: a change of the rule goes
-//! to all three.
+//! The same rule as mhfe's `cargo xtask copies` and MnemoCode's: a change of the rule goes to all
+//! three.
 //!
 //! Usage: `cargo xtask copies [--tokens N]`, N a whole number from 2, 50 by default. The controls
 //! that the checker must decide right are its unit tests.

@@ -159,14 +159,15 @@ mod tests {
     // The profile's digests are replayed here, not in tests/ (RUST-08): the public API gives only
     // whether `T` passes, not `T` itself.
 
-    use super::*;
-    use crate::test_support::{hex, wallet_check_prefixes, wallet_check_rows};
+    use serde_json::Value;
 
-    /// The phrase of a vector: 192 zero bits, then `counter` as a 64-bit big-endian number.
-    fn phrase(counter: u64) -> Phrase {
-        let mut entropy = [0u8; STATE_BYTES];
-        entropy[STATE_BYTES - 8..].copy_from_slice(&counter.to_be_bytes());
-        Phrase::from_entropy(&entropy).unwrap()
+    use super::*;
+    use crate::test_support::{WALLET_CHECK_VECTORS, hex, profile_vectors, text};
+
+    /// The seed of a case of the profile vectors.
+    fn seed(case: &Value) -> Seed {
+        let phrase = Phrase::read(text(case, "mnemonic")).unwrap();
+        Seed::derive(&phrase, text(case, "bip39_passphrase"))
     }
 
     /// Whether `T` fails the check: its first 16 bits are not all zero.
@@ -174,34 +175,34 @@ mod tests {
         digest[..CHECK_BITS / 8] != [0; CHECK_BITS / 8]
     }
 
-    /// vectors/profiles/README.md: the whole `T` of each row, and the first bytes of the failing
-    /// digests its text gives: each row's counter with the other row's passphrase, and the first
-    /// row with `BE32(256)` left out.
+    /// vectors/profiles/wallet-check.json: the whole `T` of each case, passing or failing, and of
+    /// the control, which leaves `BE32(256)` out and must not pass.
     #[test]
     fn the_digests_are_the_profile_vectors() {
-        let rows = wallet_check_rows();
-        for (counter, passphrase, expected) in &rows {
-            let seed = Seed::derive(&phrase(*counter), passphrase);
-            assert_eq!(digest(seed.as_bytes())[..], hex(expected), "{counter}");
+        let cases = profile_vectors(WALLET_CHECK_VECTORS, "cases");
+        for case in &cases {
+            let id = text(case, "id");
+            let digest = digest(seed(case).as_bytes());
+            assert_eq!(digest[..], hex(text(case, "digest_hex")), "{id}");
+            assert_eq!(case["passes"], !fails(&digest), "{id}");
         }
-        let [(first, first_passphrase, _), (second, second_passphrase, _)] = &rows[..] else {
-            panic!("two rows");
+        let controls = profile_vectors(WALLET_CHECK_VECTORS, "controls");
+        let [control] = &controls[..] else {
+            panic!("one control");
         };
-        let prefixes = wallet_check_prefixes();
-        let crossed = [(first, second_passphrase), (second, first_passphrase)];
-        for ((counter, passphrase), prefix) in crossed.into_iter().zip(&prefixes) {
-            let seed = Seed::derive(&phrase(*counter), passphrase);
-            let digest = digest(seed.as_bytes());
-            assert_eq!(digest[..4], hex(prefix), "{counter}");
-            assert!(fails(&digest), "{counter}");
+        // The first case, with `BE32(256)` left out of `T`.
+        for field in ["counter", "entropy_hex", "mnemonic", "bip39_passphrase"] {
+            assert_eq!(control[field], cases[0][field], "{field}");
         }
-        let seed = Seed::derive(&phrase(*first), first_passphrase);
+        assert_eq!(text(control, "omits"), "BE32(256)");
+        let seed = seed(control);
         let without_length = Sha256::new()
             .chain_update(DOMAIN)
             .chain_update(seed.as_bytes())
             .finalize();
-        assert_eq!(without_length[..4], hex(&prefixes[2]));
+        assert_eq!(without_length[..], hex(text(control, "digest_hex")));
         assert!(fails(&without_length));
+        assert_eq!(control["passes"], false);
         assert_eq!(format!("{seed:?}"), "Seed(hidden)");
     }
 }

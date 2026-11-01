@@ -1,11 +1,11 @@
 //! What the corpus tests share: the corpora, the specification's vectors read from its repository
 //! (the submodule `tests/spec`, the specification of the version this crate implements) and
 //! Unicode's `NormalizationTest.txt` in `tests/fixtures/`, the Argon2id of a transcript, the
-//! replay of a transcript and of a recovery case through the public API, and the rows of the
-//! profile vectors' tables.
+//! replay of a transcript and of a recovery case through the public API, and the reader of the
+//! profile vectors.
 //!
 //! The crate's unit tests include this file too (`src/test_support.rs`), for the field readers,
-//! `hex`, `password`, `every_round`, `RecordedKeys` and the wallet-check rows.
+//! `hex`, `password`, `every_round`, `RecordedKeys` and the wallet-check vectors.
 #![allow(dead_code, reason = "each test file uses its own part")]
 
 use std::fs;
@@ -20,8 +20,10 @@ use sha2::{Digest, Sha256};
 const TESTS: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/tests");
 /// The recovery cases beside the transcripts of a suite.
 const RECOVERY_CASES: &str = "negative-cases.json";
-/// The specification publishes the profile vectors only as the Markdown tables of this file.
-const PROFILE_VECTORS: &str = "spec/vectors/profiles/README.md";
+/// The folder of the profile vectors, one JSON file for each profile.
+const PROFILE_VECTORS: &str = "spec/vectors/profiles";
+/// The profile vectors of MHFE-WALLET-CHECK-SEED-1.
+pub(crate) const WALLET_CHECK_VECTORS: &str = "wallet-check.json";
 
 /// The files that the `SHA256SUMS` of `folder` lists, each checked against its SHA-256 first.
 pub(crate) fn checked_files(folder: &str) -> Vec<String> {
@@ -52,72 +54,15 @@ pub(crate) fn specification_version() -> String {
         .to_owned()
 }
 
-/// The rows of the table in the section of the profile vectors whose heading ends with `profile`,
-/// such as `MHFE-REPAIR-1`: each row's cells, trimmed, without the header row and its rule.
-pub(crate) fn profile_table(profile: &str) -> Vec<Vec<String>> {
-    let readme = fs::read_to_string(format!("{TESTS}/{PROFILE_VECTORS}")).unwrap();
-    let rows: Vec<Vec<String>> = readme
-        .lines()
-        .skip_while(|line| !(line.starts_with("## ") && line.ends_with(profile)))
-        .skip_while(|line| !line.starts_with('|'))
-        .take_while(|line| line.starts_with('|'))
-        // The header row and the rule under it.
-        .skip(2)
-        .map(|row| {
-            row.trim_matches('|')
-                .split('|')
-                .map(|cell| cell.trim().to_owned())
-                .collect()
-        })
-        .collect();
-    assert!(!rows.is_empty(), "no table for {profile}");
-    rows
-}
-
-/// A cell's literal value, which the tables write as code: its text between the backticks.
-pub(crate) fn literal(cell: &str) -> &str {
-    cell.strip_prefix('`')
-        .and_then(|inner| inner.strip_suffix('`'))
-        .unwrap_or_else(|| panic!("{cell} is not a literal"))
-}
-
-/// The rows of MHFE-WALLET-CHECK-SEED-1: the counter, the BIP39 passphrase, which the table writes
-/// as words when it is empty, and the digest `T` in hex.
-pub(crate) fn wallet_check_rows() -> Vec<(u64, String, String)> {
-    profile_table("MHFE-WALLET-CHECK-SEED-1")
-        .iter()
-        .map(|row| {
-            let passphrase = match row[1].as_str() {
-                "empty string" => "",
-                cell => literal(cell),
-            };
-            (
-                row[0].parse().unwrap(),
-                passphrase.to_owned(),
-                literal(&row[2]).to_owned(),
-            )
-        })
-        .collect()
-}
-
-/// The digest prefixes that the text under the MHFE-WALLET-CHECK-SEED-1 table gives, in order: the
-/// first row's counter with the empty passphrase, the second row's counter with `TREZOR`, and the
-/// first row with `BE32(256)` left out. The text writes each as eight hex digits in backticks.
-pub(crate) fn wallet_check_prefixes() -> Vec<String> {
-    let readme = fs::read_to_string(format!("{TESTS}/{PROFILE_VECTORS}")).unwrap();
-    let prefixes: Vec<String> = readme
-        .lines()
-        .skip_while(|line| !(line.starts_with("## ") && line.ends_with("MHFE-WALLET-CHECK-SEED-1")))
-        .skip(1)
-        .skip_while(|line| !line.starts_with('|'))
-        .skip_while(|line| line.starts_with('|'))
-        .take_while(|line| !line.starts_with("## "))
-        .flat_map(|line| line.split('`').skip(1).step_by(2))
-        .filter(|code| code.len() == 8 && code.bytes().all(|byte| byte.is_ascii_hexdigit()))
-        .map(str::to_owned)
-        .collect();
-    assert_eq!(prefixes.len(), 3, "{prefixes:?}");
-    prefixes
+/// The list `field` of the profile vectors' file `name`, which their `SHA256SUMS` must list; every
+/// file it lists is checked against it first.
+pub(crate) fn profile_vectors(name: &str, field: &str) -> Vec<Value> {
+    let listed = checked_files(PROFILE_VECTORS);
+    assert!(listed.iter().any(|file| file == name), "{name}");
+    read(PROFILE_VECTORS, name)[field]
+        .as_array()
+        .unwrap()
+        .clone()
 }
 
 /// The transcripts of `folder`: every file its `SHA256SUMS` lists, checked against it, but the

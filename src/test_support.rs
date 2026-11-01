@@ -14,8 +14,7 @@ use crate::engine::{Argon2Engine, KEY_BYTES, SALT_BYTES};
 #[path = "../tests/support/corpus.rs"]
 mod corpus;
 pub(crate) use corpus::{
-    RecordedKeys, every_round, hex, number, password, text, wallet_check_prefixes,
-    wallet_check_rows,
+    RecordedKeys, WALLET_CHECK_VECTORS, every_round, hex, number, password, profile_vectors, text,
 };
 
 /// Passwords, settings, phrases, length detection and the verifier's byte order of suite 3.

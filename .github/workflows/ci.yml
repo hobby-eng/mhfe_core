@@ -61,11 +61,6 @@ jobs:
     env:
       RUSTFLAGS: -D warnings
     steps:
-      # Git on Windows converts line endings by default. The specification's repository, the
-      # submodule tests/spec, has no attributes that stop it, and the tests check its files against
-      # their SHA-256.
-      - name: Keep the line endings of the repositories
-        run: git config --global core.autocrlf false
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false

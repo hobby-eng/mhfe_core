@@ -146,9 +146,7 @@ compiler: there the host implements `Argon2Engine`.
 
 The tests read the specification's test vectors from its repository, which this one holds as the
 submodule `tests/spec`. Clone with `git clone --recurse-submodules`, or run
-`git submodule update --init` in an existing clone. On Windows, clone with
-`git -c core.autocrlf=false`, so that the specification's files keep the line endings their
-`SHA256SUMS` hash.
+`git submodule update --init` in an existing clone.
 
 - `cargo test --locked` runs the fast tests. They replay the specification's test vectors of both
   suites and of the profiles with the Argon2id keys the vectors record, so that no test needs
