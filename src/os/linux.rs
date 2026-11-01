@@ -2,7 +2,7 @@
 //!
 //! Linux's secret memory (`memfd_secret`, on by default since Linux 6.5): its pages leave the
 //! kernel's direct map, so that no process, root included, reads them directly through
-//! `/proc/PID/mem`, `process_vm_readv` or `PTRACE_PEEKDATA`; they are locked and out of core dumps
+//! `/proc/PID/mem`, `process_vm_readv` or `PTRACE_PEEKDATA`; they stay out of swap and core dumps
 //! by construction, and the kernel refuses to hibernate while they exist, so that they never reach
 //! a hibernation image.
 //! Android never calls it.
@@ -14,8 +14,9 @@
 //! io_uring or listing of the process's threads.
 #![allow(
     unsafe_code,
-    reason = "memfd_secret, ftruncate, mmap, madvise, munmap, prctl, unshare, socket, open, close \
-              and the io_uring and Landlock calls are foreign functions"
+    reason = "memfd_secret, ftruncate, mmap, madvise, getrandom, munmap, sysconf, prctl, unshare, \
+              socket, open, close and the io_uring and Landlock calls are foreign functions, and \
+              a new mapping is written through a raw pointer"
 )]
 
 #[cfg(target_os = "linux")]
@@ -42,7 +43,7 @@ const MEMFD_SECRET: Option<libc::c_long> = None;
 
 /// `bytes` bytes of secret memory, or `None` where the kernel refuses: one without secret memory,
 /// a policy that forbids the call, or a request beyond RLIMIT_MEMLOCK, which these pages count
-/// against.
+/// against and which an older kernel refuses at mmap, a newer one at the first touch of a page.
 #[cfg(target_os = "linux")]
 pub(super) fn secret_pages(bytes: usize) -> Option<NonNull<u8>> {
     let number = MEMFD_SECRET?;
@@ -75,12 +76,40 @@ pub(super) fn secret_pages(bytes: usize) -> Option<NonNull<u8>> {
     // The mapping is shared, so a child process would share the secret: it gets no mapping
     // instead, or the pages are given back and anonymous ones taken.
     // SAFETY: madvise marks the pages of the mapping just made and changes no content.
-    if unsafe { libc::madvise(mapped, bytes, libc::MADV_DONTFORK) } != 0 {
+    if unsafe { libc::madvise(mapped, bytes, libc::MADV_DONTFORK) } != 0
+        || !charge_pages(mapped, bytes)
+    {
         // SAFETY: the mapping was just made and nothing refers to it.
         unsafe { libc::munmap(mapped, bytes) };
         return None;
     }
     NonNull::new(mapped.cast())
+}
+
+/// Charges every page of a new mapping of secret memory now, and returns whether the kernel took
+/// them all. Since Linux commit 97d34aa65c29 it charges a page to the user's count against
+/// RLIMIT_MEMLOCK at the page's first fault, not at mmap, and a fault over the limit is SIGBUS,
+/// which would end the process at its first write to the secret. A write that the kernel itself
+/// makes gets EFAULT instead, so the getrandom system call writes one byte into each page. It is
+/// the raw call, since libc's function may be served by the vDSO in user space, where the write
+/// would fault; the filter of `enter` allows it, and MADV_POPULATE_WRITE answers EINVAL on this
+/// memory.
+#[cfg(target_os = "linux")]
+fn charge_pages(mapped: *mut libc::c_void, bytes: usize) -> bool {
+    // SAFETY: sysconf takes an integer and touches no memory of this process.
+    let page = unsafe { libc::sysconf(libc::_SC_PAGESIZE) } as usize;
+    for offset in (0..bytes).step_by(page) {
+        let byte = mapped.cast::<u8>().wrapping_add(offset);
+        // SAFETY: getrandom writes at most the one byte it is asked for, at `byte`, inside the
+        // mapping, to which nothing else refers yet.
+        if unsafe { libc::syscall(libc::SYS_getrandom, byte, 1usize, 0u32) } != 1 {
+            return false;
+        }
+        // Secret memory starts zeroed.
+        // SAFETY: the byte lies in the mapping, on the page the kernel just wrote to.
+        unsafe { byte.write_volatile(0) };
+    }
+    true
 }
 
 /// The error number of a call that the filter or Landlock refuses. Both answer before the call

@@ -19,7 +19,8 @@ impl Pages {
     pub(crate) fn new(bytes: usize) -> Self {
         #[cfg(target_os = "linux")]
         if let Some(start) = super::linux::secret_pages(bytes) {
-            // Secret memory is locked and out of core dumps by construction.
+            // Secret memory stays out of swap and core dumps by construction, which is what
+            // `locked` promises: on a newer kernel the mapping itself carries no lock.
             return Self {
                 start,
                 bytes,

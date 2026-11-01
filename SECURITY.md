@@ -72,10 +72,11 @@ be trusted and offline.
 - Secret pages: on x86-64 and AArch64, the kernel's secret memory (`memfd_secret`, on by default
   since Linux 6.5) where it is offered. Its pages leave the kernel's direct map, so that no process,
   root included, reads them directly through `/proc/PID/mem`, `process_vm_readv` or
-  `PTRACE_PEEKDATA`; they are locked, out of core dumps and not given to a child process.
-  Otherwise, and on other architectures, anonymous pages with `mlock`, `MADV_DONTDUMP` and
-  `MADV_WIPEONFORK` (Linux 4.14 and later). Both count against `RLIMIT_MEMLOCK`; a lock it refuses
-  is reported by `Secret::is_locked`.
+  `PTRACE_PEEKDATA`; they never reach swap, stay out of core dumps and are not given to a child
+  process. Otherwise, and on other architectures, anonymous pages with `mlock`, `MADV_DONTDUMP` and
+  `MADV_WIPEONFORK` (Linux 4.14 and later). Both count against `RLIMIT_MEMLOCK`, secret memory on
+  newer kernels for all of the user's processes together: a `Secret` beyond it takes anonymous
+  pages, and a lock it refuses is reported by `Secret::is_locked`.
 - Isolation: `RLIMIT_CORE` 0 and `PR_SET_DUMPABLE` 0, which also keeps other programs of the user
   from `ptrace` and `/proc/PID/mem`; `PR_SET_NO_NEW_PRIVS`; on x86-64 and little-endian AArch64 a
   seccomp filter that refuses with `EACCES` new sockets, io_uring, `ptrace`, `process_vm_writev`,

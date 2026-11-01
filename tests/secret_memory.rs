@@ -1,10 +1,12 @@
 //! Where the pages of a secret and the work area of Argon2id lie, as the system reports them, and
 //! that encoding a password and deriving a BIP39 seed take nothing from the heap. The program has a
 //! `main` of its own (`harness = false`), so that the counting allocator sees no allocation of
-//! another thread.
+//! another thread; a process under a low lock limit, which may end by a signal, is a child process
+//! that it starts again in a role.
 #![allow(
     unsafe_code,
-    reason = "a global allocator, and the system calls that tell where pages lie"
+    reason = "a global allocator, and the system calls that tell where pages lie and set the lock \
+              limit"
 )]
 #![allow(
     clippy::unwrap_used,
@@ -45,6 +47,11 @@ unsafe impl GlobalAlloc for Counting {
 static ALLOCATOR: Counting = Counting;
 
 fn main() {
+    #[cfg(target_os = "linux")]
+    if std::env::var_os(linux::ROLE).is_some() {
+        linux::secrets_under_every_lock_limit();
+        return;
+    }
     // WebAssembly has no pages of its own to give a secret: it is a heap buffer there.
     #[cfg(any(unix, windows))]
     run(
@@ -53,8 +60,13 @@ fn main() {
     );
     #[cfg(any(target_os = "linux", windows))]
     run(
-        "a secret lies on locked pages out of core dumps",
-        a_secret_lies_on_locked_pages_out_of_core_dumps,
+        "a secret lies on pages kept out of swap and core dumps",
+        a_secret_lies_on_pages_kept_out_of_swap_and_core_dumps,
+    );
+    #[cfg(target_os = "linux")]
+    run(
+        "a secret works under every lock limit and says whether it is locked",
+        linux::a_secret_works_under_every_lock_limit,
     );
     #[cfg(not(target_arch = "wasm32"))]
     run(
@@ -101,7 +113,7 @@ fn encoding_a_password_and_deriving_a_seed_take_nothing_from_the_heap() {
 
 /// What the system reports of the pages; the unit tests check what `Secret` reports itself.
 #[cfg(any(target_os = "linux", windows))]
-fn a_secret_lies_on_locked_pages_out_of_core_dumps() {
+fn a_secret_lies_on_pages_kept_out_of_swap_and_core_dumps() {
     let mut secret = Secret::with_capacity(16);
     secret.push(b"public").unwrap();
     #[cfg(target_os = "linux")]
@@ -153,8 +165,16 @@ fn lock_limit() -> u64 {
 #[cfg(target_os = "linux")]
 mod linux {
     use std::ops::Range;
+    use std::process::Command;
 
     use mhfe_core::protect::Secret;
+
+    /// The variable that starts this program as the child of the lock-limit test.
+    pub(super) const ROLE: &str = "MHFE_CORE_TEST_LOCK_LIMITS";
+
+    /// The highest lock limit tried, Linux's default: a higher one, or none, only makes the way
+    /// down longer.
+    const HIGHEST_LOCK_LIMIT: u64 = 8 << 20;
 
     /// One mapping of /proc/self/smaps: its addresses, its name and its VmFlags.
     pub(super) struct Mapping {
@@ -200,8 +220,10 @@ mod linux {
         mappings
     }
 
-    /// Locked (`lo`) and out of core dumps (`dd`); secret memory is shared, so a child process
-    /// gets none of it (`dc`), while anonymous pages give a child zeros (`wf`).
+    /// Out of core dumps (`dd`) on pages of either kind. Anonymous pages are locked (`lo`) and give
+    /// a child process zeros (`wf`). Secret memory is shared, so a child gets none of it (`dc`),
+    /// and its kind is what keeps it out of swap: since Linux commit 97d34aa65c29 its folios are
+    /// unevictable and the mapping has no `lo`, which an older kernel's has.
     pub(super) fn secret_pages_are_marked(secret: &Secret) {
         let address = secret.as_bytes().as_ptr() as usize;
         let mappings = mappings();
@@ -209,17 +231,17 @@ mod linux {
             .iter()
             .find(|mapping| mapping.range.contains(&address))
             .unwrap();
+        let flags: &[&str] = if mapping.name.starts_with("/secretmem") {
+            &["dd", "dc"]
+        } else {
+            &["dd", "lo", "wf"]
+        };
         assert!(
-            mapping.has("lo") && mapping.has("dd"),
-            "{:?}",
+            flags.iter().all(|flag| mapping.has(flag)),
+            "{} {:?}",
+            mapping.name,
             mapping.flags
         );
-        let child = if mapping.name.starts_with("/secretmem") {
-            "dc"
-        } else {
-            "wf"
-        };
-        assert!(mapping.has(child), "{} {:?}", mapping.name, mapping.flags);
     }
 
     /// The one new mapping of `bytes` bytes is out of core dumps and gives a child zeros, and it
@@ -235,6 +257,45 @@ mod linux {
         let area = new[0];
         assert!(area.has("dd") && area.has("wf"), "{:?}", area.flags);
         assert_eq!(area.has("lo"), locked, "{:?}", area.flags);
+    }
+
+    /// In a child process: the limit stays its own, and so does a SIGBUS at a write to a page
+    /// beyond the limit.
+    pub(super) fn a_secret_works_under_every_lock_limit() {
+        let status = Command::new(std::env::current_exe().unwrap())
+            .env(ROLE, "child")
+            .status()
+            .unwrap();
+        assert!(status.success(), "{status}");
+    }
+
+    /// The child's part: a secret of two pages is written and read back under each limit, down to
+    /// 0. The limit comes down a page at a time because secret memory is charged to the user's
+    /// count, which other programs add to, so that only one limit, unknown here, falls between the
+    /// two pages. They are locked exactly when the limit holds them, on anonymous pages if the
+    /// count leaves no room for secret memory; `mlock` lets a process with CAP_IPC_LOCK past any
+    /// limit, so this needs one without it.
+    pub(super) fn secrets_under_every_lock_limit() {
+        // SAFETY: sysconf takes an integer and touches no memory of this process.
+        let page = unsafe { libc::sysconf(libc::_SC_PAGESIZE) } as u64;
+        let public = vec![0x5a; page as usize + 1];
+        let highest = super::lock_limit().min(HIGHEST_LOCK_LIMIT);
+        for pages in (0..=highest / page).rev() {
+            let limit = libc::rlimit {
+                rlim_cur: pages * page,
+                rlim_max: pages * page,
+            };
+            // SAFETY: setrlimit reads the struct, which lives for the call.
+            assert_eq!(unsafe { libc::setrlimit(libc::RLIMIT_MEMLOCK, &limit) }, 0);
+            let mut secret = Secret::with_capacity(public.len());
+            secret.push(&public).unwrap();
+            assert_eq!(secret.as_bytes(), public, "{pages} pages");
+            assert_eq!(
+                secret.is_locked(),
+                limit.rlim_cur >= public.len() as u64,
+                "{pages} pages"
+            );
+        }
     }
 }
 

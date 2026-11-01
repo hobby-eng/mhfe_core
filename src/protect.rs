@@ -289,6 +289,14 @@ mod tests {
         );
     }
 
+    /// Two pages of the largest size in use, 64 KiB: Linux touches every page before handing it
+    /// out, and that must leave no trace.
+    #[test]
+    fn a_zeroed_secret_holds_only_zeros_on_every_page() {
+        let secret = Secret::zeroed(128 << 10);
+        assert!(secret.as_bytes().iter().all(|&byte| byte == 0));
+    }
+
     #[test]
     fn debug_output_hides_the_bytes() {
         let mut secret = Secret::with_capacity(8);
