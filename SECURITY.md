@@ -6,7 +6,8 @@ that the construction is secure. The [specification](https://github.com/hobby-en
 documentation of each item describe the protocol and its limits, such as suite 4's missing password
 check and the 16 bits of the wallet check.
 
-Report a suspected vulnerability privately through GitHub's security advisories for this repository.
+Report a suspected vulnerability privately through
+[GitHub's security advisory form](https://github.com/hobby-eng/mhfe_core/security/advisories/new).
 Never include a real seed phrase, password, private key or wallet file.
 
 ## Secrets in memory
