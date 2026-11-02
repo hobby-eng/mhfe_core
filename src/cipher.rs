@@ -59,7 +59,9 @@ impl<E: Argon2Engine> Mhfe<E> {
     /// check of step 6. `on_unchecked(container)` comes once, after step 5 and before round 13, so
     /// that a person can write the container down, marked as not yet verified, during the check.
     /// `Break` from either stops there and comes back as the result, which is otherwise
-    /// `Continue` with the container, after the check passed.
+    /// `Continue` with the container, after the check passed. After `Break` the container shown to
+    /// `on_unchecked` stays unchecked: a host gives it out, and its repair card, only after
+    /// `Continue`.
     ///
     /// Errors: [`Error::SameLengthNeedsShortPhrase`] before any Argon2id work, those of the engine,
     /// [`Error::FixedPoint`], [`Error::CreationCheckFailed`].
@@ -365,6 +367,27 @@ mod tests {
         );
         assert!(stopped_when_shown.unwrap().is_break());
         assert_eq!(last_round, 12, "the check never started");
+
+        // In the first round of the check: the container was shown, unchecked, and is not returned.
+        shown = false;
+        let stopped_in_check = cipher.encrypt(
+            &zero_12(),
+            &password,
+            Suite::TwentyFourWords,
+            &mut |round, _| {
+                if round == 13 {
+                    ControlFlow::Break(())
+                } else {
+                    ControlFlow::Continue(())
+                }
+            },
+            &mut |_| {
+                shown = true;
+                ControlFlow::Continue(())
+            },
+        );
+        assert!(stopped_in_check.unwrap().is_break());
+        assert!(shown);
 
         let container = cipher
             .encrypt(

@@ -40,7 +40,10 @@ the hash. A test on Linux shows that no block of a call stays on those stacks. M
 the code writes about 11 KiB deep in a release build and 89 KiB in an unoptimized one.
 
 The Argon2id work area, 2 GiB or more, lies on pages of its own. They are left out of core dumps on
-Linux, Android and Windows, and out of a child process on Linux, Android, macOS and iOS. The engine
+Linux, Android and Windows, and out of a child process on Linux, Android, macOS and iOS. Windows
+gives a process 512 such exclusions of less than 4 GiB each, which every live `Secret` shares, so
+there the area is left out only as far as they reach: never at memory levels 20 and 21, and not
+while about 500 `Secret`s are alive. `NativeArgon2::is_out_of_dumps` says whether all of it is. The engine
 wipes the area after every call, whether the call succeeded or not. The area is locked only where
 the limit on locked memory holds all of it: `RLIMIT_MEMLOCK` on Unix, 8 MiB by default on Linux
 since 5.16, or a working set that Windows lets grow by its size. `NativeArgon2::is_locked` says
@@ -57,7 +60,8 @@ reference implementation's error numbers, never text that was passed in.
   neither locked nor wiped, and a copy of `Phrase::as_str` is the program's own. A program should
   read secrets into a `Secret` and show them with `protect::write_secret`.
 - The unchecked container. `Mhfe::encrypt` shows it to `on_unchecked` before its creation check, and
-  only the program can keep a copy from being released before `encrypt` returns `Ok`.
+  only the program can keep a copy, and its repair card, from being released before `encrypt`
+  returns `Ok(ControlFlow::Continue(_))`. After `Break` they stay unchecked.
 - A process that is ended, which the specification allows at any moment. Its memory is not wiped:
   the system discards it.
 - Hibernation, which writes locked pages and the work area to disk. On Linux the kernel refuses to

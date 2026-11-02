@@ -74,6 +74,12 @@ impl NativeArgon2 {
         self.work_area.is_locked()
     }
 
+    /// Whether all of the work area is left out of core dumps: on Windows only as far as the 512
+    /// registrations a process has reach.
+    pub fn is_out_of_dumps(&self) -> bool {
+        self.work_area.is_out_of_dumps()
+    }
+
     /// One call of Argon2id, on the threads, so that the lanes and the first and last hash run
     /// there and the caller's stack stays out of it. What it leaves is [`NativeArgon2::argon2id`]'s
     /// to clear.

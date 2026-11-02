@@ -1,0 +1,898 @@
+{
+  "schemaVersion": 1,
+  "auditId": "AUD-005",
+  "auditNumber": 5,
+  "date": "2026-11-02",
+  "title": "Full-scope security audit of mhfe-core 0.2.0",
+  "reviewer": {
+    "name": "Kimi Code coordinator and four independent scoped reviewers",
+    "model": null,
+    "reasoningEffort": null,
+    "phases": [
+      "Protocol and profiles",
+      "Native memory and operating-system protections",
+      "Public API, build and supply chain",
+      "Documentation and historical findings",
+      "Coordinator challenge, execution and reporting"
+    ],
+    "reviewerMetadata": "Exact model identifiers and reasoning-effort settings were not exposed for any phase"
+  },
+  "snapshot": {
+    "commit": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+    "commitComplete": true,
+    "tree": "1d754805b7ae513f458c6499de9a399a096f1d7d",
+    "workingTree": {
+      "beforeAuditRecords": "clean after fetching origin; origin/main matched",
+      "baselineWorktreeDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "baselineIndexDiffSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "auditChanges": "Only the AUD-005 report pair, harness and index row; no product file changed"
+    },
+    "sourceFingerprint": "d65829d8097c92b6fcb2f57223b03cd78821fc6afb2ca91e4e2f984b32872fc1",
+    "sourceFingerprintMethod": "SHA-256 of sorted SHA-256/two-space/recursive-Git-path/LF rows for 415 regular files",
+    "regularFileCountRecursive": 415,
+    "rootRegularFileCount": 227,
+    "specification": {
+      "version": "0.7.0",
+      "gitlink": "4535e3d9e62dd2979b2aee4d2a5233c93d2cc3ef",
+      "workingTree": "clean",
+      "regularFileCount": 188
+    },
+    "artifacts": "Local debug, release-harness, documentation and WASM Clippy outputs only; no release-artifact acceptance"
+  },
+  "scope": {
+    "kind": "Full-scope audit with incomplete execution",
+    "included": [
+      "All first-party Rust source, tests, public API and unsafe/FFI seams",
+      "Secret ownership, OS protections, protocol operations and optional profiles",
+      "Manifests, lockfile, build inputs, xtask, workflows, licenses and current documents",
+      "Historical findings and verification harnesses",
+      "Normative specification requirements and vector consumers relevant to core operations"
+    ],
+    "identityOnly": "Binary assets and unrelated specification research, PDF and maintenance files",
+    "threats": [
+      "Hostile or mistaken text and file inputs",
+      "Oversized normalization and numeric boundaries",
+      "Cancellation during creation verification",
+      "Operating-system registration refusal and crash reporting",
+      "Unreadable process-memory pages and verification-tool failure"
+    ],
+    "excludedByRule": "Trusted runtime compromise and failures requiring trusted host code or callbacks to misbehave under CORE-54",
+    "vectorReplay": "Skipped; ordinary fast published cases ran inside cargo xtask check",
+    "fullCostArgon2": "not-run",
+    "releaseAcceptance": "not-run",
+    "nonLinuxRuntime": "blocked: unavailable in this environment",
+    "runtime32Bit": "blocked: no Wasmtime executable available; source/arithmetic evidence only",
+    "memoryBudgetBytes": 4294967296,
+    "memoryPeak": null,
+    "realSecretsUsed": false,
+    "paidCiDispatched": false
+  },
+  "procedureHashes": {
+    "FULL_AUDIT_GUIDE.md": "e1b2fb641e4a25ebf292548fc1e2ef0c25dbd01faa5c2b580c6ba75df2afcab7",
+    "AUDIT_STANDARD.md": "0c80621acaf5d210f85af76de28a994e545f89f3f660a129026ac0931bb38593",
+    "AUDIT_TEMPLATE.md": "8122777f8093b04119633459b9b2cc50bc6ca9258bfc6184b52136d3b8172210",
+    "audit-report.schema.json": "989bf3de974d581579c1d1c1e143d5ab9fa232dc70cc8c6f84ad00531ae698fb",
+    "audits.instructions.md": "05f13b0c4875ffbd0f0af14d4c6660e0edea980c0d0193dd96d53c41be36117f",
+    "wallet-full-audit/SKILL.md": "5fef2f168d0d2895a469ea10be76dee1c44c55f8678162bcf5487108b2c4395d",
+    "bip-tools.instructions.md": "e3e8fa0db8d983227c634b91c114f64cbabda7257e118189094f4946c9ff09a6",
+    "code-core.instructions.md": "0c2c2b2a31b9cb218d92c6117b252b3f3550a0ffb7ee8c0ff955bcc4110e2178",
+    "code-rust.instructions.md": "8693723e1e28d3b3afc12dc383283d8d127b9079e168789a6c908fd300bdcb52",
+    "code-tooling.instructions.md": "29352e5985429837c8325669f0a42dd1b03c43191b681c633db6a29df77fca63",
+    "code-typescript.instructions.md": "06003edeecddf831e12b7ae8d3d518e138e7abe8b853af53e52cefdb7786ee0e",
+    "code-browser.instructions.md": "954f96b4c2c11ffd23ad6b85113e80eedfb049e2689dd5a134e45de84f130f10",
+    "ci.instructions.md": "22320f16f35a530bda5839a478ca9cce59cd2d1cabe64b75f96339af470cad41",
+    "docs.instructions.md": "b310055b4a9cde36dbcc4fd6487898193b2324f7731b63395ccf10a7c0d2561b",
+    "GLOSSARY.md": "ef514c847fdd5fb24ab5a0bd649e29e01955190c6a0afcbf3445c14e775cc2e5",
+    "mhfe_core/AGENTS.md": "52c520c5540e4202902bdca34a1ae1cc049b1de2fffcc9601a17e612aedfc238"
+  },
+  "environment": {
+    "os": "Linux 7.0.0-42-generic x86-64",
+    "rustc": "1.99.1",
+    "rustcCommit": "58cf8f9c35b355199727627d07ae34a4e2846d67",
+    "llvm": "23.1.1",
+    "cargo": "1.99.1",
+    "dprint": "0.63.0",
+    "cargoAudit": "0.22.2",
+    "git": "2.53.0",
+    "heavyChecks": "Sequential through ../tmp/memguard.sh",
+    "toolchainHome": "/home/user/Documents/bip_tools/workingspace/",
+    "newToolsInstalled": false
+  },
+  "independentReview": {
+    "initialPatchSha256": "2646dede1b1e8401e06686bfac058c12a280132fb3c08ad42dd8dbb16306ff3e",
+    "productFindingsDisputed": 0,
+    "recordIssues": [
+      "Regular-file split corrected to 227 root and 188 specification files",
+      "Harness lockfile count corrected to 48 dependency packages and 49 entries including aud005",
+      "Publication guidance is now checked against both source documents with two negative controls"
+    ],
+    "followUpEvidence": "AUD-005-evidence/final-review.json (local)",
+    "execution": "Static/data review only; no builds, probes, non-Linux runtime or vector replay"
+  },
+  "checks": [
+    {
+      "id": "baseline",
+      "command": "Git identity, origin comparison and empty worktree/index diffs",
+      "outcome": "passed",
+      "counts": "HEAD and origin/main 9e8cff9; 415 files",
+      "evidence": "AUD-005-evidence/snapshot.json (local)"
+    },
+    {
+      "id": "inventory",
+      "command": "aud005 inventory",
+      "outcome": "passed",
+      "exitCode": 0,
+      "counts": "415 original files",
+      "evidence": "AUD-005-evidence/inventory.log (local)",
+      "logSha256": "c65e96647b2a9e7c6488e6d64e824ad6314872c1bd01ba8e8b4b81a6e3d384f7"
+    },
+    {
+      "id": "final-scope",
+      "command": "Final aud005 inventory, then git diff --name-only 9e8cff90f5e85ca1b4b9499c4e500311a310f3e4 -- . and git status --short",
+      "outcome": "passed",
+      "counts": "The final inventory diagnostic named only the intentional audit-index change; scoped Git identity showed only that tracked modification and AUD-005 additions",
+      "evidence": "AUD-005-evidence/inventory-final.log, final-tracked-scope.log and final-status.log (local)",
+      "logSha256": {
+        "inventory-final.log": "7c3f8b2207718725b336a9f0618b09cd36fac3c0b86714a56ebc0903289fffd3",
+        "final-tracked-scope.log": "d1c925bb221a0e966bc22c6283a10d3d3bfba2914d984caa2548c43189bd3f15",
+        "final-status.log": "aea3ef44d2548d31e659b0759f72b04c7faf5ade3ab263911fdb3de0cbeca8f0"
+      }
+    },
+    {
+      "id": "source-findings",
+      "command": "aud005 source-findings",
+      "outcome": "passed",
+      "exitCode": 0,
+      "counts": "Five defect groups; cancellation callbacks 1 through 13",
+      "evidence": "AUD-005-evidence/finding-probes.json (local)",
+      "logSha256": "43ad95158d88da0de88279cdb8e24c39bfe437f72d9cf87ec49b8a26806bc148"
+    },
+    {
+      "id": "fast",
+      "command": "aud005 run fast ../tmp/memguard.sh cargo xtask check",
+      "outcome": "passed",
+      "exitCode": 0,
+      "counts": {
+        "libraryUnitTests": 80,
+        "integrationTests": 19,
+        "xtaskTests": 58,
+        "doctests": 1,
+        "fullCostIgnored": 1,
+        "isolationProcess": "passed",
+        "secretMemoryProcess": "passed"
+      },
+      "evidence": "AUD-005-evidence/fast.log (local)",
+      "logSha256": "d85130d1fd5c3d98d03d5a13de199d475b689606650518d9cb09fb3fb5b54c55"
+    },
+    {
+      "id": "advisory",
+      "command": "aud005 run advisory ../tmp/memguard.sh cargo audit --json",
+      "outcome": "passed",
+      "exitCode": 0,
+      "counts": {
+        "lockfileDependencies": 45,
+        "advisories": 1401,
+        "vulnerabilities": 0,
+        "warnings": 0
+      },
+      "databaseCommit": "5e70b63df03ec9dfdbb2474894eed72ab68fba16",
+      "databaseCommitTimeUtc": "2026-11-02T11:38:58Z",
+      "evidence": "AUD-005-evidence/advisory.log (local)",
+      "logSha256": "61282580a2ed56de6f3d5dfb225cbc017528a81d0476b75fd9566c4b7d8306b3"
+    },
+    {
+      "id": "harness-clippy",
+      "command": "cargo clippy --offline --locked --manifest-path docs/audits/AUD-005-harnesses/Cargo.toml --all-targets -- -D warnings",
+      "outcome": "passed",
+      "exitCode": 0,
+      "evidence": "AUD-005-evidence/harness-clippy.log (local)",
+      "logSha256": "20ad30e3bb9002c8c358ad27e28e3f2497266a16c6825fdb935d2958f2f0cc42"
+    },
+    {
+      "id": "harness-format",
+      "command": "cargo fmt --manifest-path docs/audits/AUD-005-harnesses/Cargo.toml -- --check",
+      "outcome": "passed",
+      "exitCode": 0,
+      "evidence": "AUD-005-evidence/harness-fmt-check.log (local)",
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "id": "harness-build",
+      "command": "cargo build --offline --locked --release --manifest-path docs/audits/AUD-005-harnesses/Cargo.toml",
+      "outcome": "passed",
+      "exitCode": 0,
+      "counts": "48 dependency packages, 49 entries including aud005; initial and post-format rebuild passed",
+      "evidence": "AUD-005-evidence/harness-rebuild.log (local)",
+      "logSha256": "ef0c8f0c81d3353296633b8306b6460d490b6b6417f8e8d686b0d7b55a224092"
+    },
+    {
+      "id": "report-validation",
+      "command": "aud005 validate",
+      "outcome": "passed",
+      "exitCode": 0,
+      "counts": "Schema, literal keys, finding parity, 32 unique coverage rows, links, metadata and privacy",
+      "evidence": "AUD-005-evidence/report-validation3.log (local)",
+      "logSha256": "0ed6fbb6565a7ff4ab69052444e892efa4a6315a557cea4cb2dd6e899322f499"
+    },
+    {
+      "id": "negative-controls",
+      "command": "aud005 negative-controls",
+      "outcome": "passed",
+      "exitCode": 0,
+      "counts": "Nine inconsistent record/source variants refused; valid pair and sources accepted",
+      "evidence": "AUD-005-evidence/negative-controls3.log (local)",
+      "logSha256": "813a5c83139c9b6f4a5a536dca75f7916414115090ebd84f2e01e3f010a07fa9"
+    },
+    {
+      "id": "vector-replay",
+      "command": "Full-cost and complete vector replay",
+      "outcome": "skipped",
+      "reason": "Request direction; vectors were already checked"
+    },
+    {
+      "id": "non-linux-runtime",
+      "command": "Windows/macOS/mobile/WASI and 32-bit runtime probes",
+      "outcome": "blocked",
+      "reason": "Runtimes unavailable; no replacement tool installed"
+    },
+    {
+      "id": "release-acceptance",
+      "command": "Canonical package, signature, attestation and release-artifact acceptance",
+      "outcome": "not-run",
+      "reason": "Release-level execution was not requested"
+    }
+  ],
+  "coverageLedger": [
+    {
+      "checkId": "CHECK-SEC-001",
+      "category": "SEC",
+      "logicalGroup": "Secret ownership",
+      "scope": "All secret owners and outputs",
+      "method": "Source trace and Linux memory tests",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "Secret ownership and caller-owned limits reviewed"
+    },
+    {
+      "checkId": "CHECK-SEC-002",
+      "category": "SEC",
+      "logicalGroup": "Isolation and dumps",
+      "scope": "Every OS implementation",
+      "method": "Source review and Linux isolation process",
+      "outcome": "failed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "AUD-005-SEC001"
+    },
+    {
+      "checkId": "CHECK-SEC-003",
+      "category": "SEC",
+      "logicalGroup": "Network egress",
+      "scope": "Active runtime graph",
+      "method": "Dependency and request-path inspection",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No runtime network client or request path"
+    },
+    {
+      "checkId": "CHECK-SEC-004",
+      "category": "SEC",
+      "logicalGroup": "Cryptography and randomness",
+      "scope": "Both suites and profiles",
+      "method": "Specification and dependency-call comparison",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No new construction or RNG integration defect"
+    },
+    {
+      "checkId": "CHECK-SEC-005",
+      "category": "SEC",
+      "logicalGroup": "Lifecycle and failures",
+      "scope": "Allocation, drop, errors and cancellation",
+      "method": "Source review and Linux memory tests",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "Ordinary cleanup holds on reviewed evidence; abrupt death excluded"
+    },
+    {
+      "checkId": "CHECK-SEC-006",
+      "category": "SEC",
+      "logicalGroup": "Browser injection",
+      "scope": "Browser surface",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No DOM, worker, storage or browser package"
+    },
+    {
+      "checkId": "CHECK-SEC-007",
+      "category": "SEC",
+      "logicalGroup": "Availability bounds",
+      "scope": "Normalization, numeric bounds and repair search",
+      "method": "Exact arithmetic and source probes",
+      "outcome": "failed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "AUD-005-API001"
+    },
+    {
+      "checkId": "CHECK-FUN-001",
+      "category": "FUN",
+      "logicalGroup": "BIP39 and normalization",
+      "scope": "Phrase, entropy, password and seed interpretation",
+      "method": "Specification review and fast cases",
+      "outcome": "failed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "AUD-005-API001 affects password admission"
+    },
+    {
+      "checkId": "CHECK-FUN-002",
+      "category": "FUN",
+      "logicalGroup": "HD derivation",
+      "scope": "Coin/path/address surface",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No HD derivation or address generation"
+    },
+    {
+      "checkId": "CHECK-FUN-003",
+      "category": "FUN",
+      "logicalGroup": "Other wallet protocols",
+      "scope": "BIP85/BIP38/messages/Silent Payments",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "Protocols not implemented"
+    },
+    {
+      "checkId": "CHECK-FUN-004",
+      "category": "FUN",
+      "logicalGroup": "Scripts and multisig",
+      "scope": "Scripts/descriptors/Miniscript",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No such implementation"
+    },
+    {
+      "checkId": "CHECK-FUN-005",
+      "category": "FUN",
+      "logicalGroup": "Transactions and PSBT",
+      "scope": "Transaction and signing surface",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No transaction or PSBT implementation"
+    },
+    {
+      "checkId": "CHECK-FUN-006",
+      "category": "FUN",
+      "logicalGroup": "Containers and recovery",
+      "scope": "Both suites, readings, repair and password check",
+      "method": "Source review and fast cases",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No reproduced wrong transformation; full-cost replay skipped"
+    },
+    {
+      "checkId": "CHECK-FUN-007",
+      "category": "FUN",
+      "logicalGroup": "Discovery and accounting",
+      "scope": "Provider/discovery surface",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No provider or discovery feature"
+    },
+    {
+      "checkId": "CHECK-API-001",
+      "category": "API",
+      "logicalGroup": "Dependency and runtime contracts",
+      "scope": "Every public operation and dependency call",
+      "method": "Source trace, cancellation and arithmetic probes",
+      "outcome": "failed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "AUD-005-API001 and AUD-005-SEC001"
+    },
+    {
+      "checkId": "CHECK-API-002",
+      "category": "API",
+      "logicalGroup": "Cancellation and outcomes",
+      "scope": "All callbacks and ControlFlow results",
+      "method": "Actual Mhfe::encrypt cancellation probe",
+      "outcome": "failed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "AUD-005-DOC001"
+    },
+    {
+      "checkId": "CHECK-API-003",
+      "category": "API",
+      "logicalGroup": "Public items and exports",
+      "scope": "22 top-level public items and associated behavior",
+      "method": "Inventory, redaction and schema review",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No monetary/file export; no additional defect"
+    },
+    {
+      "checkId": "CHECK-API-004",
+      "category": "API",
+      "logicalGroup": "Encoding and interoperability",
+      "scope": "UTF-8, NFKD, words, endian and repair encodings",
+      "method": "Literal contracts and fast cases",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "Complete vector replay not repeated"
+    },
+    {
+      "checkId": "CHECK-BLD-001",
+      "category": "BLD",
+      "logicalGroup": "Manifest and composition",
+      "scope": "Cargo cfg/features and package inputs",
+      "method": "Static graph and package review",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "Native/WASM engine selection agrees with source"
+    },
+    {
+      "checkId": "CHECK-BLD-002",
+      "category": "BLD",
+      "logicalGroup": "Target execution",
+      "scope": "Native, Windows, macOS, mobile and WASM",
+      "method": "Linux fast gates, WASM Clippy and CI inspection",
+      "outcome": "blocked",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No non-Linux or 32-bit runtime"
+    },
+    {
+      "checkId": "CHECK-BLD-003",
+      "category": "BLD",
+      "logicalGroup": "Dependencies and provenance",
+      "scope": "45 lockfile packages and legal inputs",
+      "method": "Manifest review and RustSec",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "1,401 advisories; zero vulnerabilities/warnings"
+    },
+    {
+      "checkId": "CHECK-BLD-004",
+      "category": "BLD",
+      "logicalGroup": "Canonical artifacts",
+      "scope": "Package and release artifacts",
+      "method": "Configuration inspection only",
+      "outcome": "not-run",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No complete artifact acceptance"
+    },
+    {
+      "checkId": "CHECK-BLD-005",
+      "category": "BLD",
+      "logicalGroup": "CI and verification workflows",
+      "scope": "All workflows and retained verification harnesses",
+      "method": "Static review and source contracts",
+      "outcome": "failed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "AUD-005-BLD001"
+    },
+    {
+      "checkId": "CHECK-UI-001",
+      "category": "UI",
+      "logicalGroup": "Real files and viewports",
+      "scope": "Application UI",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No page or viewport"
+    },
+    {
+      "checkId": "CHECK-UI-002",
+      "category": "UI",
+      "logicalGroup": "Navigation and state",
+      "scope": "Widgets and UI state",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No navigation or input widget"
+    },
+    {
+      "checkId": "CHECK-UI-003",
+      "category": "UI",
+      "logicalGroup": "Visibility and accessibility",
+      "scope": "Reveal/help/QR/accessibility",
+      "method": "Surface inspection",
+      "outcome": "not-applicable",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No UI; redaction covered by SEC/API"
+    },
+    {
+      "checkId": "CHECK-ARC-001",
+      "category": "ARC",
+      "logicalGroup": "Ownership and imports",
+      "scope": "Modules, cfg selection and host seams",
+      "method": "Resolved source review",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No additional boundary or cycle defect"
+    },
+    {
+      "checkId": "CHECK-ARC-002",
+      "category": "ARC",
+      "logicalGroup": "Dead code and duplication",
+      "scope": "Active and historical tooling",
+      "method": "Copies/code-rules gates and source review",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No active Node/C input"
+    },
+    {
+      "checkId": "CHECK-ARC-003",
+      "category": "ARC",
+      "logicalGroup": "Tests and production fidelity",
+      "scope": "Tests, probes and negative controls",
+      "method": "Control-flow and source review",
+      "outcome": "failed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "AUD-005-BLD001"
+    },
+    {
+      "checkId": "CHECK-DOC-001",
+      "category": "DOC",
+      "logicalGroup": "Capability and safety claims",
+      "scope": "README, SECURITY, rustdoc and specification",
+      "method": "Claims-to-source comparison",
+      "outcome": "failed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "AUD-005-DOC001 and AUD-005-DOC002"
+    },
+    {
+      "checkId": "CHECK-DOC-002",
+      "category": "DOC",
+      "logicalGroup": "Commands and legal material",
+      "scope": "Commands, versions, licenses and reporting",
+      "method": "Static comparison",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "No additional mismatch"
+    },
+    {
+      "checkId": "CHECK-DOC-003",
+      "category": "DOC",
+      "logicalGroup": "Audit consistency",
+      "scope": "Previous records and new pair",
+      "method": "Structured reconciliation, schema and negative controls",
+      "outcome": "passed",
+      "snapshot": "9e8cff90f5e85ca1b4b9499c4e500311a310f3e4",
+      "evidence": "20 previous dispositions and new validation"
+    }
+  ],
+  "findings": [
+    {
+      "id": "AUD-005-SEC001",
+      "category": "SEC",
+      "kind": "finding",
+      "title": "Windows can leave Argon2 blocks outside error-report exclusion",
+      "severity": "medium",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "releaseBlockingReason": "Requires Windows, registration exhaustion or a high memory level, and a crash/report during Argon2; no direct secret compromise was demonstrated",
+      "affectedFiles": [
+        "src/os/windows.rs:58-59",
+        "src/os/windows.rs:81-105",
+        "src/os/windows.rs:138-153",
+        "src/engine/native.rs:56-75",
+        "SECURITY.md:42-48"
+      ],
+      "affectedBuilds": [
+        "Windows"
+      ],
+      "reproduction": "The 32-bit registration size and 512-entry process limit require 513 blocks at level 20 and 769 at level 21. Registration stops at the first refusal while engine construction still succeeds. Separately, 512 simultaneously live Secret values consume the quota before a small work area is created. aud005 source-findings checks the exact arithmetic and source contracts.",
+      "expected": "The whole work area is excluded as SECURITY.md promises, or construction refuses/exposes a required security decision before secret input.",
+      "observed": "Level 20 leaves 512 bytes uncovered; level 21 leaves 1,099,511,628,288 bytes uncovered. After 512 other live registrations, a 65,536-byte work area has no covered block. NativeArgon2 exposes is_locked but not the failed dump coverage.",
+      "impact": "A Windows error report during Argon2 can include unregistered secret-derived blocks and make password candidates cheaper to test. No original phrase/password disclosure, actual dump or cross-platform impact was demonstrated.",
+      "evidence": [
+        "AUD-005-evidence/finding-probes.json (local), SHA-256 43ad95158d88da0de88279cdb8e24c39bfe437f72d9cf87ec49b8a26806bc148",
+        "Source locations and Microsoft WerRegisterExcludedMemoryBlock contract",
+        "Windows runtime not executed"
+      ],
+      "recommendedFix": "Require complete WER exclusion before worker startup or secret input, or expose an explicit mandatory status and narrow the documented guarantee. Account for every live registration.",
+      "requiredVerification": "On Windows, cover 512 live Secret values, the 513/769 arithmetic, refusal/status before Argon2, drop/unregister balance and thread-construction failure without a secret-dependent fallback.",
+      "rules": [
+        "CORE-24",
+        "RUST-13",
+        "DOC-07"
+      ]
+    },
+    {
+      "id": "AUD-005-DOC001",
+      "category": "DOC",
+      "kind": "finding",
+      "title": "Cancellation guidance can release an unchecked container and repair card",
+      "severity": "medium",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "releaseBlockingReason": "The guidance violates the mandatory creation-check contract, but no incorrect transformation or corrupt container was demonstrated",
+      "affectedFiles": [
+        "src/repair.rs:18-22",
+        "SECURITY.md:58-60",
+        "src/cipher.rs:85-114",
+        "src/error.rs:1-2"
+      ],
+      "affectedBuilds": [
+        "All hosts following the API guidance"
+      ],
+      "reproduction": "Continue from on_unchecked and Break at round 13. Production Mhfe::encrypt returns Ok(ControlFlow::Break(())) before the reverse comparison, while repair rustdoc and SECURITY.md permit release once encrypt returns Ok. The audit executes this exact callback sequence with a public synthetic engine.",
+      "expected": "NEW-5/NEW-6 keep a cancelled container unverified and forbid program release before the check passes. RPR-1 releases a repair card only after the creation check passes. Publication requires Ok(ControlFlow::Continue(_)).",
+      "observed": "Ok(Break) satisfies the documented release condition without verification. The error-module header also still names cancellation after Error::Cancelled was removed.",
+      "impact": "A host can publish an unchecked container and repair card as finished backups instead of reporting cancellation. No wrong Feistel result or direct secret compromise was demonstrated.",
+      "evidence": [
+        "AUD-005-evidence/finding-probes.json (local), SHA-256 43ad95158d88da0de88279cdb8e24c39bfe437f72d9cf87ec49b8a26806bc148",
+        "tests/spec/README.md:442-447 (NEW-5/NEW-6)",
+        "tests/spec/README.md:874-876 (RPR-1)"
+      ],
+      "recommendedFix": "Require Ok(ControlFlow::Continue(_)) in both publication conditions, describe Break as unverified and remove cancellation from the error-module summary. Coordinate host documentation.",
+      "requiredVerification": "Add production-path cancellation regressions/doctests at on_unchecked and the first reverse-check round; require no final publication on Break, publication only on Continue and correct engine reuse. Check mhfe and browser consumers.",
+      "relatedFindings": [
+        "AUD-004-API001"
+      ],
+      "rules": [
+        "CORE-22",
+        "DOC-06",
+        "DOC-07"
+      ]
+    },
+    {
+      "id": "AUD-005-API001",
+      "category": "API",
+      "kind": "finding",
+      "title": "NFKD byte counting overflows before password-length refusal on 32-bit targets",
+      "severity": "low",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "releaseBlockingReason": "Large-input denial of service without memory corruption, truncated-password acceptance or secret compromise",
+      "affectedFiles": [
+        "src/nfkd.rs:24-29",
+        "src/nfkd.rs:38-70",
+        "src/password.rs:49-69"
+      ],
+      "affectedBuilds": [
+        "32-bit WebAssembly hosts",
+        "Shared passphrase/draw callers of the same helper"
+      ],
+      "reproduction": "Repeat U+FDFA 130,150,525 times: 390,451,575 input bytes expand to 4,294,967,325 bytes (2^32 + 29). The usize count wraps to 29 on a 32-bit target and enters the success path before a bounds panic; checked builds can panic during counting. The preceding repetition count fits u32 and reaches PasswordTooLong.",
+      "expected": "PW-5 and Password::new refuse every normalized password over 1,024 bytes before writing, never truncate it and do not panic on outside input.",
+      "observed": "Source arithmetic proves the 32-bit overflow and undersized write attempt. The audit did not execute a 32-bit runtime; runtimeExecuted is false in finding-probes.json.",
+      "impact": "Input-triggered denial of service. Rust bounds checks prevent memory corruption and no truncated password or seed is returned. The roughly 372 MiB input requirement limits practical severity.",
+      "evidence": [
+        "AUD-005-evidence/finding-probes.json (local), SHA-256 43ad95158d88da0de88279cdb8e24c39bfe437f72d9cf87ec49b8a26806bc148",
+        "src/password.rs:239-245",
+        "tests/spec/README.md:351-354 (PW-5)"
+      ],
+      "recommendedFix": "Use checked or saturating accumulation and return the over-limit outcome as soon as the relevant limit is exceeded, preserving admitted NFKD bytes and the separate BIP39 passphrase contract.",
+      "requiredVerification": "Run exact boundary and preceding control on 32-bit WebAssembly in release and checked builds; require non-panicking refusal before allocation/writing and recheck 0, 1, 1,024 and 1,025 normalized bytes.",
+      "rules": [
+        "CORE-48",
+        "CORE-50",
+        "RUST-05"
+      ]
+    },
+    {
+      "id": "AUD-005-DOC002",
+      "category": "DOC",
+      "kind": "finding",
+      "title": "README omits the WebAssembly exception to its 64-bit requirement",
+      "severity": "low",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "releaseBlockingReason": "Documentation-only platform confusion",
+      "affectedFiles": [
+        "README.md:62-63",
+        "src/lib.rs:15-18",
+        "src/engine/native.rs:12-16",
+        ".github/workflows/ci.yml:147-180"
+      ],
+      "affectedBuilds": [
+        "WebAssembly documentation"
+      ],
+      "reproduction": "Compare the unconditional 64-bit requirement in README.md with the following browser sentence, explicit 32-bit WebAssembly rustdoc and CI WASM target.",
+      "expected": "Distinguish the native engine's 64-bit restriction from supported 32-bit WebAssembly with a host engine.",
+      "observed": "The README can lead a WebAssembly integrator to reject a supported target.",
+      "impact": "Limited documentation defect; no runtime or protocol effect.",
+      "evidence": [
+        "AUD-005-evidence/finding-probes.json (local), source-contract section",
+        "Fast WASM Clippy and CI WASM job definition"
+      ],
+      "recommendedFix": "State that native builds need 64-bit, while 32-bit WebAssembly is supported with a host Argon2id engine and suitable memory limits.",
+      "requiredVerification": "Compare revised wording with native compile_error!, WASM rustdoc and CI target coverage while retaining the memory qualification.",
+      "rules": [
+        "DOC-06",
+        "DOC-07"
+      ]
+    },
+    {
+      "id": "AUD-005-BLD001",
+      "category": "BLD",
+      "kind": "finding",
+      "title": "Stack scanner can treat unread pages as a clean result",
+      "severity": "low",
+      "status": "fixed",
+      "releaseBlocking": false,
+      "releaseBlockingReason": "Verification-tool false success, not a demonstrated production stack residue",
+      "affectedFiles": [
+        "docs/audits/AUD-003-harnesses/sec/probe-stack/src/main.rs:86-93",
+        "docs/audits/AUD-003-harnesses/sec/probe-stack/src/main.rs:223-240",
+        "docs/audits/AUD-003-harnesses/sec/probe-stack/src/main.rs:293",
+        "docs/audits/AUD-003-harnesses/sec/run-matrix.sh:13-18"
+      ],
+      "affectedBuilds": [
+        "Retained Linux x86-64 stack-verification harness"
+      ],
+      "reproduction": "Two scan paths discard read_exact_at results into zero-initialized buffers. The read helper anticipates guard-page failures. The wrapper checks only a completion marker and zero stack-hit lines and never requires known control hits.",
+      "expected": "Unexpected read failure and absent positive controls prevent a passing verification verdict under CORE-22/CORE-28 and the remaining AUD-004-BLD001 acceptance requirement.",
+      "observed": "source-findings confirms two ignored read-result sites and no wrapper positive-control requirement. Unexpected unread pages can therefore produce the same zero-hit verdict as a clean completed scan.",
+      "impact": "A maintainer can accept an erasure check that did not read secret-bearing pages. No current production residue is established; independent fast memory tests passed.",
+      "evidence": [
+        "AUD-005-evidence/finding-probes.json (local), source-contract section",
+        "Source control flow; no fault injection or new stack scan executed"
+      ],
+      "recommendedFix": "Track read coverage, fail on unexpected errors, classify permitted guard pages separately and require expected positive-control hits before accepting zero production hits.",
+      "requiredVerification": "Require nonzero for unexpected read errors, incomplete coverage, absent controls, crash, timeout and malformed output; require zero only for a complete controlled clean scan.",
+      "relatedFindings": [
+        "AUD-004-BLD001"
+      ],
+      "rules": [
+        "CORE-22",
+        "CORE-28"
+      ]
+    }
+  ],
+  "observations": [],
+  "remediation": [
+    {
+      "id": "AUD-005-SEC001",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "Fixed in the commit that adds this record. SECURITY.md states the limit of the 512 Windows exclusions, and NativeArgon2::is_out_of_dumps says whether all of the work area is excluded. In practice only a host holding about 500 Secrets reaches it: memory levels 20 and 21 need 2 and 3 TiB, which Windows does not commit on real machines."
+    },
+    {
+      "id": "AUD-005-DOC001",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "Fixed in the commit that adds this record. SECURITY.md, src/repair.rs and Mhfe::encrypt name Ok(ControlFlow::Continue(_)) as the condition for giving out a container and its card; a test stops in the first round of the check and gets Break with the container shown unchecked; src/error.rs no longer names cancellation."
+    },
+    {
+      "id": "AUD-005-API001",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "Fixed in the commit that adds this record. Nfkd::of counts with saturating addition, so a text whose NFKD passes the address space of a 32-bit target is refused as PasswordTooLong before anything is written."
+    },
+    {
+      "id": "AUD-005-DOC002",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "Fixed in the commit that adds this record. The README says that a native build needs a 64-bit target and that in 32-bit WebAssembly the program supplies Argon2id."
+    },
+    {
+      "id": "AUD-005-BLD001",
+      "status": "fixed",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "Fixed in the commit that adds this record. probe-stack ends on a stack page it cannot read and counts the unreadable pages of the writable mappings; run-matrix.sh requires the probe's own copies of the secrets to be found. The default scan passes with 38 hits on 40 calls and no stack hits. This completes AUD-004-BLD001, whose positive control was missing."
+    }
+  ],
+  "previousFindings": [
+    {
+      "id": "AUD-002-BLD001",
+      "recordedStatus": "accepted",
+      "disposition": "Accepted 0.1.0 cache/publication risk unchanged"
+    },
+    {
+      "id": "AUD-002-SEC001",
+      "recordedStatus": "verified",
+      "disposition": "Source consistent; no fresh runtime verification"
+    },
+    {
+      "id": "AUD-002-API001",
+      "recordedStatus": "verified",
+      "disposition": "Source consistent; no 4 GiB probe rerun"
+    },
+    {
+      "id": "AUD-002-API002",
+      "recordedStatus": "verified",
+      "disposition": "Source consistent; caller-stack limitation remains documented"
+    },
+    {
+      "id": "AUD-002-BLD002",
+      "recordedStatus": "verified",
+      "disposition": "Source consistent; macOS-host Clippy remains"
+    },
+    {
+      "id": "AUD-002-BLD003",
+      "recordedStatus": "verified",
+      "disposition": "Source consistent; audit records remain outside production gates"
+    },
+    {
+      "id": "AUD-002-ARC001",
+      "recordedStatus": "verified",
+      "disposition": "Source consistent; duplicate CI commands remain removed"
+    },
+    {
+      "id": "AUD-002-DOC001",
+      "recordedStatus": "accepted",
+      "disposition": "Accepted historical release-note risk unchanged"
+    },
+    {
+      "id": "AUD-002-DOC002",
+      "recordedStatus": "verified",
+      "disposition": "Original wording corrected; SEC001 is a different work-area case"
+    },
+    {
+      "id": "AUD-003-SEC001",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; cleared hash frame and cleanup remain"
+    },
+    {
+      "id": "AUD-003-API001",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; explicit 2 MiB worker stacks remain"
+    },
+    {
+      "id": "AUD-003-API002",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; auto-trait changelog entry remains"
+    },
+    {
+      "id": "AUD-003-BLD001",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; vendored filename contract remains"
+    },
+    {
+      "id": "AUD-003-DOC001",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; obsolete badge statement remains removed"
+    },
+    {
+      "id": "AUD-004-API001",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; DOC001 records missed guidance"
+    },
+    {
+      "id": "AUD-004-API002",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; finite host budget contract remains"
+    },
+    {
+      "id": "AUD-004-BLD001",
+      "recordedStatus": "fixed",
+      "disposition": "Original failure propagation present; AUD-005-BLD001 covers independent unread-page/control defects"
+    },
+    {
+      "id": "AUD-004-DOC001",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; known-pair qualification remains"
+    },
+    {
+      "id": "AUD-004-DOC002",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; CORE-25 library exception matches the gate"
+    },
+    {
+      "id": "AUD-004-DOC003",
+      "recordedStatus": "fixed",
+      "disposition": "Source consistent; AUD-003 completeness and links remain"
+    }
+  ],
+  "limitations": [
+    "Fresh runtime was Linux x86-64 only; no Windows, macOS, Android, iOS or WASI runtime execution",
+    "The 32-bit overflow and Windows WER findings are source/arithmetic-confirmed, not runtime-executed",
+    "Complete vector corpora and full-cost Argon2 were not replayed; ordinary fast cases passed",
+    "No complete release-artifact acceptance, package reproducibility, signature/attestation verification or publication",
+    "No application/browser integration, fuzzing, mutation campaign, Miri, ThreadSanitizer, statistical timing or full compiler-output erasure proof",
+    "Upstream internals were reviewed only at traced call seams; RustSec and provenance are not complete dependency audits",
+    "Host-managed strings, memory admission, display policy and application warnings belong to separate host projects",
+    "Memory budgets are assigned limits, not measured peaks",
+    "This experimental-construction audit is not independent cryptographic certification or proof of absence of other defects"
+  ]
+}

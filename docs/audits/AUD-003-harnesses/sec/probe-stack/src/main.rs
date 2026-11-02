@@ -84,11 +84,13 @@ fn memory() -> File {
 }
 
 fn read(mem: &File, start: usize, end: usize) -> Vec<u8> {
-    // Page by page: glibc's guard of a thread stack may lie inside the mapping (MADV_GUARD_INSTALL),
-    // and a read of it fails.
+    // A window of a thread's stack, above its guard: a page that cannot be read ends the probe.
     let mut bytes = vec![0u8; end - start];
     for (index, page) in bytes.chunks_mut(4096).enumerate() {
-        let _ = mem.read_exact_at(page, (start + index * 4096) as u64);
+        let at = start + index * 4096;
+        if let Err(error) = mem.read_exact_at(page, at as u64) {
+            panic!("{at:#x} could not be read: {error}");
+        }
     }
     bytes
 }
@@ -222,11 +224,16 @@ fn real_scan(calls: usize, memory_kib: u32, passes: u32, length: usize) {
         .sum();
     let mut image = Vec::with_capacity(total + MIB);
     let mut places = Vec::new();
+    // glibc's guard of a thread stack may lie inside its mapping (MADV_GUARD_INSTALL), and a read of
+    // it fails: such pages are counted, not scanned.
+    let mut unreadable = 0;
     for region in regions.iter().filter(|region| region.perms.starts_with("rw") && !region.name.starts_with("[v")) {
         let first = image.len();
         image.resize(first + (region.end - region.start), 0u8);
         for (index, page) in image[first..].chunks_mut(4096).enumerate() {
-            let _ = mem.read_exact_at(page, (region.start + index * 4096) as u64);
+            if mem.read_exact_at(page, (region.start + index * 4096) as u64).is_err() {
+                unreadable += 1;
+            }
         }
         places.push((region.clone(), first));
     }
@@ -237,6 +244,7 @@ fn real_scan(calls: usize, memory_kib: u32, passes: u32, length: usize) {
         let bytes = &image[*first..*first + (region.end - region.start)];
         scan(&format!("{:#x} {:?} {}", region.start, region.perms, region.name), region.start, bytes, &table, &mut hits);
     }
+    println!("{unreadable} pages of the writable mappings could not be read");
     println!("{hits} hits in the writable mappings after the first call");
     drop(image);
     // Every call from now on, with one password and then the other: every word of each stack that

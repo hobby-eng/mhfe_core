@@ -19,7 +19,7 @@
 //! unknown places and `s` unreadable words with 2e + s <= k are repaired, words of the card
 //! included. A host releases a card only after the container's creation check passed: it makes
 //! the card inside the `on_unchecked` of [`crate::Mhfe::encrypt`] and gives it out once `encrypt`
-//! returns `Ok`.
+//! returns `Ok(ControlFlow::Continue(_))`. After `Break` the container and its card stay unchecked.
 //!
 //! A card adds nothing for someone who holds the whole container phrase, but it completes a
 //! damaged or partial copy for whoever has both, as it does for the owner: it is kept apart from

@@ -1,5 +1,4 @@
-//! The refusals of the suites, of their settings and of a [`crate::protect::Secret`], and
-//! cancellation.
+//! The refusals of the suites, of their settings and of a [`crate::protect::Secret`].
 
 use std::fmt;
 

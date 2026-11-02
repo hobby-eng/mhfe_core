@@ -24,7 +24,10 @@ impl<'a> Nfkd<'a> {
     pub(crate) fn of(text: &'a str) -> Self {
         let mut bytes = 0;
         for character in text.chars() {
-            decompose_compatible(character, |part| bytes += part.len_utf8());
+            // Saturating: on a 32-bit target a long text could wrap the count to a small one.
+            decompose_compatible(character, |part| {
+                bytes = usize::saturating_add(bytes, part.len_utf8())
+            });
         }
         Self { text, bytes }
     }

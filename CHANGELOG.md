@@ -5,6 +5,10 @@
 - A cancelled operation is no longer an error: `Mhfe::encrypt`, `Mhfe::decrypt` and
   `wallet_check::draw` return `Result<ControlFlow<(), T>, Error>`, and `Break` from a callback comes
   back as the result. `Error::Cancelled` is gone.
+- `NativeArgon2::is_out_of_dumps` says whether all of the work area is left out of core dumps, which
+  on Windows holds only as far as a process's 512 exclusions reach.
+- On a 32-bit target, a password whose NFKD passes 4 GiB is refused as too long instead of ending
+  the process.
 
 ## 0.2.0 (2026-11-01)
 

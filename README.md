@@ -59,8 +59,8 @@ mistyped password before the long computation starts.
 mhfe-core = "0.2"
 ```
 
-You need Rust 1.99 or later and a 64-bit target. No C compiler is needed. In a browser, your program
-supplies Argon2id itself.
+You need Rust 1.99 or later. A native build needs a 64-bit target; in WebAssembly, which is 32-bit,
+your program supplies Argon2id itself. No C compiler is needed.
 
 The crate is a library: your program asks for the phrase and the password, shows the result and
 warns the person where the specification asks for it. The example in the
