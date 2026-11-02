@@ -7322,7 +7322,7 @@
       "status": "fixed",
       "fixCommit": null,
       "verificationCommit": null,
-      "evidence": "Fixed in the commit that adds this record. AUD-003 has its three UI rows, its whole methods and its index links; its generator no longer cuts them."
+      "evidence": "Fixed in the commit that adds this record. AUD-003 has its three UI rows and index links; complete methods were restored from its existing JSON."
     }
   ],
   "limitations": [

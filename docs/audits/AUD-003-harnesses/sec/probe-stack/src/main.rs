@@ -22,6 +22,10 @@ use rayon::ThreadPoolBuilder;
 const SALT: &[u8; 16] = b"0123456789abcdef";
 const LANES: u32 = 4;
 const MIB: usize = 1 << 20;
+/// Linux x86-64 base pages, the target of this probe.
+const PAGE_BYTES: usize = 4096;
+/// /proc/PID/pagemap marks guard regions at bit 58 on Linux 6.15 and later.
+const PAGEMAP_GUARD: u64 = 1 << 58;
 
 #[derive(Clone, Debug)]
 struct Region {
@@ -81,6 +85,28 @@ fn idle_sps(pool: &[u32]) -> Vec<usize> {
 
 fn memory() -> File {
     OpenOptions::new().read(true).write(true).open("/proc/self/mem").unwrap()
+}
+
+/// Reads one mapped page; only a kernel-confirmed guard page is excluded from the scan.
+fn read_mapping_page(
+    mem: &File,
+    pagemap: &File,
+    address: usize,
+    page: &mut [u8],
+) -> std::io::Result<bool> {
+    match mem.read_exact_at(page, address as u64) {
+        Ok(()) => Ok(true),
+        Err(error) => {
+            let mut entry = [0u8; 8];
+            let offset = (address / PAGE_BYTES * entry.len()) as u64;
+            pagemap.read_exact_at(&mut entry, offset)?;
+            if u64::from_ne_bytes(entry) & PAGEMAP_GUARD != 0 {
+                Ok(false)
+            } else {
+                Err(error)
+            }
+        }
+    }
 }
 
 fn read(mem: &File, start: usize, end: usize) -> Vec<u8> {
@@ -208,6 +234,7 @@ fn real_scan(calls: usize, memory_kib: u32, passes: u32, length: usize) {
     let before = tids();
     let mut engine = NativeArgon2::new(memory_kib).unwrap();
     let pool: Vec<u32> = tids().into_iter().filter(|tid| !before.contains(tid)).collect();
+    assert_eq!(pool.len(), LANES as usize, "all four engine threads must be inspected");
     println!("pool threads: {pool:?}");
     let password = password_of(1, length);
     let other = password_of(2, length);
@@ -224,15 +251,15 @@ fn real_scan(calls: usize, memory_kib: u32, passes: u32, length: usize) {
         .sum();
     let mut image = Vec::with_capacity(total + MIB);
     let mut places = Vec::new();
-    // glibc's guard of a thread stack may lie inside its mapping (MADV_GUARD_INSTALL), and a read of
-    // it fails: such pages are counted, not scanned.
-    let mut unreadable = 0;
+    // A guard inside a writable mapping is not readable memory. Every other read error fails.
+    let pagemap = File::open("/proc/self/pagemap").unwrap();
+    let mut guards = 0;
     for region in regions.iter().filter(|region| region.perms.starts_with("rw") && !region.name.starts_with("[v")) {
         let first = image.len();
         image.resize(first + (region.end - region.start), 0u8);
-        for (index, page) in image[first..].chunks_mut(4096).enumerate() {
-            if mem.read_exact_at(page, (region.start + index * 4096) as u64).is_err() {
-                unreadable += 1;
+        for (index, page) in image[first..].chunks_mut(PAGE_BYTES).enumerate() {
+            if !read_mapping_page(&mem, &pagemap, region.start + index * PAGE_BYTES, page).unwrap() {
+                guards += 1;
             }
         }
         places.push((region.clone(), first));
@@ -244,7 +271,7 @@ fn real_scan(calls: usize, memory_kib: u32, passes: u32, length: usize) {
         let bytes = &image[*first..*first + (region.end - region.start)];
         scan(&format!("{:#x} {:?} {}", region.start, region.perms, region.name), region.start, bytes, &table, &mut hits);
     }
-    println!("{unreadable} pages of the writable mappings could not be read");
+    println!("{guards} kernel-confirmed guard pages excluded from writable mappings");
     println!("{hits} hits in the writable mappings after the first call");
     drop(image);
     // Every call from now on, with one password and then the other: every word of each stack that
@@ -506,5 +533,27 @@ fn main() {
             println!("call: {answer:?}, tag starts {:02x}{:02x}", key[0], key[1]);
         }
         _ => panic!("usage: scan|depth|below [calls] [memory_kib] [passes] [password bytes]"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn an_unreadable_non_guard_page_fails_instead_of_becoming_a_zero_page() {
+        let unreadable = File::open("/dev/null").unwrap();
+        let no_guard = File::open("/dev/zero").unwrap();
+        let mut page = [0u8; PAGE_BYTES];
+        assert!(read_mapping_page(&unreadable, &no_guard, 0, &mut page).is_err());
+    }
+
+    #[test]
+    fn a_readable_page_needs_no_guard_exception() {
+        let memory = File::open("/dev/zero").unwrap();
+        let unavailable_pagemap = File::open("/dev/null").unwrap();
+        let mut page = [1u8; PAGE_BYTES];
+        assert!(read_mapping_page(&memory, &unavailable_pagemap, 0, &mut page).unwrap());
+        assert!(page.iter().all(|byte| *byte == 0));
     }
 }

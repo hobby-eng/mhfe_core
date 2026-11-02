@@ -751,7 +751,7 @@
       "status": "fixed",
       "fixCommit": null,
       "verificationCommit": null,
-      "evidence": "Fixed in the commit that adds this record. SECURITY.md states the limit of the 512 Windows exclusions, and NativeArgon2::is_out_of_dumps says whether all of the work area is excluded. In practice only a host holding about 500 Secrets reaches it: memory levels 20 and 21 need 2 and 3 TiB, which Windows does not commit on real machines."
+      "evidence": "Fixed in the commit that adds this record. SECURITY.md states the 512-registration limit; NativeArgon2::is_out_of_dumps reports complete coverage. Levels 20 and 21 require 2 and 3 TiB and may be refused; the registration limit also affects much smaller areas when other live Secrets consume entries. No Windows runtime reproduction was performed."
     },
     {
       "id": "AUD-005-DOC001",

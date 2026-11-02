@@ -262,7 +262,7 @@ fn check_privacy_and_links(
     Ok(())
 }
 
-pub(crate) fn negative_controls() -> Result<()> {
+pub(crate) fn record_negative_controls() -> Result<()> {
     let (json_path, md_path) = report_paths();
     let json_text = fs::read_to_string(json_path)?;
     let md = fs::read_to_string(md_path)?;
@@ -272,7 +272,11 @@ pub(crate) fn negative_controls() -> Result<()> {
         let mut changed = original.clone();
         changed["findings"][0][field] = match field {
             "severity" => json!("high"),
-            "status" => json!("fixed"),
+            "status" => json!(if original["findings"][0]["status"] == "fixed" {
+                "open"
+            } else {
+                "fixed"
+            }),
             "category" => json!("API"),
             _ => json!("Changed title"),
         };
@@ -300,6 +304,13 @@ pub(crate) fn negative_controls() -> Result<()> {
     if validate_text(&serde_json::to_string(&wording)?, &md).is_ok() {
         return Err("record control accepted prohibited wording".into());
     }
+    println!("seven inconsistent record controls refused; valid record passes");
+    Ok(())
+}
+
+/// The original baseline combines report controls with two vulnerable-source controls.
+pub(crate) fn negative_controls() -> Result<()> {
+    record_negative_controls()?;
     crate::probe::negative_controls()?;
     println!("nine inconsistent record/source controls refused; valid record and sources pass");
     Ok(())

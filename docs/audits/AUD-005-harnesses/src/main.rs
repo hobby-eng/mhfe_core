@@ -29,6 +29,7 @@ fn execute() -> Result<()> {
         Some("source-findings") => probe::source_findings(),
         Some("validate") => record::validate(),
         Some("negative-controls") => record::negative_controls(),
+        Some("record-negative-controls") => record::record_negative_controls(),
         _ => Err("unknown mode; see AUD-005-harnesses/README.md".into()),
     }
 }

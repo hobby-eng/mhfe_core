@@ -43,3 +43,7 @@ saved as `all-paths.nul`, and `git ls-files --recurse-submodules -z | xargs -0 s
 `source-SHA256SUMS`. Initialize `tests/spec` first. `provenance` reads the JSON produced by
 `aud004 run metadata cargo metadata --locked --offline --format-version 1`; `registry` reads the
 successful `provenance.json` result. Report checks need the final AUD-004 Markdown/JSON pair.
+
+Follow-up of 2026-11-02: the status control always selects a different valid status, including
+after remediation changes the record to `fixed`. Original run hashes describe the original tool;
+this correction does not change those historical results.

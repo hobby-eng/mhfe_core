@@ -6,9 +6,9 @@
 //!   first line.
 //! - TOOL-02: a shell script starts with `#!/usr/bin/env bash` and `set -euo pipefail`.
 //! - A reason on every lint exception: Rust's `allow` and `expect` carry `reason = "..."`.
-//! - CORE-25 for this crate: every Cargo requirement is a caret, so that a
-//!   user resolves the fixes of the dependencies, but the exceptions of CARGO_EXCEPTIONS; Cargo.lock
-//!   is the one lockfile (TOOL-05). RUST-01: every Cargo.toml has its lints table.
+//! - CORE-25: the published library uses carets except for CARGO_EXCEPTIONS; repository tools
+//!   require exact versions. Cargo.lock is the one lockfile (TOOL-05). RUST-01: every Cargo.toml
+//!   has its lints table.
 //! - TOOL-01: the repository's tools are `cargo xtask` tasks, so it holds no Node.js script and no
 //!   Node.js tooling (package.json, its lockfiles, .node-version).
 //! - CORE-19 for this crate: the library describes this crate, never a program built on it or an
@@ -78,6 +78,8 @@ const CARGO_EXCEPTIONS: [(&str, &str); 2] = [
     // Every tag comes from it, and the engine's clearing rests on what it leaves on the stack.
     ("argon2", "=0.6.0"),
 ];
+/// This repository publishes the root library; its other active crates are private tools.
+const PUBLISHED_LIBRARY_MANIFEST: &str = "Cargo.toml";
 /// The lints tables of RUST-01.
 const LINTS_TABLES: [&str; 2] = ["[lints.rust]", "[lints.clippy]"];
 /// The files of Node.js tooling, which a Rust repository does not hold (TOOL-01).
@@ -498,6 +500,7 @@ fn is_continuation(line: &str) -> bool {
 
 /// CORE-25 for one Cargo.toml, the crate's or a tool's, at `path`.
 fn check_cargo_requirements(path: &str, manifest: &str, problems: &mut Vec<String>) {
+    let library = path == PUBLISHED_LIBRARY_MANIFEST;
     let mut in_dependencies = false;
     for line in manifest.split('\n') {
         if line.starts_with('[') {
@@ -506,13 +509,31 @@ fn check_cargo_requirements(path: &str, manifest: &str, problems: &mut Vec<Strin
         let Some((name, requirement)) = cargo_dependency(line) else {
             continue;
         };
-        let excepted = CARGO_EXCEPTIONS.contains(&(name, requirement));
-        if in_dependencies && !is_caret(requirement) && !excepted {
+        let allowed = if library {
+            is_caret(requirement) || CARGO_EXCEPTIONS.contains(&(name, requirement))
+        } else {
+            is_exact(requirement)
+        };
+        if in_dependencies && !allowed {
+            let policy = if library {
+                "a caret requirement"
+            } else {
+                "an exact version"
+            };
             problems.push(format!(
-                "{path}: {name} = \"{requirement}\" is not a caret requirement (CORE-25)"
+                "{path}: {name} = \"{requirement}\" is not {policy} (CORE-25)"
             ));
         }
     }
+}
+
+/// A full exact Cargo comparator, including a prerelease or build suffix when present.
+fn is_exact(requirement: &str) -> bool {
+    let Some(version) = requirement.strip_prefix('=') else {
+        return false;
+    };
+    let core = version.split(['-', '+']).next().unwrap_or_default();
+    version_numbers(core) == Some(3)
 }
 
 /// A dependency line of Cargo.toml: its name, and its version alone or in an inline table, as
@@ -763,8 +784,31 @@ mod tests {
         let tool = "[dependencies]\nsha2 = \">=0.10\"\n\n[lints.rust]\n\n[lints.clippy]\n";
         assert_eq!(
             problems_of("xtask/Cargo.toml", tool),
-            ["xtask/Cargo.toml: sha2 = \">=0.10\" is not a caret requirement (CORE-25)"]
+            ["xtask/Cargo.toml: sha2 = \">=0.10\" is not an exact version (CORE-25)"]
         );
+    }
+
+    #[test]
+    fn private_tools_require_full_exact_versions_without_library_exceptions() {
+        for version in [
+            "0.11",
+            "^0.11.1",
+            "=0.11",
+            "=0.11.*",
+            ">=0.11.1",
+            ">=0.1.26, <0.1.27",
+        ] {
+            let manifest = format!("[dependencies]\nunicode-normalization = \"{version}\"\n");
+            let mut problems = Vec::new();
+            check_cargo_requirements("xtask/Cargo.toml", &manifest, &mut problems);
+            assert_eq!(problems.len(), 1, "{version}");
+        }
+        for version in ["=0.11.1", "=1.2.3-rc.1", "=1.2.3+build"] {
+            let manifest = format!("[dependencies]\na = \"{version}\"\n");
+            let mut problems = Vec::new();
+            check_cargo_requirements("xtask/Cargo.toml", &manifest, &mut problems);
+            assert!(problems.is_empty(), "{version}");
+        }
     }
 
     #[test]

@@ -29,6 +29,13 @@ thread's stack pointer. Subcommands of the probe:
 - `call`, `secret`, `isolated`: one call, one `Secret` in or out of the isolation, and calls in a
   process isolated whole, for `prlimit` and `strace`.
 
+Follow-up of 2026-11-02: the wrapper requires all 38 known control hits and the completed
+40-call result. Stack-window read failures end the probe. For the initial mapping snapshot,
+only guard pages identified by bit 58 of Linux's pagemap are skipped and counted; any other
+read failure ends it. Guard classification requires Linux 6.15 or later when such pages exist:
+see the [kernel pagemap documentation](https://www.kernel.org/doc/html/latest/admin-guide/mm/pagemap.html).
+On older kernels an unclassified unreadable page fails rather than yielding a clean scan.
+
 `sec001-tried-fix.diff` is the fix tried in a private copy of the tree, which the probe then found
 clean under thin LTO. `gdb-hold.txt` is the debugger script of the `hold` subcommand: it shows the
 sleeping threads' frames while the words are on the stack.

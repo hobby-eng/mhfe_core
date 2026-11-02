@@ -13,7 +13,8 @@ pub enum Error {
     EmptyPassword,
     /// The password is longer than [`Password::MAX_BYTES`] after NFKD normalization.
     PasswordTooLong {
-        /// Its length in bytes after normalization.
+        /// Its length in bytes after normalization, saturating at `usize::MAX`. That value is
+        /// a lower bound when normalization exceeds the target's address space.
         bytes: usize,
     },
     /// The password contains a control character (General_Category Cc), U+2028 or U+2029.
@@ -86,11 +87,18 @@ impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             Self::EmptyPassword => f.write_str("the password is empty"),
-            Self::PasswordTooLong { bytes } => write!(
-                f,
-                "the password has {bytes} bytes after NFKD, more than {}",
-                Password::MAX_BYTES
-            ),
+            Self::PasswordTooLong { bytes } => {
+                let bound = if *bytes == usize::MAX {
+                    "at least "
+                } else {
+                    ""
+                };
+                write!(
+                    f,
+                    "the password has {bound}{bytes} bytes after NFKD, more than {}",
+                    Password::MAX_BYTES
+                )
+            }
             Self::ForbiddenCharacter => {
                 f.write_str("the password contains a control character, U+2028 or U+2029")
             }
@@ -143,3 +151,23 @@ impl fmt::Display for Error {
 }
 
 impl std::error::Error for Error {}
+
+#[cfg(test)]
+mod tests {
+    use super::Error;
+
+    #[test]
+    fn password_length_messages_distinguish_exact_counts_and_lower_bounds() {
+        assert_eq!(
+            Error::PasswordTooLong { bytes: 1_025 }.to_string(),
+            "the password has 1025 bytes after NFKD, more than 1024"
+        );
+        assert_eq!(
+            Error::PasswordTooLong { bytes: usize::MAX }.to_string(),
+            format!(
+                "the password has at least {} bytes after NFKD, more than 1024",
+                usize::MAX
+            )
+        );
+    }
+}

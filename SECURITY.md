@@ -42,8 +42,8 @@ the code writes about 11 KiB deep in a release build and 89 KiB in an unoptimize
 The Argon2id work area, 2 GiB or more, lies on pages of its own. They are left out of core dumps on
 Linux, Android and Windows, and out of a child process on Linux, Android, macOS and iOS. Windows
 gives a process 512 such exclusions of less than 4 GiB each, which every live `Secret` shares, so
-there the area is left out only as far as they reach: never at memory levels 20 and 21, and not
-while about 500 `Secret`s are alive. `NativeArgon2::is_out_of_dumps` says whether all of it is. The engine
+there the area is left out only as far as they reach: never whole at memory levels 20 and 21, and at
+lower levels not once live `Secret`s have taken the entries it needs. `NativeArgon2::is_out_of_dumps` says whether all of it is. The engine
 wipes the area after every call, whether the call succeeded or not. The area is locked only where
 the limit on locked memory holds all of it: `RLIMIT_MEMLOCK` on Unix, 8 MiB by default on Linux
 since 5.16, or a working set that Windows lets grow by its size. `NativeArgon2::is_locked` says

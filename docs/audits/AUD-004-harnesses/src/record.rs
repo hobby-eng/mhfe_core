@@ -332,7 +332,11 @@ pub(crate) fn negative_controls() -> Result<()> {
         let mut changed = original.clone();
         changed["findings"][0][field] = match field {
             "severity" => json!("medium"),
-            "status" => json!("fixed"),
+            "status" => json!(if original["findings"][0]["status"] == "fixed" {
+                "open"
+            } else {
+                "fixed"
+            }),
             "category" => json!("SEC"),
             _ => json!("Changed title"),
         };

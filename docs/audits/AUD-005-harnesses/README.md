@@ -43,6 +43,9 @@ The examples below name the resulting program `aud005`. Replace it with its actu
   category, a duplicate heading, an extra Markdown finding, prohibited wording and corrected
   publication guidance in either source document. Every accepted invalid control makes the command
   exit nonzero.
+- `aud005 record-negative-controls` checks only the seven report variants and can run after
+  remediation. The original `negative-controls` and `source-findings` require the reviewed
+  vulnerable source facts; they are baseline reproductions, not acceptance tests for a fixed tree.
 
 Successful probes print a short result and exit zero. Raw evidence stays in
 `docs/audits/AUD-005-evidence/`, which Git ignores; it is not a public artifact. The baseline files
@@ -57,3 +60,7 @@ git ls-files --recurse-submodules -z | xargs -0 sha256sum \
 Report validation needs `docs/audits/AUD-005-2026-11-02.md`, its JSON twin, the audit index and the
 canonical procedure/schema in the adjacent workspace checkouts. No command contacts a live wallet,
 uses a real secret, dispatches CI or publishes anything.
+
+Follow-up of 2026-11-02: report status controls always select a different valid status, including
+when the first finding is already `fixed`. The report-only command keeps that validation separate
+from the original vulnerable-source controls. Original run hashes retain their historical meaning.
