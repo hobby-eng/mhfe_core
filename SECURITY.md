@@ -1,10 +1,10 @@
 # Security
 
 mhfe-core is experimental research software. Independent cryptographers have not reviewed its
-construction, so do not use it to protect real funds. Passing tests and matching vectors do not show
-that the construction is secure. The [specification](https://github.com/hobby-eng/mhfe-spec) and the
-documentation of each item describe the protocol and its limits, such as suite 4's missing password
-check and the 16 bits of the wallet check.
+construction. Passing tests and matching vectors do not show that the construction is secure. The
+[specification](https://github.com/hobby-eng/mhfe-spec) and the documentation of each item describe
+the protocol and its limits, such as suite 4's missing password check and the 16 bits of the wallet
+check.
 
 Report a suspected vulnerability privately through
 [GitHub's security advisory form](https://github.com/hobby-eng/mhfe_core/security/advisories/new).
@@ -43,12 +43,12 @@ The Argon2id work area, 2 GiB or more, lies on pages of its own. They are left o
 Linux, Android and Windows, and out of a child process on Linux, Android, macOS and iOS. Windows
 gives a process 512 such exclusions of less than 4 GiB each, which every live `Secret` shares, so
 there the area is left out only as far as they reach: never whole at memory levels 20 and 21, and at
-lower levels not once live `Secret`s have taken the entries it needs. `NativeArgon2::is_out_of_dumps` says whether all of it is. The engine
-wipes the area after every call, whether the call succeeded or not. The area is locked only where
-the limit on locked memory holds all of it: `RLIMIT_MEMLOCK` on Unix, 8 MiB by default on Linux
-since 5.16, or a working set that Windows lets grow by its size. `NativeArgon2::is_locked` says
-whether it is. Anyone who reads its blocks can test a password guess cheaply, so a swap area that
-can hold them must be encrypted.
+lower levels not once live `Secret`s have taken the entries it needs.
+`NativeArgon2::is_out_of_dumps` says whether all of it is. The engine wipes the area after every
+call, whether the call succeeded or not. The area is locked only where the limit on locked memory
+holds all of it: `RLIMIT_MEMLOCK` on Unix, 8 MiB by default on Linux since 5.16, or a working set
+that Windows lets grow by its size. `NativeArgon2::is_locked` says whether it is. Anyone who reads
+its blocks can test a password guess cheaply, so a swap area that can hold them must be encrypted.
 
 No secret leaves the crate except the results a program asks for. Every type that holds a secret
 prints as hidden in `Debug` and has no `Display`. Errors carry counts, positions, settings and the

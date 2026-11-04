@@ -26,8 +26,7 @@
 //! 128 KiB of the stack below the caller's frame, so such a call needs about 140 KiB of free stack:
 //! on a smaller thread stack, such as musl's default of 128 KiB, it ends the process.
 //!
-//! The construction is experimental and has not been independently reviewed. Do not use it to
-//! protect real funds.
+//! The construction is experimental and has not been independently reviewed.
 //!
 //! A host isolates itself before it reads a secret or makes a native engine, whose threads inherit
 //! the isolation, and does the creation duties the crate leaves to it: it reads the password twice,

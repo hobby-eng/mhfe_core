@@ -35,8 +35,7 @@ mhfe-core is the Rust library that does this work, and the `mhfe` tool is built 
 the published [MHFE specification](https://github.com/hobby-eng/mhfe-spec) 0.7.0, so a recovery does
 not depend on this code: any program that follows the specification opens the same containers.
 
-> **Experimental.** The construction has not been reviewed by independent cryptographers. Do not
-> use it to protect real funds.
+> **Experimental.** The construction has not been reviewed by independent cryptographers.
 
 ## What it does
 
@@ -72,8 +71,9 @@ In a debug build Argon2id takes about 16 times as long. Setting `opt-level = 3` 
 ## Security
 
 Secrets stay on memory pages of their own and are wiped after use, and a program can close itself
-off from the network and from other programs before it reads one. What this covers on each system,
-and what it does not, is in [SECURITY.md](SECURITY.md).
+off from the network and from other programs before it reads one. On Windows the network stays open,
+and none of this makes an everyday or compromised computer trustworthy. What this covers on each
+system, and what it does not, is in [SECURITY.md](SECURITY.md).
 
 ## Testing
 
