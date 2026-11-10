@@ -1,7 +1,7 @@
 //! The optional source profile MHFE-WALLET-CHECK-SEED-1 (specification: "Optional source profile:
-//! a recovery check for new 24-word phrases"): a new 24-word phrase is drawn until its BIP39 seed
-//! passes a check, [`draw`], and every recovery evaluates the check for its 24-word readings,
-//! [`Seed::passes`]. It changes nothing in suite 3.
+//! a recovery check for new 24-word phrases"): every recovery evaluates the check for its 24-word
+//! readings, [`Seed::passes`]. The crate draws no new phrases: a host that draws one until its
+//! BIP39 seed passes the check does so itself. It changes nothing in suite 3.
 //!
 //! The check, byte for byte: `T` is the SHA-256 digest of
 //!
@@ -21,7 +21,6 @@
 //! is a function of the phrase alone, so anyone who sees the phrase can test the check.
 
 use std::fmt;
-use std::ops::ControlFlow;
 
 use sha2::{Digest, Sha256};
 use zeroize::Zeroize;
@@ -29,7 +28,7 @@ use zeroize::Zeroize;
 use crate::nfkd::Nfkd;
 use crate::packing::{STATE_BYTES, STATE_WORDS};
 use crate::protect::Secret;
-use crate::{Error, Phrase, stack};
+use crate::{Phrase, stack};
 
 /// The domain tag, which keeps the check apart from every other hash of the seed.
 const DOMAIN: &[u8] = b"MHFE-WALLET-CHECK-SEED-1";
@@ -99,41 +98,6 @@ impl fmt::Debug for Seed {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("Seed(hidden)")
     }
-}
-
-/// The profile's generation: with `passphrase` held fixed, each trial `fill` writes 32 bytes from
-/// the host's cryptographic generator, and the first trial whose 24-word phrase passes the check
-/// is the phrase, about 65,536 trials on average. The trials run one after another, in order, so
-/// the phrase depends only on their outcomes. The loop has no limit of its own: a host counts the
-/// trials in `fill` and at the limit it states, or the person sets, returns `Break`, which comes
-/// back as the result; otherwise the result is `Continue` with the phrase. The phrase then becomes a suite 3 container as any other, with its creation check. The NFKD of
-/// `passphrase`, before the first trial, takes time and memory linear in its length, so a host
-/// bounds a passphrase it reads from a file or the clipboard.
-#[expect(
-    clippy::expect_used,
-    reason = "the trial buffer is made with exactly 32 bytes"
-)]
-pub fn draw(
-    passphrase: &str,
-    fill: &mut dyn FnMut(&mut [u8; STATE_BYTES]) -> ControlFlow<()>,
-) -> Result<ControlFlow<(), Phrase>, Error> {
-    stack::cleared(|| {
-        let normalized = Nfkd::of(passphrase).write();
-        let mut entropy = Secret::zeroed(STATE_BYTES);
-        loop {
-            let trial = entropy
-                .as_mut_bytes()
-                .try_into()
-                .expect("a trial has 32 bytes");
-            if fill(trial).is_break() {
-                return Ok(ControlFlow::Break(()));
-            }
-            let phrase = Phrase::encode(entropy.as_bytes())?;
-            if seed_passes(Seed::of(&phrase, &normalized).bytes.as_bytes()) {
-                return Ok(ControlFlow::Continue(phrase));
-            }
-        }
-    })
 }
 
 /// `T = SHA-256(DOMAIN || BE32(256) || seed)`.

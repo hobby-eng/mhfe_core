@@ -2,9 +2,11 @@
 
 ## Unreleased
 
-- A cancelled operation is no longer an error: `Mhfe::encrypt`, `Mhfe::decrypt` and
-  `wallet_check::draw` return `Result<ControlFlow<(), T>, Error>`, and `Break` from a callback comes
-  back as the result. `Error::Cancelled` is gone.
+- `wallet_check::draw` is gone: the crate draws no new seed phrases. A host that draws a phrase
+  until it passes the wallet check does so itself and checks it with `Seed::passes`.
+- A cancelled operation is no longer an error: `Mhfe::encrypt` and `Mhfe::decrypt` return
+  `Result<ControlFlow<(), T>, Error>`, and `Break` from a callback comes back as the result.
+  `Error::Cancelled` is gone.
 - `NativeArgon2::is_out_of_dumps` says whether all of the work area is left out of core dumps, which
   on Windows holds only as far as a process's 512 exclusions reach.
 - On a 32-bit target, a password whose NFKD passes 4 GiB is refused as too long instead of ending

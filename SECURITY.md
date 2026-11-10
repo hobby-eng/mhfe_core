@@ -16,8 +16,7 @@ Every secret the crate holds lives in a `protect::Secret`. A `Secret` has whole 
 own, shared with no other data, keeps a fixed size and is overwritten when it is dropped. This
 covers the encoded password, the text of every phrase, the entropy and the cipher's state, each
 round's halves, message, salt, Argon2id key and mask, a BIP39 passphrase in NFKD, the BIP39 seed,
-the word numbers of a repair and what it changed, the word indexes of a password check, and the
-entropy of each trial of a draw.
+the word numbers of a repair and what it changed, and the word indexes of a password check.
 
 A password or passphrase is normalized (NFKD) directly into its `Secret`, so no copy of it reaches
 ordinary memory: `tests/secret_memory.rs` counts the heap allocations while this happens and finds

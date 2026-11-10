@@ -15,7 +15,6 @@ struct mhfe_core::protect::Secret
 struct mhfe_core::protect::Isolation #[non_exhaustive]
 fn mhfe_core::protect::write_secret #[cfg(not(target_arch = "wasm32"))]
 struct mhfe_core::wallet_check::Seed
-fn mhfe_core::wallet_check::draw
 struct mhfe_core::repair::Card
 struct mhfe_core::repair::Repaired
 struct mhfe_core::repair::Change

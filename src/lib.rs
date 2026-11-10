@@ -8,9 +8,9 @@
 //! creates a container and checks it; [`Mhfe::decrypt`] recovers its state, which
 //! [`Recovery::readings`] reads under the specification's length rules.
 //!
-//! Three optional profiles of the specification have modules of their own: [`wallet_check`], a
-//! new 24-word phrase drawn to pass a check of its BIP39 seed; [`repair`], repair words for a
-//! container; and [`password_check`], a password of EFF words with a check word.
+//! Three optional profiles of the specification have modules of their own: [`wallet_check`], the
+//! check of a 24-word phrase's BIP39 seed; [`repair`], repair words for a container; and
+//! [`password_check`], a password of EFF words with a check word.
 //!
 //! Native builds compute Argon2id with RustCrypto's `argon2` on four threads of their own,
 //! [`NativeArgon2`], at every memory level from 0 to 21, and only on 64-bit targets. A WebAssembly

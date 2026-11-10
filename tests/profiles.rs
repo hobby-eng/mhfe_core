@@ -9,13 +9,11 @@
 #[path = "support/corpus.rs"]
 mod corpus;
 
-use std::ops::ControlFlow;
-
 use corpus::{WALLET_CHECK_VECTORS, hex, number, profile_vectors, text};
 use mhfe_core::Phrase;
 use mhfe_core::password_check::{self, Check, EFF_WORDS};
 use mhfe_core::repair::{Card, Repaired};
-use mhfe_core::wallet_check::{self, Seed};
+use mhfe_core::wallet_check::Seed;
 use serde_json::Value;
 use sha2::{Digest, Sha256};
 
@@ -51,48 +49,6 @@ fn the_wallet_check_cases_pass_and_fail_as_published() {
     // The check is defined for 24 words only.
     let twelve = Phrase::from_entropy(&[0; 16]).unwrap();
     assert_eq!(Seed::derive(&twelve, "TREZOR").passes(), None);
-}
-
-/// The trials run in order and the first that passes is the phrase: with the first case's
-/// passphrase, the second case's counter fails and the first case's passes.
-#[test]
-fn a_draw_returns_the_first_trial_that_passes() {
-    let cases = profile_vectors(WALLET_CHECK_VECTORS, "cases");
-    let passphrase = text(&cases[0], "bip39_passphrase");
-    let passing = counted(&cases[0]);
-    let mut entropies = [counted(&cases[1]), passing].into_iter();
-    let mut trials = 0;
-    let drawn = wallet_check::draw(passphrase, &mut |entropy| {
-        trials += 1;
-        match entropies.next() {
-            Some(next) => {
-                *entropy = next;
-                ControlFlow::Continue(())
-            }
-            None => ControlFlow::Break(()),
-        }
-    })
-    .unwrap()
-    .continue_value()
-    .unwrap();
-    assert_eq!(trials, 2);
-    let expected = Phrase::from_entropy(&passing).unwrap();
-    assert_eq!(drawn.as_str(), expected.as_str());
-    let stopped = wallet_check::draw(passphrase, &mut |_| ControlFlow::Break(()));
-    assert!(stopped.unwrap().is_break());
-    // A host's limit: the trials end at it, without a phrase.
-    let failing = counted(&cases[1]);
-    let mut left = 3;
-    let bounded = wallet_check::draw(passphrase, &mut |entropy| {
-        if left == 0 {
-            return ControlFlow::Break(());
-        }
-        left -= 1;
-        *entropy = failing;
-        ControlFlow::Continue(())
-    });
-    assert!(bounded.unwrap().is_break());
-    assert_eq!(left, 0);
 }
 
 /// Each case's card of every size is the published one, and a case that names its transcript holds
