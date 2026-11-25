@@ -12,8 +12,9 @@ Never include a real seed phrase, password, private key or wallet file.
 
 ## Secrets in memory
 
-Every secret the crate holds lives in a `protect::Secret`. A `Secret` has whole memory pages of its
-own, shared with no other data, keeps a fixed size and is overwritten when it is dropped. This
+Every secret the crate holds lives in a `protect::Secret`. On Unix and Windows a `Secret` has whole
+memory pages of its own, shared with no other data; in WebAssembly it is an ordinary heap buffer. It
+keeps a fixed size and is overwritten when it is dropped. This
 covers the encoded password, the text of every phrase, the entropy and the cipher's state, each
 round's halves, message, salt, Argon2id key and mask, a BIP39 passphrase in NFKD, the BIP39 seed,
 the word numbers of a repair and what it changed, and the word indexes of a password check.
@@ -46,9 +47,10 @@ gives a process 512 such exclusions of less than 4 GiB each, which every live `S
 there the area is left out only as far as they reach: never whole at memory levels 20 and 21, and at
 lower levels not once live `Secret`s have taken the entries it needs.
 `NativeArgon2::is_out_of_dumps` says whether all of it is. The engine wipes the area after every
-call, whether the call succeeded or not. The area is locked only where the limit on locked memory
-holds all of it: `RLIMIT_MEMLOCK` on Unix, 8 MiB by default on Linux since 5.16, or a working set
-that Windows lets grow by its size. `NativeArgon2::is_locked` says whether it is. Anyone who reads
+call, whether the call succeeded or not. The area is locked only where the system lets all of it be
+locked: on Unix when `RLIMIT_MEMLOCK` holds it, 8 MiB by default on Linux since 5.16, and on Windows
+when `VirtualLock` takes it after the working set was asked to grow by its size.
+`NativeArgon2::is_locked` says whether it is. Anyone who reads
 its blocks can test a password guess cheaply, so a swap area that can hold them must be encrypted.
 
 No secret leaves the crate except the results a program asks for. Every type that holds a secret
@@ -76,26 +78,35 @@ reference implementation's error numbers, never text that was passed in.
 
 `protect::Secret`, `protect::Isolation::enter()` and `protect::write_secret` are those of
 [secret-protection-core](https://github.com/hobby-eng/secret-protection-core) 0.2: its
-[security policy](https://github.com/hobby-eng/secret-protection-core/blob/main/SECURITY.md) and
-[technical guide](https://github.com/hobby-eng/secret-protection-core/blob/main/docs/TECHNICAL.md)
+[security policy](https://github.com/hobby-eng/secret-protection-core/blob/v0.2.0/SECURITY.md) and
+[technical guide](https://github.com/hobby-eng/secret-protection-core/blob/v0.2.0/docs/TECHNICAL.md)
 say what each system offers a `Secret`, what isolation applies there, for which threads, and what it
 does not cover. A field of the isolation report is true only when reading the protection back
 confirmed it, and a refusal shows as `false`, never as an error. On every system, descriptors and
-handles opened before the call, such as a socket or a file open for writing, stay usable, so the
-computer must still be trusted and offline.
+handles opened before the call, such as a file open for writing or a connected socket, stay usable
+for reading and writing, so the computer must still be trusted and offline; on Linux with the filter
+a socket can no longer connect, bind, listen or accept.
 
 What this crate adds to it:
 
 - The engine's four threads, the Argon2id lanes, start in `NativeArgon2::new`. A program calls
   `Isolation::enter()` before it, while it has one thread, so that the protections hold for the
-  whole process, the lanes included.
-- `Isolation::enter()` applies what breaks no program. A program that needs more, such as refusing
-  file locks, `sendmsg` and signals to other processes, takes secret-protection-core itself, the
-  same version that this crate resolves to, and calls `Isolation::enter_with` with its `Options`.
+  whole process, the lanes included. On Linux this also decides where every `Secret` lies:
+  secret-protection-core takes the kernel's secret memory only when the process had one thread at
+  its first `Secret` or `enter()`, and otherwise locked anonymous pages, which root can read.
+- `Isolation::enter()` applies every protection that has no option of its own: the dump settings
+  of each system; on Linux and Android the seccomp filter where there is one, on Linux also
+  Landlock and the namespaces; on macOS the sandbox and the refusal of a debugger; on Windows the
+  access lists, low integrity, the job and the mitigation policies. These already refuse starting
+  another program where they hold, on Windows writing the clipboard, and from Linux 6.12 signals
+  to processes outside the Landlock layer. The options stay off: refusing file locks and `sendmsg`,
+  signals only to the process itself, locking all memory, refusing new executable code, loading
+  only DLLs that Microsoft signed, and putting the filter on threads that already run. A program that needs one takes secret-protection-core itself, the same version that
+  this crate resolves to, and calls `Isolation::enter_with` with its `Options`.
 - In WebAssembly a `Secret` is an ordinary heap buffer, wiped when it is dropped, and the stack is
-  not cleared after a call: a host ends the instance after an operation, or after a session of
-  several, to give back what the stack held. Isolation applies nothing there, and the Argon2id
-  engine and its memory belong to the host.
+  not cleared after a call. Ending the instance, after an operation or after a session of several,
+  frees what the stack held, though nothing promises that the memory is overwritten. Isolation
+  applies nothing there, and the Argon2id engine and its memory belong to the host.
 
 ## Unsafe Rust and failures
 

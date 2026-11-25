@@ -18,7 +18,7 @@ use std::process::{Child, Command, Stdio};
 #[cfg(not(target_arch = "wasm32"))]
 use mhfe_core::protect;
 use mhfe_core::protect::Isolation;
-#[cfg(any(target_os = "linux", windows))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 use mhfe_core::{Argon2Engine, NativeArgon2};
 
 /// The variable that gives a child process its role.
@@ -72,7 +72,7 @@ fn child(role: &str) -> Child {
 /// The `isolated` role: enters the isolation, on Unix while it has one thread, checks the report,
 /// says so and waits until its standard input closes, so that the test can look at it from
 /// outside. On Windows, where the isolation holds for every thread, it starts a thread before the
-/// call and one after, which wait with it, and runs Argon2id after the call.
+/// call and one after, which wait with it. On Windows and macOS it runs Argon2id after the call.
 fn isolated() {
     #[cfg(windows)]
     waiting_thread();
@@ -84,10 +84,9 @@ fn isolated() {
     #[cfg(windows)]
     windows::reads_back_the_same(isolation);
     #[cfg(windows)]
-    {
-        waiting_thread();
-        argon2id_still_works();
-    }
+    waiting_thread();
+    #[cfg(any(target_os = "macos", windows))]
+    argon2id_still_works();
     println!("entered");
     idle();
 }
@@ -150,7 +149,7 @@ fn a_secret_is_written_after_the_buffered_public_output() {
 
 /// Argon2id runs its lanes on threads started after the isolation. The tag of this call was
 /// computed with OpenSSL through Python cryptography 46.0.5.
-#[cfg(any(target_os = "linux", windows))]
+#[cfg(any(target_os = "linux", target_os = "macos", windows))]
 fn argon2id_still_works() {
     let mut engine = NativeArgon2::new(1024).unwrap();
     let mut key = [0u8; 32];
@@ -358,8 +357,8 @@ mod linux {
         }
     }
 
-    /// From Linux 6.7 (Landlock's ABI 4), Landlock refuses to connect even a TCP socket opened
-    /// before, which the filter cannot refuse.
+    /// A TCP socket opened before cannot connect: the filter refuses `connect` itself, and from
+    /// Linux 6.7 (Landlock's ABI 4) Landlock refuses it too, also where there is no filter.
     fn connecting_is_refused(socket: &OwnedFd, port: u16) {
         // SAFETY: with a null attribute and the version flag the call only returns a number.
         let abi = unsafe {
@@ -386,7 +385,7 @@ mod linux {
                 size_of::<libc::sockaddr_in>() as libc::socklen_t,
             )
         };
-        let expected = (abi >= 4).then_some(libc::EACCES);
+        let expected = (FILTERED || abi >= 4).then_some(libc::EACCES);
         assert_eq!(error_of(result.into()), expected, "Landlock {abi}");
     }
 

@@ -58,6 +58,9 @@ mistyped password before the long computation starts.
 mhfe-core = "0.2"
 ```
 
+0.2 is the current release. The version in this repository's `Cargo.toml` is the next one, which
+is not published yet.
+
 You need Rust 1.99 or later. A native build needs a 64-bit target; in WebAssembly, which is 32-bit,
 your program supplies Argon2id itself. No C compiler is needed.
 

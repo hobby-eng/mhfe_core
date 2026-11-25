@@ -124,20 +124,23 @@ fn a_secret_lies_on_pages_kept_out_of_swap_and_core_dumps() {
 
 #[cfg(not(target_arch = "wasm32"))]
 fn the_work_area_lies_on_pages_of_its_own() {
-    /// One page more than 1 MiB: a size that no other mapping of this program has.
+    /// Just over 1 MiB: a size that no other mapping of this program has, also once rounded up to
+    /// whole pages of 16 or 64 KiB.
     const AREA_KIB: u32 = 1028;
+    #[cfg(unix)]
+    let bytes = (AREA_KIB as usize * 1024).next_multiple_of(page_size());
     #[cfg(target_os = "linux")]
     let before = linux::mappings();
     let engine = NativeArgon2::new(AREA_KIB).unwrap();
-    // Unix locks the area when RLIMIT_MEMLOCK holds all of it; Windows once the working set grew
-    // by its size, which the process of a user may ask for.
+    // Unix locks the area when RLIMIT_MEMLOCK holds all of its pages; Windows once the working set
+    // grew by its size, which the process of a user may ask for.
     #[cfg(unix)]
-    let lockable = lock_limit() >= u64::from(AREA_KIB) * 1024;
+    let lockable = lock_limit() >= u64::try_from(bytes).unwrap();
     #[cfg(not(unix))]
     let lockable = true;
     assert_eq!(engine.is_locked(), lockable);
     #[cfg(target_os = "linux")]
-    linux::work_area_is_marked(&before, AREA_KIB as usize * 1024, engine.is_locked());
+    linux::work_area_is_marked(&before, bytes, engine.is_locked());
 }
 
 fn six_hundred_secrets_made_one_after_another_report_their_core_dump_exclusion() {
@@ -147,6 +150,14 @@ fn six_hundred_secrets_made_one_after_another_report_their_core_dump_exclusion()
     for _ in 0..600 {
         assert_eq!(Secret::with_capacity(1).is_out_of_dumps(), out_of_dumps);
     }
+}
+
+/// The size of the system's pages, to which a mapping's length is rounded up.
+#[cfg(unix)]
+fn page_size() -> usize {
+    // SAFETY: sysconf takes an integer and only reports the page size.
+    let size = unsafe { libc::sysconf(libc::_SC_PAGESIZE) };
+    usize::try_from(size).unwrap()
 }
 
 /// RLIMIT_MEMLOCK, the most memory this process may lock.
@@ -221,7 +232,7 @@ mod linux {
     }
 
     /// Out of core dumps (`dd`) on pages of either kind. Anonymous pages are locked (`lo`) and give
-    /// a child process zeros (`wf`). Secret memory is shared, so a child gets none of it (`dc`),
+    /// a child process zeros (`wf`) where the kernel can. Secret memory is shared, so a child gets none of it (`dc`),
     /// and its kind is what keeps it out of swap: since Linux commit 97d34aa65c29 its folios are
     /// unevictable and the mapping has no `lo`, which an older kernel's has.
     pub(super) fn secret_pages_are_marked(secret: &Secret) {
@@ -234,7 +245,19 @@ mod linux {
         let flags: &[&str] = if mapping.name.starts_with("/secretmem") {
             &["dd", "dc"]
         } else {
-            &["dd", "lo", "wf"]
+            assert_eq!(
+                mapping.has("wf"),
+                wipe_on_fork_available(),
+                "{:?}",
+                mapping.flags
+            );
+            assert_eq!(
+                mapping.has("wf"),
+                secret.is_out_of_children(),
+                "{:?}",
+                mapping.flags
+            );
+            &["dd", "lo"]
         };
         assert!(
             flags.iter().all(|flag| mapping.has(flag)),
@@ -255,8 +278,35 @@ mod linux {
             .collect();
         assert_eq!(new.len(), 1);
         let area = new[0];
-        assert!(area.has("dd") && area.has("wf"), "{:?}", area.flags);
+        assert!(area.has("dd"), "{:?}", area.flags);
+        assert_eq!(area.has("wf"), wipe_on_fork_available(), "{:?}", area.flags);
         assert_eq!(area.has("lo"), locked, "{:?}", area.flags);
+    }
+
+    /// Whether the kernel gives a child zeros for a page (Linux 4.14 and later), asked of a page of
+    /// this test's own, so that the flags above are checked against the kernel, not against the
+    /// crate's own answer alone.
+    fn wipe_on_fork_available() -> bool {
+        let bytes = super::page_size();
+        // SAFETY: reserves one private anonymous page, with no file and no address asked for.
+        let page = unsafe {
+            libc::mmap(
+                std::ptr::null_mut(),
+                bytes,
+                libc::PROT_READ | libc::PROT_WRITE,
+                libc::MAP_PRIVATE | libc::MAP_ANONYMOUS,
+                -1,
+                0,
+            )
+        };
+        assert_ne!(page, libc::MAP_FAILED);
+        // SAFETY: both calls take the page just reserved, which nothing else uses; the second
+        // gives it back.
+        unsafe {
+            let available = libc::madvise(page, bytes, libc::MADV_WIPEONFORK) == 0;
+            assert_eq!(libc::munmap(page, bytes), 0);
+            available
+        }
     }
 
     /// In a child process: the limit stays its own, and so does a SIGBUS at a write to a page

@@ -55,9 +55,9 @@ impl NativeArgon2 {
     /// holds for the calling thread only (Android, or Linux with other threads), that thread makes
     /// the engine. They end soon after the engine is dropped, not by the time the drop returns.
     ///
-    /// The area is locked where the system's limit on locked memory holds all of it, which also
-    /// commits it: on Linux, Android, macOS and iOS when RLIMIT_MEMLOCK is at least its size, on
-    /// Windows when the working set could grow by its size.
+    /// The area is locked where the system lets all of it be locked, which also commits it: on
+    /// Linux, Android, macOS and iOS when RLIMIT_MEMLOCK is at least its size, on Windows when
+    /// `VirtualLock` takes it after the working set was asked to grow by its size.
     pub fn new(memory_kib: u32) -> Result<Self, Error> {
         // An area of no memory is refused before anything is reserved or started.
         if memory_kib == 0 {
@@ -65,7 +65,8 @@ impl NativeArgon2 {
         }
         let bytes = memory_kib as usize * 1024;
         let work_area = WorkArea::new(bytes).ok_or(Error::OutOfMemory)?;
-        // Pages always meet a Block's alignment; `blocks` counts on this check, not on that.
+        // The cast in `blocks` needs a Block's alignment of 64. Pages give it, but
+        // secret-protection-core does not promise where in its pages a later release puts the area.
         if !work_area.as_slice().as_ptr().cast::<Block>().is_aligned() {
             return Err(Error::OutOfMemory);
         }
@@ -153,6 +154,9 @@ impl Argon2Engine for NativeArgon2 {
         result
     }
 }
+
+// `blocks` counts a Block as exactly its 1 KiB of words.
+const _: () = assert!(size_of::<Block>() == Block::SIZE);
 
 /// The work area as Argon2 blocks.
 #[allow(

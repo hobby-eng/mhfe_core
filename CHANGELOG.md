@@ -12,23 +12,38 @@
 - On a 32-bit target, a password whose NFKD passes 4 GiB is refused as too long instead of ending
   the process.
 - `protect` is secret-protection-core 0.2: `Secret`, `Isolation` and `write_secret` are its own,
-  re-exported, and this crate's copies of the system calls are gone. A program that needs more of
-  it, such as `Isolation::enter_with`, depends on the same version.
-- `Secret::push` returns `secret_protection_core::SecretError` when the secret is full;
+  re-exported, and this crate's copies of the system calls are gone. `Secret` also has that crate's
+  `locked`, `zeroed`, `as_mut_bytes` and `is_out_of_children`. A program that needs more of it,
+  such as `Isolation::enter_with`, depends on the same version.
+- `Secret::push` returns `protect::SecretError`, that crate's refusal, when the secret is full;
   `Error::SecretFull` is gone.
+- On Linux a `Secret` gets the kernel's secret memory only when the process had one thread at its
+  first `Secret` or `Isolation::enter`. Otherwise every `Secret` lies on locked anonymous pages,
+  which root can read and which do not keep the system from hibernating. A program makes its first
+  `Secret`, or isolates itself, before it starts a thread, `NativeArgon2::new` included.
 - The isolation report confirms only what it reads back. On Windows `no_core_dumps` and
   `no_file_changes` are always false: error reports still hold the stacks, and low integrity writes
-  where a low label allows it. On Linux `no_memory_reading` is false in a nested PID namespace, such
-  as a container's, where a tracer outside could hide, and `no_new_sockets` and `no_file_changes`
-  are false on processors without the seccomp filter, all but x86-64 and little-endian AArch64.
-  New fields report further protections, and two reports are equal only when the outcome of every
-  protection is.
-- `Isolation::enter` refuses more. Linux and Android refuse starting a program, System V IPC,
-  message queues, kernel keyrings and calls on other processes, and Linux enters an IPC namespace
-  with the network one. Windows puts the process in a job that allows one process and no clipboard
-  writes, refuses child processes and narrows where DLLs load from. The macOS sandbox writes only to
-  /dev/null and the process's own terminal and reads no other terminal. After isolating itself, a
-  program can no longer start another.
+  where a low label allows it. A second `enter` on Windows may read `no_memory_reading` as false, as
+  Windows can hide the threads it checks from a process that lowered itself. On Linux
+  `no_memory_reading` is false in a nested PID namespace, such as a container's, where a tracer
+  outside could hide, and `no_new_sockets` and `no_file_changes` are false on processors without
+  the seccomp filter, all but x86-64 and little-endian AArch64. New fields report further
+  protections, and two reports are equal only when the outcome of every protection is.
+- `Isolation::enter` refuses more by default. On Linux and Android the filter refuses starting a
+  program, System V IPC, message queues and kernel keyrings; `connect`, `bind`, `listen`, `accept`
+  and `sendmmsg`, on a socket opened before too; and calls on a process or a thread named by its
+  number, the process's own too, such as `pthread_setaffinity_np` and `pthread_setschedparam`.
+  Linux enters an IPC namespace with the network one, and from Linux 6.12 its Landlock layer keeps
+  signals and abstract UNIX sockets within the layer, so that a child started before the call can
+  no longer be signalled. The macOS sandbox now denies all it does not allow: it writes only to
+  /dev/null and the process's own terminal, reads no other terminal, and refuses every Mach
+  service, such as the pasteboard and opening URLs, signals to other processes, starting a process
+  and mapping code from outside /usr/lib and /System. Windows puts the process in a job that allows
+  one process and keeps it from writing the clipboard, from other programs' windows, from global
+  atoms and from changing the desktop; it refuses child processes and narrows where DLLs load from,
+  extension points included. Where these hold, a program can no longer start another after
+  isolating itself: on Linux and Android with the seccomp filter, on Windows under the
+  child-process policy and the job, and on macOS under the sandbox.
 - In a child of `fork`, a `Secret` of the parent reports no protection, and the child ends at the
   first access to its bytes.
 - In WebAssembly nothing clears the stack after a call: a stack that runs over there has no guard

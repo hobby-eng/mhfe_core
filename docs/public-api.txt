@@ -14,6 +14,7 @@ trait mhfe_core::Argon2Engine
 struct mhfe_core::NativeArgon2 #[cfg(not(target_arch = "wasm32"))]
 use mhfe_core::protect::Isolation
 use mhfe_core::protect::Secret
+use mhfe_core::protect::SecretError
 use mhfe_core::protect::write_secret #[cfg(not(target_arch = "wasm32"))]
 struct mhfe_core::wallet_check::Seed
 struct mhfe_core::repair::Card

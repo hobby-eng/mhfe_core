@@ -13,23 +13,27 @@
 //! [`password_check`], a password of EFF words with a check word.
 //!
 //! Native builds compute Argon2id with RustCrypto's `argon2` on four threads of their own,
-//! [`NativeArgon2`], at every memory level from 0 to 21, and only on 64-bit targets. A WebAssembly
+//! `NativeArgon2`, at every memory level from 0 to 21, and only on 64-bit targets. A WebAssembly
 //! build has no engine of its own: the host implements [`Argon2Engine`] and refuses the levels it
 //! cannot reach when it is made, as a 32-bit WebAssembly host does above level 0.
 //!
-//! The crate reads no input. Every secret it holds lives in a [`protect::Secret`]: memory pages of
-//! its own, locked and kept out of core dumps where the system allows it, and wiped when dropped.
-//! [`protect::Isolation::enter`] applies what the system offers against a secret leaving the
-//! process and reports what holds, and [`protect::write_secret`] shows a secret past the standard
-//! library's output buffer. After each call that computes with a secret, but
-//! [`repair::Repaired::changes`] and those of [`protect`] and the engine, the crate overwrites
-//! 128 KiB of the stack below the caller's frame, so such a call needs about 140 KiB of free stack:
-//! on a smaller thread stack, such as musl's default of 128 KiB, it ends the process.
+//! The crate reads no input. Every secret it holds lives in a [`protect::Secret`], wiped when
+//! dropped: on Unix and Windows memory pages of its own, locked and kept out of core dumps where
+//! the system allows it, and in WebAssembly an ordinary heap buffer.
+//! [`protect::Isolation::enter`] applies the default protections of the system against a secret
+//! leaving the process and reports what holds, and in a native build `protect::write_secret` shows
+//! a secret past the standard library's output buffer. In a native build, after each call that computes with a
+//! secret, but [`repair::Repaired::changes`] and those of [`protect`] and the engine, the crate
+//! overwrites 128 KiB of the stack below the caller's frame, so such a call needs about 140 KiB of
+//! free stack: on a smaller thread stack, such as musl's default of 128 KiB, it ends the process.
+//! WebAssembly leaves the stack as it is, as a stack that runs over there has no guard page; its
+//! buffers are still wiped when dropped.
 //!
 //! The construction is experimental and has not been independently reviewed.
 //!
-//! A host isolates itself before it reads a secret or makes a native engine, whose threads inherit
-//! the isolation, and does the creation duties the crate leaves to it: it reads the password twice,
+//! A host isolates itself while it has one thread, before it reads a secret or makes a native
+//! engine, whose threads inherit the isolation; on Linux this also gives every `Secret` the
+//! kernel's secret memory. It does the creation duties the crate leaves to it: it reads the password twice,
 //! warns about other lengths, checks free memory where the example marks it, and shows the suite:
 //!
 //! ```no_run

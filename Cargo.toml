@@ -33,9 +33,11 @@ sha2 = { version = "0.11", default-features = false, features = ["zeroize"] }
 unicode-normalization = { version = ">=0.1.26, <0.1.27", default-features = false }
 zeroize = "1.9"
 # Pages for secrets and for the work area of Argon2id, the isolation of the process, the secret
-# writer and the clearing of stacks after secret work: `protect` passes its `Secret`, `Isolation`
-# and `write_secret` on. At least 0.2.0, the line this crate was moved onto; not pinned exactly, so
-# that its audited patch releases reach every program that uses this crate.
+# writer and the clearing of stacks after secret work: `protect` passes its `Secret`,
+# `SecretError`, `Isolation` and `write_secret` on. At least 0.2.0, the line this crate was moved
+# onto. The safety of every secret rests on it, yet it is not pinned exactly: its patch releases
+# come from the same workspace with audits of their own, and an exact pin would keep their fixes
+# from every program that uses this crate.
 secret-protection-core = "0.2.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
@@ -81,7 +83,7 @@ members = ["xtask"]
 exclude = ["docs/audits"]
 
 [lints.rust]
-unsafe_code = "deny" # "deny", not "forbid": the operating-system modules allow it (RUST-07)
+unsafe_code = "deny" # not "forbid": the work area's view as Argon2 blocks allows it (RUST-07)
 missing_docs = "deny" # library crates
 unreachable_pub = "deny"
 
