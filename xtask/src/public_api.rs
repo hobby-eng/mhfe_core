@@ -3,7 +3,8 @@
 //! `non_exhaustive` attributes. The check also refuses `#[macro_export]` and `#[doc(hidden)]`
 //! anywhere in src/, and a public enum without `#[non_exhaustive]`, but for the enums of
 //! EXHAUSTIVE. It reads the sources as rustfmt writes them: an item of a module at the start of a
-//! line, its attributes on the lines just above it.
+//! line, its attributes on the lines just above it. An item that a `pub use` takes from a crate of
+//! EXTERNAL, whose sources it does not read, is listed with the kind `use`.
 //!
 //! Run as `cargo xtask public-api`.
 
@@ -44,6 +45,9 @@ const NON_EXHAUSTIVE: &str = "#[non_exhaustive]";
 const REFUSED_ATTRIBUTES: &[&str] = &["#[macro_export]", "#[doc(hidden)]"];
 /// The modules a `pub use` may not start from: the check follows a path down from its file only.
 const UNREAD_MODULES: &[&str] = &["crate", "self", "super"];
+/// The crates whose items a `pub use` may pass on as they are: the protection crate, whose
+/// `Secret`, `Isolation` and `write_secret` are `protect`'s.
+const EXTERNAL: &[&str] = &["secret_protection_core"];
 
 /// An item at the start of a line of a module file, with the attributes just above it.
 struct Item {
@@ -175,6 +179,16 @@ impl Api<'_> {
     /// The items a `pub use` of `file` re-exports, each with its public name and with the `use`'s
     /// attributes before its own.
     fn reexported(&mut self, item: &Item, file: &str) -> Vec<Public> {
+        if let Some(names) = external(&item.rest) {
+            return names
+                .into_iter()
+                .map(|name| Public {
+                    kind: "use",
+                    name: name.to_owned(),
+                    attributes: item.attributes.clone(),
+                })
+                .collect();
+        }
         let Some((source_file, names)) = exports_of(&item.rest, file) else {
             let problem = format!(
                 "{file}: pub use {} is not a form this check reads",
@@ -314,6 +328,22 @@ fn exports_of<'a>(rest: &'a str, file: &str) -> Option<(String, Vec<(&'a str, &'
     Some((source_file, names))
 }
 
+/// The public names of a `pub use` of items of a crate of EXTERNAL, `krate::{A, B as C}` or
+/// `krate::A`; `None` for any other `use`.
+fn external(rest: &str) -> Option<Vec<&str>> {
+    let tree = rest.split(';').next().unwrap_or_default().trim();
+    let (prefix, names) = braced(tree).or_else(|| plain(tree))?;
+    let krate = prefix.split("::").next()?;
+    EXTERNAL.contains(&krate).then(|| {
+        names
+            .split(',')
+            .map(str::trim)
+            .filter(|name| !name.is_empty())
+            .map(|name| name.split_once(" as ").map_or(name, |(_, alias)| alias))
+            .collect()
+    })
+}
+
 /// The module path and the names of `a::b::{C, D as E}`.
 fn braced(tree: &str) -> Option<(&str, &str)> {
     let (prefix, names) = tree.strip_suffix('}')?.split_once("::{")?;
@@ -423,6 +453,28 @@ mod tests {
     #[test]
     fn the_items_of_the_list_pass_with_their_count() {
         assert_eq!(check(&sample(), SAMPLE_LIST), Ok(4));
+    }
+
+    /// Items of the protection crate passed on by a `pub use` are listed with the kind `use`,
+    /// renamed ones by their new name; another crate's are not a form the check reads.
+    #[test]
+    fn items_of_an_external_crate_are_listed_as_use() {
+        let mut sources = sample();
+        let protect = format!(
+            "{}pub use secret_protection_core::{{Isolation, Secret as Buffer}};
+",
+            sources["src/protect.rs"]
+        );
+        sources.insert("src/protect.rs".to_owned(), protect);
+        let list = format!(
+            "{SAMPLE_LIST}use mhfe_core::protect::Isolation
+use mhfe_core::protect::Buffer
+"
+        );
+        assert_eq!(check(&sources, &list), Ok(6));
+        let other = sources["src/protect.rs"].replace("secret_protection_core", "other_crate");
+        sources.insert("src/protect.rs".to_owned(), other);
+        assert!(check(&sources, &list).is_err());
     }
 
     #[test]

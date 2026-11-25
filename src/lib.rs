@@ -67,8 +67,8 @@
 //! }
 //! ```
 
-// Unsafe code is allowed in the operating-system modules, `os.rs` and `os/*.rs`, and for the view
-// of the work area as Argon2 blocks in `engine/native.rs`, only.
+// Unsafe code is allowed for the view of the work area as Argon2 blocks in `engine/native.rs`
+// only: the operating system is secret-protection-core's.
 #![deny(unsafe_code)]
 
 mod cipher;
@@ -76,7 +76,6 @@ mod engine;
 mod error;
 mod feistel;
 mod nfkd;
-mod os;
 mod packing;
 mod password;
 pub mod password_check;

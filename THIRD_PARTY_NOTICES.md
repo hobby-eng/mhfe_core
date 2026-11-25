@@ -40,12 +40,11 @@ Direct dependencies, each for one need:
 - `sha2` 0.11.1, `MIT OR Apache-2.0`: the verifier and the wallet-check digest.
 - `unicode-normalization` 0.1.26, `(MIT OR Apache-2.0) AND Unicode-3.0`: the NFKD of a password
   and a passphrase, with Unicode 18.0.0's tables.
-- `zeroize` 1.9.1, `Apache-2.0 OR MIT`: wiping.
-- `libc` 0.2.191, `MIT OR Apache-2.0`, on Unix systems: the calls for memory pages, process
-  protections and the secret writer.
+- `zeroize` 1.9.2, `Apache-2.0 OR MIT`: wiping.
+- `secret-protection-core` 0.2.0, `MIT OR Apache-2.0`: the memory pages of secrets and of the
+  Argon2id work area, the isolation of the process, the secret writer and the clearing of stacks.
 - `rayon` 1.12.0, `MIT OR Apache-2.0`, on native targets: the native engine's own pool of threads
   for the Argon2id lanes.
-- `windows-sys` 0.61.2, `MIT OR Apache-2.0`, on Windows: the same calls there.
 
 Crates they bring in:
 
@@ -53,12 +52,13 @@ Crates they bring in:
 - `MIT OR Apache-2.0`, or the same two in the other order: `arrayvec` 0.7.8, `base64ct` 1.8.3,
   `block-buffer` 0.12.1, `cfg-if` 1.0.5, `cmov` 0.5.4, `cpufeatures` 0.3.1, `crossbeam-deque` 0.8.8,
   `crossbeam-epoch` 0.9.21, `crossbeam-utils` 0.8.23, `crypto-common` 0.2.2, `ctutils` 0.4.6,
-  `digest` 0.11.3, `either` 1.19.0, `hybrid-array` 0.4.15, `rayon-core` 1.13.0, `typenum` 1.20.1,
-  `windows-link` 0.2.1.
+  `digest` 0.11.3, `either` 1.19.0, `enumflags2` 0.7.12, `hybrid-array` 0.4.15, `landlock` 0.4.8
+  (on Linux), `libc` 0.2.191 (on Unix systems), `rayon-core` 1.13.0, `thiserror` 2.0.21,
+  `typenum` 1.20.1, `windows-link` 0.2.1 and `windows-sys` 0.61.2 (on Windows).
 - `Zlib OR Apache-2.0 OR MIT`: `tinyvec` 1.13.3.
 - At build time only, `MIT OR Apache-2.0` or `Apache-2.0 OR MIT`: `zeroize_derive` 1.5.0,
-  `proc-macro2` 1.0.107, `quote` 1.0.47, `syn` 2.0.119; and `unicode-ident` 1.0.27,
-  `(MIT OR Apache-2.0) AND Unicode-3.0`.
+  `enumflags2_derive` 0.7.12, `thiserror-impl` 2.0.21, `proc-macro2` 1.0.107, `quote` 1.0.47,
+  `syn` 2.0.119 and 3.0.9; and `unicode-ident` 1.0.27, `(MIT OR Apache-2.0) AND Unicode-3.0`.
 
 The tests also use `serde_json` 1.0.154 with the crates it brings in, under `MIT OR Apache-2.0` or
 the same two in the other order, but `memchr` 2.8.3 (`Unlicense OR MIT`) and `zmij` 1.0.23 (`MIT`);

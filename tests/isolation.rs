@@ -78,10 +78,11 @@ fn isolated() {
     waiting_thread();
     let isolation = Isolation::enter();
     expect_whole_process(isolation);
-    // A second call reads back the same, what the first one set included: on Linux the namespace,
-    // on Windows the access lists and the integrity level.
-    #[cfg(any(target_os = "linux", windows))]
+    // A second call reads back the same, what the first one set included, such as the namespace.
+    #[cfg(target_os = "linux")]
     assert_eq!(Isolation::enter(), isolation);
+    #[cfg(windows)]
+    windows::reads_back_the_same(isolation);
     #[cfg(windows)]
     {
         waiting_thread();
@@ -187,9 +188,11 @@ fn expect_whole_process(isolation: Isolation) {
             && isolation.no_file_changes,
         "{isolation:?}"
     );
+    // Error reports keep the stacks and registers, and low integrity still writes where a low
+    // label allows it: both read false on Windows.
     #[cfg(windows)]
     assert!(
-        isolation.no_core_dumps && isolation.no_memory_reading && isolation.no_file_changes,
+        isolation.no_memory_reading && !isolation.no_core_dumps && !isolation.no_file_changes,
         "{isolation:?}"
     );
 }
@@ -220,6 +223,13 @@ mod linux {
     use std::ptr;
 
     use mhfe_core::protect::{Isolation, Secret};
+
+    /// Whether this crate's seccomp filter applies: on x86-64 and little-endian AArch64. Elsewhere
+    /// Landlock alone confirms neither refused sockets nor refused file changes.
+    const FILTERED: bool = cfg!(all(
+        any(target_arch = "x86_64", target_arch = "aarch64"),
+        target_endian = "little"
+    ));
 
     /// Requests of linux/fsverity.h, linux/fscrypt.h and linux/btrfs.h that change a file or make
     /// a folder through a descriptor open only for reading.
@@ -305,17 +315,18 @@ mod linux {
         std::thread::scope(|scope| {
             scope.spawn(|| {
                 let isolation = Isolation::enter();
-                assert!(
-                    isolation.no_core_dumps
-                        && isolation.no_memory_reading
-                        && isolation.no_new_sockets
-                        && isolation.no_file_changes,
-                    "{isolation:?}"
-                );
+                memory_reading_as_reported(isolation);
+                assert!(isolation.no_core_dumps, "{isolation:?}");
+                assert_eq!(isolation.no_new_sockets, FILTERED, "{isolation:?}");
+                assert_eq!(isolation.no_file_changes, FILTERED, "{isolation:?}");
                 assert!(!isolation.whole_process && !isolation.empty_network);
-                calls_are_refused(idle.id());
+                if FILTERED {
+                    calls_are_refused(idle.id());
+                }
                 connecting_is_refused(&unconnected, listener.local_addr().unwrap().port());
-                files_stay_as_they_are(&folder, &file);
+                if FILTERED {
+                    files_stay_as_they_are(&folder, &file);
+                }
                 what_a_secret_command_needs_still_works(&terminal, secret_memory);
             });
         });
@@ -450,13 +461,10 @@ mod linux {
 
     /// What a process of one thread reports on Linux, and the side effects of the empty network.
     pub(super) fn expect_whole_process(isolation: Isolation) {
-        assert!(
-            isolation.no_core_dumps
-                && isolation.no_memory_reading
-                && isolation.no_new_sockets
-                && isolation.no_file_changes,
-            "{isolation:?}"
-        );
+        memory_reading_as_reported(isolation);
+        assert!(isolation.no_core_dumps, "{isolation:?}");
+        assert_eq!(isolation.no_new_sockets, FILTERED, "{isolation:?}");
+        assert_eq!(isolation.no_file_changes, FILTERED, "{isolation:?}");
         if isolation.empty_network {
             // No ID map is written in the new user namespace.
             // SAFETY: getuid and getgid only read.
@@ -478,6 +486,20 @@ mod linux {
             );
             eprintln!("This system allows no user namespace: the empty network is not checked.");
         }
+    }
+
+    /// Other programs cannot read the memory: confirmed in the first PID namespace, unknown in a
+    /// nested one, such as a container's, where a tracer outside it would be invisible.
+    fn memory_reading_as_reported(isolation: Isolation) {
+        use secret_protection_core::{Outcome, Protection};
+        let first_namespace = fs::read_link("/proc/self/ns/pid")
+            .is_ok_and(|link| link.as_os_str() == "pid:[4026531836]");
+        let expected = if first_namespace {
+            Outcome::Confirmed
+        } else {
+            Outcome::Unknown
+        };
+        assert_eq!(isolation.outcome(Protection::NoMemoryReading), expected);
     }
 
     /// The error number of a call that returned -1, or `None` for one that succeeded.
@@ -533,6 +555,8 @@ mod windows {
 
     use std::ptr;
 
+    use mhfe_core::protect::Isolation;
+
     use windows_sys::Win32::Foundation::{
         CloseHandle, ERROR_ACCESS_DENIED, ERROR_INVALID_PARAMETER, ERROR_NOT_ALL_ASSIGNED,
         ERROR_SUCCESS, GetLastError, HANDLE, INVALID_HANDLE_VALUE, LUID,
@@ -550,6 +574,26 @@ mod windows {
         THREAD_GET_CONTEXT, THREAD_QUERY_LIMITED_INFORMATION, THREAD_SET_CONTEXT,
         THREAD_SUSPEND_RESUME,
     };
+
+    /// What a second call reads back: the same, but the access lists and the integrity level may
+    /// read as unknown, as Windows can hide the threads from a process that lowered itself, and
+    /// then they refuse a requirement.
+    pub(super) fn reads_back_the_same(isolation: Isolation) {
+        use secret_protection_core::{Outcome, Protection};
+        let again = Isolation::enter();
+        for measure in isolation.measures() {
+            let protection = measure.protection;
+            if matches!(
+                protection,
+                Protection::LowIntegrity | Protection::NoMemoryReading
+            ) && again.outcome(protection) == Outcome::Unknown
+            {
+                assert!(again.require(&[protection]).is_err());
+            } else {
+                assert_eq!(again.outcome(protection), measure.outcome, "{protection:?}");
+            }
+        }
+    }
 
     /// A program of the same user can open the isolated process neither to read its memory nor
     /// to change its access list, and none of its threads to read or change its context, suspend

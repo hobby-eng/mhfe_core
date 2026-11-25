@@ -1,37 +1,12 @@
-//! Clearing what a secret computation leaves on the stack: the copies that moves leave behind, and
-//! what dependencies keep there and never wipe, such as the bits, words and SHA-256 state of
-//! bip39's parsing and encoding and the HMAC states of its PBKDF2. Best effort: how deep a body
-//! writes is not measured, so the cleared depth has a margin.
+//! Clearing what a secret computation leaves on the stack, by secret-protection-core: the copies
+//! that moves leave behind, and what dependencies keep there and never wipe, such as the bits,
+//! words and SHA-256 state of bip39's parsing and encoding and the HMAC states of its PBKDF2. Every
+//! public function that computes with a secret, but `Repaired::changes` and those of `protect` and
+//! the engine, runs its body through [`cleared`] once, and so does every round of the permutation;
+//! each thread of the Argon2id engine runs `overwrite` after a call.
 
-use std::hint::black_box;
-
-use zeroize::Zeroize;
-
-/// The stack below the caller's frame that [`overwrite`] clears, after the body in [`cleared`].
-pub(crate) const CLEARED_BYTES: usize = 128 * 1024;
-
-/// Runs `body` in a frame of its own, then overwrites [`CLEARED_BYTES`] of the stack below the
-/// caller's frame, where that frame and the ones it called lay. Every public function that computes
-/// with a secret, but `Repaired::changes` and those of `protect` and the engine, runs its body
-/// through it once, and so does every round of the permutation.
-#[inline(never)]
-pub(crate) fn cleared<T>(body: impl FnOnce() -> T) -> T {
-    let result = run(body);
-    overwrite();
-    result
-}
-
-#[inline(never)]
-fn run<T>(body: impl FnOnce() -> T) -> T {
-    body()
-}
-
-/// Overwrites [`CLEARED_BYTES`] of the stack below the caller's frame: after the body in
-/// [`cleared`], and on each thread of the Argon2id engine after a call.
-#[inline(never)]
-pub(crate) fn overwrite() {
-    let mut stack = [0u8; CLEARED_BYTES];
-    // Volatile writes; `black_box` keeps the array, and so the writes, where the body's frames were.
-    stack.zeroize();
-    black_box(&stack);
-}
+#[cfg(all(test, target_os = "linux"))]
+pub(crate) use secret_protection_core::CLEARED_STACK_BYTES as CLEARED_BYTES;
+#[cfg(not(target_arch = "wasm32"))]
+pub(crate) use secret_protection_core::clear_stack as overwrite;
+pub(crate) use secret_protection_core::with_cleared_stack as cleared;

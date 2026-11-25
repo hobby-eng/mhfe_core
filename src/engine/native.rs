@@ -3,10 +3,10 @@
 
 use argon2::{Algorithm, Argon2, Block, Params, Version};
 use rayon::{ThreadPool, ThreadPoolBuilder};
+use secret_protection_core::WorkArea;
 use zeroize::Zeroize;
 
 use super::{Argon2Engine, KEY_BYTES, SALT_BYTES};
-use crate::os::Pages;
 use crate::{Error, stack};
 
 // A native 32-bit build cannot run even level 0: Rust refuses a slice of 2 GiB or more there (it
@@ -14,11 +14,16 @@ use crate::{Error, stack};
 // operation. A WebAssembly build has no native engine: its host supplies Argon2id.
 #[cfg(not(target_pointer_width = "64"))]
 compile_error!("the native Argon2id engine needs a 64-bit target: suite 3 needs at least 2 GiB");
+// The work area is pages of its own only on Unix and Windows; elsewhere it would be heap memory
+// with nothing kept out of dumps or swap.
+#[cfg(not(any(unix, windows)))]
+compile_error!("the native Argon2id engine needs Unix or Windows");
 
 /// Argon2id lanes, fixed by the specification, and as many threads to run them.
 const LANES: u32 = 4;
 
-/// The stack of each thread: std's default, far above [`stack::CLEARED_BYTES`].
+/// The stack of each thread: std's default, far above the 128 KiB that
+/// [`secret_protection_core::clear_stack`] overwrites.
 const THREAD_STACK_BYTES: usize = 2 * 1024 * 1024;
 
 /// A thread the system refuses, and whatever RustCrypto refuses, as [`Error::Argon2Failed`] reports
@@ -32,14 +37,14 @@ const ARGON2_INCORRECT_PARAMETER: i32 = -25;
 /// process where the system allows it. After every call the area is wiped and each thread
 /// overwrites its stack.
 pub struct NativeArgon2 {
-    work_area: Pages,
+    work_area: WorkArea,
     threads: ThreadPool,
 }
 
 impl NativeArgon2 {
     /// Reserves `memory_kib` KiB once, for every call, and starts the four threads; a call with
-    /// more memory is [`Error::OutOfMemory`], as is a reservation the system refuses, and a thread
-    /// it refuses is [`Error::Argon2Failed`]. The host encodes the password first, so that a
+    /// more memory is [`Error::OutOfMemory`], as are 0 KiB and a reservation the system refuses,
+    /// and a thread it refuses is [`Error::Argon2Failed`]. The host encodes the password first, so that a
     /// refused one costs no reservation. It estimates no free memory: a reservation the system
     /// grants can still end the process when it is used (overcommit; the OOM or low-memory killer,
     /// jetsam), so the host checks free memory before (the specification's "Resources").
@@ -54,8 +59,16 @@ impl NativeArgon2 {
     /// commits it: on Linux, Android, macOS and iOS when RLIMIT_MEMLOCK is at least its size, on
     /// Windows when the working set could grow by its size.
     pub fn new(memory_kib: u32) -> Result<Self, Error> {
+        // An area of no memory is refused before anything is reserved or started.
+        if memory_kib == 0 {
+            return Err(Error::OutOfMemory);
+        }
         let bytes = memory_kib as usize * 1024;
-        let work_area = Pages::work_area(bytes).ok_or(Error::OutOfMemory)?;
+        let work_area = WorkArea::new(bytes).ok_or(Error::OutOfMemory)?;
+        // Pages always meet a Block's alignment; `blocks` counts on this check, not on that.
+        if !work_area.as_slice().as_ptr().cast::<Block>().is_aligned() {
+            return Err(Error::OutOfMemory);
+        }
         // A pool of its own: the global one would take a thread per processor and outlive this
         // engine. An explicit number and stack size also leave RAYON_NUM_THREADS and
         // RUST_MIN_STACK without a say.
@@ -146,10 +159,10 @@ impl Argon2Engine for NativeArgon2 {
     unsafe_code,
     reason = "RustCrypto takes its memory as Blocks, and bytes become Blocks through a raw pointer"
 )]
-fn blocks(work_area: &mut Pages) -> &mut [Block] {
+fn blocks(work_area: &mut WorkArea) -> &mut [Block] {
     let area = work_area.as_mut_slice();
     let count = area.len() / Block::SIZE;
-    // SAFETY: pages start on a page boundary, which meets a Block's alignment of 64; `count`
+    // SAFETY: `new` refused an area that does not start on a Block's alignment of 64; `count`
     // Blocks fit in the area; a Block is 128 u64, of which every bit pattern is valid; and the
     // result borrows the pages exclusively, as `area` did.
     unsafe { std::slice::from_raw_parts_mut(area.as_mut_ptr().cast::<Block>(), count) }
@@ -197,6 +210,11 @@ mod tests {
                 .unwrap();
             assert_eq!(key[..], hex(tag));
         }
+    }
+
+    #[test]
+    fn an_engine_of_no_memory_is_refused() {
+        assert!(matches!(NativeArgon2::new(0), Err(Error::OutOfMemory)));
     }
 
     #[test]

@@ -29,7 +29,9 @@ on the stack. So every round, and every public function that computes with a sec
 KiB of the stack below its frame when it is done. The exceptions are `Repaired::changes` and the
 functions of `protect` and the engine. How deep these calls write has not been measured, so this is
 best effort. Such a call needs about 140 KiB of free stack: on a smaller thread stack, such as
-musl's default of 128 KiB, it ends the process.
+musl's default of 128 KiB, it ends the process. In WebAssembly nothing is overwritten, as a stack
+that runs over there has no guard page and would write into other memory: what these functions
+leave stays in the instance's memory until later calls overwrite it or the host ends the instance.
 
 Argon2id runs on four threads of the engine's own, the lanes and the first and last hash, so the
 caller's stack stays out of it. RustCrypto's `argon2` keeps H0, its hashes and the blocks of its
@@ -72,140 +74,34 @@ reference implementation's error numbers, never text that was passed in.
 
 ## Each system
 
-`protect::Isolation::enter()` applies what the system offers, for good, and reads each protection
-back. A field of its report is true only when that reading confirmed it, and a refusal shows as
-`false`, never as an error. On every system, descriptors and handles opened before the call, such as
-a socket or a file open for writing, stay usable, so the computer must still be trusted and offline.
+`protect::Secret`, `protect::Isolation::enter()` and `protect::write_secret` are those of
+[secret-protection-core](https://github.com/hobby-eng/secret-protection-core) 0.2: its
+[security policy](https://github.com/hobby-eng/secret-protection-core/blob/main/SECURITY.md) and
+[technical guide](https://github.com/hobby-eng/secret-protection-core/blob/main/docs/TECHNICAL.md)
+say what each system offers a `Secret`, what isolation applies there, for which threads, and what it
+does not cover. A field of the isolation report is true only when reading the protection back
+confirmed it, and a refusal shows as `false`, never as an error. On every system, descriptors and
+handles opened before the call, such as a socket or a file open for writing, stay usable, so the
+computer must still be trusted and offline.
 
-### Linux
+What this crate adds to it:
 
-On x86-64 and AArch64, a `Secret` uses the kernel's secret memory (`memfd_secret`, on by default
-since Linux 6.5) where it is offered. Its pages leave the kernel's direct map, so no process, root
-included, can read them directly through `/proc/PID/mem`, `process_vm_readv` or `PTRACE_PEEKDATA`.
-They never reach swap, stay out of core dumps and are not given to a child process. Otherwise, and
-on other architectures, a `Secret` uses anonymous pages with `mlock`, `MADV_DONTDUMP` and
-`MADV_WIPEONFORK` (Linux 4.14 and later).
-
-Both kinds count against `RLIMIT_MEMLOCK`, and on newer kernels secret memory counts for all of the
-user's processes together. A `Secret` beyond the limit takes anonymous pages, and
-`Secret::is_locked` reports a lock that was refused.
-
-Isolation applies:
-
-- `RLIMIT_CORE` 0 and `PR_SET_DUMPABLE` 0, which also keeps other programs of the user from `ptrace`
-  and `/proc/PID/mem`.
-- `PR_SET_NO_NEW_PRIVS`.
-- On x86-64 and little-endian AArch64, a seccomp filter. It refuses with `EACCES` new sockets,
-  io_uring, `ptrace`, `process_vm_writev`, `pidfd_getfd`, every call that changes the file system
-  and every `ioctl` but the terminal's, and it answers `ENOSYS` to `openat2` and to every call newer
-  than Linux 7.0.
-- Landlock where the kernel has it (5.13 and later), which refuses writing, creating, removing and
-  renaming files, on newer kernels also truncating them and device `ioctl`s, and from Linux 6.7 also
-  TCP bind and connect.
-
-These hold for the calling thread and the threads it starts, such as its engine's lanes. Called
-while the process has one thread, they hold for the whole process, which then also enters a user and
-network namespace of its own where the system allows it. No ID map is written, so `getuid()` and
-`getgid()` read 65534 afterwards.
-
-The filter allows `ftruncate`, which sizes the secret memory of every `Secret`; it changes only a
-file that was open for writing before the call. A program that needs another `ioctl` in an isolated
-thread is refused it, such as `FIONBIO`, which the standard library's `Command::output` uses.
-
-Isolation does not cover:
-
-- Root and `CAP_SYS_PTRACE`.
-- A `/proc/PID/mem` descriptor opened or a tracer attached before the call, such as a debugger the
-  process was started under.
-- On architectures without the filter, what only the filter refuses: new sockets, io_uring, modes,
-  owners, extended attributes, times and the `ioctl`s on files that are not devices (fs-verity,
-  encryption policies, btrfs subvolumes). On a kernel without Landlock, also `ptrace`,
-  `process_vm_writev` and `pidfd_getfd` on other processes.
-
-### Android
-
-A `Secret` uses anonymous pages with `mlock`, `MADV_DONTDUMP` and `MADV_WIPEONFORK`, within the
-app's limit on locked memory. It never uses secret memory, which the app's seccomp policy forbids.
-
-Isolation applies the same dump settings and filter as on Linux, without Landlock, the namespace or
-any io_uring call, at which the app's policy would end the process. The filter holds for the calling
-thread only. That thread must be a native thread of its own: made with `pthread_create`, never
-attached to the virtual machine, never running Java, reporting progress through shared memory rather
-than JNI, and ending with the operation. The only barrier of the whole app against the network is to
-have no `INTERNET` permission.
-
-On a crash, Android's crash handler makes the process dumpable again for `crash_dump`, whose
-tombstone holds the registers and the memory near them. CI only builds the code for Android; it has
-not run on a device.
-
-### macOS
-
-A `Secret` uses anonymous pages with `mlock`, which a child process does not get
-(`minherit(VM_INHERIT_NONE)`). No call keeps single pages out of a core dump.
-
-Isolation, for the whole process, sets `RLIMIT_CORE` to 0, calls `ptrace(PT_DENY_ATTACH)` and enters
-a sandbox without network or file writes, except for the terminal and `/dev/null`. The call to
-`ptrace` would end a process that a debugger already traces, so it is skipped there and
-`no_memory_reading` is false. Otherwise the kernel's answer stands in for a reading back, which no
-public call allows.
-
-Isolation does not cover root or a process started under a debugger.
-
-### iOS
-
-A `Secret` works as on macOS, though whether `mlock` holds on a device has not been checked.
-Isolation can only set `RLIMIT_CORE` to 0: an app can neither refuse a debugger nor narrow its
-sandbox, which already keeps its writes inside its own container. CI only builds the code for iOS;
-it has not run on a device.
-
-### Windows
-
-A `Secret` uses `VirtualAlloc` and is locked with `VirtualLock` after the working set has grown once
-by 1 MiB. It is left out of Windows Error Reporting dumps by `WerRegisterExcludedMemoryBlock`, given
-back when the `Secret` is dropped, since a process holds 512 such entries.
-
-Isolation, for the whole process, applies:
-
-- Error reports leave out the heap.
-- The access list of the process becomes one entry for its owner, granting only waiting for it,
-  reading its basic information and ending it. A program of the same user can then neither open it
-  to read its memory nor restore the list.
-- The access list of every thread becomes one entry for its owner, granting only waiting for it and
-  reading its basic information and its list. The token's default access list becomes that entry
-  too, so threads started afterwards, the Argon2id lanes among them, get it as well. A program of
-  the same user can open none of them to read or change its registers, suspend it or change its
-  list.
-- The process token drops to low integrity, which refuses writes to the user's files and registry,
-  for child processes too. Low-integrity folders stay writable, and so do volumes without access
-  control, such as FAT and exFAT USB sticks and SD cards.
-
-This has side effects. Every object that the process, or a process it starts, creates after the call
-without an access list of its own (threads, pipes, events and others) gets the default list, so
-opening it by name or ID, from the process itself too, grants little more than waiting for it.
-Programs of the same user can also suspend and resume a process it starts, since on a process the
-entry's `THREAD_QUERY_LIMITED_INFORMATION` bit means `PROCESS_SUSPEND_RESUME`. The process cannot,
-for instance, run a child with piped standard streams (the standard library's `Command::output`), as
-in an isolated thread on Linux. A thread started after the call cannot suspend itself or change its
-own context through `GetCurrentThread()`, as some runtimes need.
-
-Isolation does not cover:
-
-- Administrators (`SeDebugPrivilege`).
-- The threads' stacks and registers, which an error report still holds.
-- Handles opened before the call, such as the parent's from `CreateProcess`, which a program of the
-  same user can duplicate from the parent.
-- Sockets, which only administrators can restrict.
-
-### WebAssembly
-
-A `Secret` is an ordinary heap buffer, wiped when it is dropped. Isolation applies nothing, and
-every field of its report is false. The Argon2id engine and its memory belong to the host.
+- The engine's four threads, the Argon2id lanes, start in `NativeArgon2::new`. A program calls
+  `Isolation::enter()` before it, while it has one thread, so that the protections hold for the
+  whole process, the lanes included.
+- `Isolation::enter()` applies what breaks no program. A program that needs more, such as refusing
+  file locks, `sendmsg` and signals to other processes, takes secret-protection-core itself, the
+  same version that this crate resolves to, and calls `Isolation::enter_with` with its `Options`.
+- In WebAssembly a `Secret` is an ordinary heap buffer, wiped when it is dropped, and the stack is
+  not cleared after a call: a host ends the instance after an operation, or after a session of
+  several, to give back what the stack held. Isolation applies nothing there, and the Argon2id
+  engine and its memory belong to the host.
 
 ## Unsafe Rust and failures
 
-Rust checks memory safety by itself, and the library forbids switching that off, except for calls to
-the operating system and for one function that hands memory to Argon2. Each of these places explains
-in a comment why it is safe.
+Rust checks memory safety by itself, and the library forbids switching that off, except for one
+function that hands memory to Argon2, which explains in a comment why it is safe. The calls to the
+operating system are secret-protection-core's, each with its own such comment.
 
 If the system refuses Argon2's memory, or a call asks for more than was reserved, the library
 reports `Error::OutOfMemory`. Any other Argon2 failure is `Error::Argon2Failed`, with an error

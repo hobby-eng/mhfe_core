@@ -1,4 +1,4 @@
-//! The refusals of the suites, of their settings and of a [`crate::protect::Secret`].
+//! The refusals of the suites and of their settings.
 
 use std::fmt;
 
@@ -76,11 +76,6 @@ pub enum Error {
         /// reports too, or the host engine's own code.
         code: i32,
     },
-    /// A [`crate::protect::Secret`] has no room for the bytes pushed; nothing was written.
-    SecretFull {
-        /// Its capacity in bytes.
-        capacity: usize,
-    },
 }
 
 impl fmt::Display for Error {
@@ -143,9 +138,6 @@ impl fmt::Display for Error {
             }
             Self::OutOfMemory => f.write_str("the memory for Argon2id could not be reserved"),
             Self::Argon2Failed { code } => write!(f, "Argon2id failed with code {code}"),
-            Self::SecretFull { capacity } => {
-                write!(f, "a secret buffer of {capacity} bytes is full")
-            }
         }
     }
 }

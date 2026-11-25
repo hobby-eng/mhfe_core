@@ -1,6 +1,6 @@
 [package]
 name = "mhfe-core"
-version = "0.2.0"
+version = "0.3.0"
 edition = "2024"
 rust-version = "1.99"
 authors = ["Sergei Semenov"]
@@ -32,6 +32,11 @@ sha2 = { version = "0.11", default-features = false, features = ["zeroize"] }
 # which 0.1.26 holds and a later 0.1.x may replace.
 unicode-normalization = { version = ">=0.1.26, <0.1.27", default-features = false }
 zeroize = "1.9"
+# Pages for secrets and for the work area of Argon2id, the isolation of the process, the secret
+# writer and the clearing of stacks after secret work: `protect` passes its `Secret`, `Isolation`
+# and `write_secret` on. At least 0.2.0, the line this crate was moved onto; not pinned exactly, so
+# that its audited patch releases reach every program that uses this crate.
+secret-protection-core = "0.2.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # Argon2id for the native engine; a WebAssembly host supplies its own. Exact, not a caret: every tag
@@ -40,33 +45,24 @@ argon2 = { version = "=0.6.0", default-features = false, features = ["parallel"]
 # The engine's own pool of threads for the lanes, whose types the engine names.
 rayon = "1.12"
 
-# Pages, locking, dump and fork advice, process protections and the secret writer.
-[target.'cfg(unix)'.dependencies]
-libc = "0.2.191"
-
-# Pages, locking and the working set, error-report exclusion, the access lists of the process and
-# its threads, token integrity and console output.
-[target.'cfg(windows)'.dependencies]
-windows-sys = { version = "0.61", features = [
-  "Win32_Foundation",
-  "Win32_System_Memory",
-  "Win32_System_ErrorReporting",
-  "Win32_System_Console",
-  "Win32_System_IO",
-  "Win32_Storage_FileSystem",
-  "Win32_Security",
-  "Win32_Security_Authorization",
-  "Win32_System_Threading",
-  "Win32_System_Diagnostics_ToolHelp",
-] }
-
 [dev-dependencies]
 # Reads the test corpora.
 serde_json = "1"
 
-# The tests read the working set of the secret pages (QueryWorkingSetEx).
+# The tests check from outside what the protection crate does: system calls on Unix, and on
+# Windows the working set and the access lists of the process and its threads.
+[target.'cfg(unix)'.dev-dependencies]
+libc = "0.2.191"
+
 [target.'cfg(windows)'.dev-dependencies]
-windows-sys = { version = "0.61", features = ["Win32_System_ProcessStatus"] }
+windows-sys = { version = "0.61", features = [
+  "Win32_Foundation",
+  "Win32_Security",
+  "Win32_Storage_FileSystem",
+  "Win32_System_Diagnostics_ToolHelp",
+  "Win32_System_ProcessStatus",
+  "Win32_System_Threading",
+] }
 
 # A `main` of their own: the isolation needs a child process of one thread, and the counting
 # allocator a process without other threads.
