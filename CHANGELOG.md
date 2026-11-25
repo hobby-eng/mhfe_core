@@ -15,12 +15,20 @@
   re-exported, and this crate's copies of the system calls are gone. `Secret` also has that crate's
   `locked`, `zeroed`, `as_mut_bytes` and `is_out_of_children`. A program that needs more of it,
   such as `Isolation::enter_with`, depends on the same version.
+- This crate requires secret-protection-core exactly at 0.2.0. A later 0.2 release, with its fixes,
+  reaches programs through a release of this crate, and a program whose other dependencies need a
+  later one cannot use this crate until then.
 - `Secret::push` returns `protect::SecretError`, that crate's refusal, when the secret is full;
   `Error::SecretFull` is gone.
-- On Linux a `Secret` gets the kernel's secret memory only when the process had one thread at its
-  first `Secret` or `Isolation::enter`. Otherwise every `Secret` lies on locked anonymous pages,
-  which root can read and which do not keep the system from hibernating. A program makes its first
-  `Secret`, or isolates itself, before it starts a thread, `NativeArgon2::new` included.
+- On Linux secret-protection-core decides once whether a `Secret` may try the kernel's secret
+  memory: at the first `Secret`, or at an earlier `Isolation::enter` made while the process has one
+  thread, and only a process of one thread at that moment may. A `Secret` then gets it on x86-64 and
+  AArch64 where the kernel offers it and lets the pages be charged. Otherwise it lies on anonymous
+  pages, which root can read and which do not keep the system from hibernating.
+  secret-protection-core tries to lock them with `mlock`, and a refusal, such as one over
+  `RLIMIT_MEMLOCK`, leaves them unlocked. `Secret::is_locked` says whether a `Secret` is locked, and
+  `Secret::locked` refuses one that is not. A program makes its first `Secret`, or isolates itself,
+  before it starts a thread, `NativeArgon2::new` included.
 - The isolation report confirms only what it reads back. On Windows `no_core_dumps` and
   `no_file_changes` are always false: error reports still hold the stacks, and low integrity writes
   where a low label allows it. A second `enter` on Windows may read `no_memory_reading` as false, as
@@ -44,6 +52,15 @@
   extension points included. Where these hold, a program can no longer start another after
   isolating itself: on Linux and Android with the seccomp filter, on Windows under the
   child-process policy and the job, and on macOS under the sandbox.
+- `Isolation::enter` also asks to limit speculation. On Linux and Android it asks the kernel to
+  force speculative store bypass and indirect branch speculation off for the calling thread and the
+  threads it starts afterwards, the engine's lanes included. On Windows it asks for the side-channel
+  isolation policy: branch targets not shared with the core's other thread, a security domain of its
+  own, no combined pages and speculative store bypass off. A limit the system applies cannot be
+  undone and may cost speed. `speculation_limited`, the outcome of `Protection::SpeculationLimited`,
+  says what came of it: on Linux and Android a processor that needs no limit counts as limited, and
+  a limit refused or left unreported reads as refused or unknown; on Windows it is the policy as
+  read back.
 - In a child of `fork`, a `Secret` of the parent reports no protection, and the child ends at the
   first access to its bytes.
 - In WebAssembly nothing clears the stack after a call: a stack that runs over there has no guard

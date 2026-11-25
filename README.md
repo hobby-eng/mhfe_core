@@ -58,8 +58,7 @@ mistyped password before the long computation starts.
 mhfe-core = "0.2"
 ```
 
-0.2 is the current release. The version in this repository's `Cargo.toml` is the next one, which
-is not published yet.
+The line above names the latest release; the changelog lists what the repository has added since.
 
 You need Rust 1.99 or later. A native build needs a 64-bit target; in WebAssembly, which is 32-bit,
 your program supplies Argon2id itself. No C compiler is needed.
@@ -73,10 +72,11 @@ In a debug build Argon2id takes about 16 times as long. Setting `opt-level = 3` 
 
 ## Security
 
-Secrets stay on memory pages of their own and are wiped after use, and a program can close itself
-off from the network and from other programs before it reads one. On Windows the network stays open,
-and none of this makes an everyday or compromised computer trustworthy. What this covers on each
-system, and what it does not, is in [SECURITY.md](SECURITY.md).
+Secrets are wiped after use, and in a native build they stay on memory pages of their own. A
+program can close itself off from the network and from other programs before it reads one. On
+Windows the network stays open, and none of this makes an everyday or compromised computer
+trustworthy. What this covers on each system, and what it does not, is in
+[SECURITY.md](SECURITY.md).
 
 ## Testing
 
@@ -84,6 +84,10 @@ Clone with `git clone --recurse-submodules`: the test vectors come from the spec
 repository. `cargo test --locked` runs the fast tests, and `cargo xtask check` runs everything CI
 checks on one computer. The full-cost vectors take hours:
 `cargo test --locked --release --test full_cost -- --ignored --nocapture`.
+
+The last coverage measurement, of commit `129736e` on 2026-11-25, ran 104 checks on Linux x86-64
+and covered **97.09%** of the measured source lines (2,403 of 2,475).
+[Coverage report](docs/COVERAGE.md)
 
 ## Licence
 

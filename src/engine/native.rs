@@ -44,10 +44,10 @@ pub struct NativeArgon2 {
 impl NativeArgon2 {
     /// Reserves `memory_kib` KiB once, for every call, and starts the four threads; a call with
     /// more memory is [`Error::OutOfMemory`], as are 0 KiB and a reservation the system refuses,
-    /// and a thread it refuses is [`Error::Argon2Failed`]. The host encodes the password first, so that a
-    /// refused one costs no reservation. It estimates no free memory: a reservation the system
-    /// grants can still end the process when it is used (overcommit; the OOM or low-memory killer,
-    /// jetsam), so the host checks free memory before (the specification's "Resources").
+    /// and a thread it refuses is [`Error::Argon2Failed`]. The host encodes the password first, so
+    /// that a refused one costs no reservation. It estimates no free memory: a reservation the
+    /// system grants can still end the process when it is used (overcommit; the OOM or low-memory
+    /// killer, jetsam), so the host checks free memory before (the specification's "Resources").
     ///
     /// The threads start here, so a host calls [`crate::protect::Isolation::enter`] first: it
     /// needs a process of one thread to hold for the whole process, and the threads inherit it

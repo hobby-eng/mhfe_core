@@ -72,11 +72,13 @@ type Pattern = fn(&[u8]) -> Option<usize>;
 /// Names of a program built on the crate and of its files, and audit identifiers.
 const FOREIGN_WORDS: [Pattern; 4] = [audit_id, program_name, program_files, front_end];
 /// The Cargo requirements that are not carets, each with its reason.
-const CARGO_EXCEPTIONS: [(&str, &str); 2] = [
+const CARGO_EXCEPTIONS: [(&str, &str); 3] = [
     // Its tables are part of the protocol, and the specification pins Unicode 18.0.0.
     ("unicode-normalization", ">=0.1.26, <0.1.27"),
     // Every tag comes from it, and the engine's clearing rests on what it leaves on the stack.
     ("argon2", "=0.6.0"),
+    // The safety of every secret rests on it: its pages, the isolation and the stack clearing.
+    ("secret-protection-core", "=0.2.0"),
 ];
 /// This repository publishes the root library; its other active crates are private tools.
 const PUBLISHED_LIBRARY_MANIFEST: &str = "Cargo.toml";

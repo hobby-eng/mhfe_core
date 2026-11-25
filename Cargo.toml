@@ -34,11 +34,10 @@ unicode-normalization = { version = ">=0.1.26, <0.1.27", default-features = fals
 zeroize = "1.9"
 # Pages for secrets and for the work area of Argon2id, the isolation of the process, the secret
 # writer and the clearing of stacks after secret work: `protect` passes its `Secret`,
-# `SecretError`, `Isolation` and `write_secret` on. At least 0.2.0, the line this crate was moved
-# onto. The safety of every secret rests on it, yet it is not pinned exactly: its patch releases
-# come from the same workspace with audits of their own, and an exact pin would keep their fixes
-# from every program that uses this crate.
-secret-protection-core = "0.2.0"
+# `SecretError`, `Isolation` and `write_secret` on. Exact, not a caret: the safety of every secret
+# rests on it, so a new version of it reaches the programs that use this crate only with a release
+# of this crate tested with it.
+secret-protection-core = "=0.2.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # Argon2id for the native engine; a WebAssembly host supplies its own. Exact, not a caret: every tag

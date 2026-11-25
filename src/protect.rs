@@ -4,7 +4,7 @@
 //! secret leaving it; and, in a native build, `write_secret`, the output of a secret. What each
 //! does on each system, and the rest of that crate, such as the options of isolation, a worker
 //! process and hidden terminal input, is in its own documentation; a host that needs the rest takes
-//! the same version of it.
+//! exactly the version this crate pins, 0.2.0.
 
 #[cfg(not(target_arch = "wasm32"))]
 pub use secret_protection_core::write_secret;

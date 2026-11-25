@@ -232,9 +232,9 @@ mod linux {
     }
 
     /// Out of core dumps (`dd`) on pages of either kind. Anonymous pages are locked (`lo`) and give
-    /// a child process zeros (`wf`) where the kernel can. Secret memory is shared, so a child gets none of it (`dc`),
-    /// and its kind is what keeps it out of swap: since Linux commit 97d34aa65c29 its folios are
-    /// unevictable and the mapping has no `lo`, which an older kernel's has.
+    /// a child process zeros (`wf`) where the kernel can. Secret memory is shared, so a child gets
+    /// none of it (`dc`), and its kind keeps it out of swap: since Linux commit 97d34aa65c29 its
+    /// folios are unevictable and the mapping has no `lo`, which an older kernel's has.
     pub(super) fn secret_pages_are_marked(secret: &Secret) {
         let address = secret.as_bytes().as_ptr() as usize;
         let mappings = mappings();

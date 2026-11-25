@@ -91,18 +91,25 @@ What this crate adds to it:
 
 - The engine's four threads, the Argon2id lanes, start in `NativeArgon2::new`. A program calls
   `Isolation::enter()` before it, while it has one thread, so that the protections hold for the
-  whole process, the lanes included. On Linux this also decides where every `Secret` lies:
-  secret-protection-core takes the kernel's secret memory only when the process had one thread at
-  its first `Secret` or `enter()`, and otherwise locked anonymous pages, which root can read.
-- `Isolation::enter()` applies every protection that has no option of its own: the dump settings
-  of each system; on Linux and Android the seccomp filter where there is one, on Linux also
-  Landlock and the namespaces; on macOS the sandbox and the refusal of a debugger; on Windows the
-  access lists, low integrity, the job and the mitigation policies. These already refuse starting
-  another program where they hold, on Windows writing the clipboard, and from Linux 6.12 signals
-  to processes outside the Landlock layer. The options stay off: refusing file locks and `sendmsg`,
-  signals only to the process itself, locking all memory, refusing new executable code, loading
-  only DLLs that Microsoft signed, and putting the filter on threads that already run. A program that needs one takes secret-protection-core itself, the same version that
-  this crate resolves to, and calls `Isolation::enter_with` with its `Options`.
+  whole process, the lanes included. On Linux it also lets every `Secret` try the kernel's secret
+  memory: secret-protection-core decides that once, at an `enter()` made while the process has one
+  thread or at the first `Secret`, whichever comes first, and only a process of one thread then
+  may. A `Secret` gets it on x86-64 and AArch64 where the kernel offers it and grants the pages.
+  Otherwise it lies on anonymous pages, which root can read. secret-protection-core tries to lock
+  them with `mlock`, and a refusal, such as one over the lock limit, leaves them unlocked:
+  `Secret::is_locked` tells, and `Secret::locked` refuses a secret that would not be locked.
+- `Isolation::enter()` applies every protection that has no option of its own: the dump settings of
+  each system; on Linux and Android the seccomp filter where there is one and a request to limit
+  speculation, on Linux also Landlock and the namespaces; on macOS the sandbox and the refusal of a
+  debugger; on Windows the access lists, low integrity, the job and the mitigation policies,
+  side-channel isolation among them. A speculation limit or side-channel policy that the system
+  applies cannot be undone and may cost speed, Argon2id's too; the report's `speculation_limited`
+  says whether one holds. These already refuse starting another program where they hold, on Windows
+  writing the clipboard, and from Linux 6.12 signals to processes outside the Landlock layer. The
+  options stay off: refusing file locks and `sendmsg`, signals only to the process itself, locking
+  all memory, refusing new executable code, loading only DLLs that Microsoft signed, and putting the
+  filter on threads that already run. A program that needs one takes secret-protection-core itself,
+  exactly the version this crate pins (0.2.0), and calls `Isolation::enter_with` with its `Options`.
 - In WebAssembly a `Secret` is an ordinary heap buffer, wiped when it is dropped, and the stack is
   not cleared after a call. Ending the instance, after an operation or after a session of several,
   frees what the stack held, though nothing promises that the memory is overwritten. Isolation
