@@ -4,7 +4,7 @@
 use std::fs;
 use std::io::{self, BufRead, BufReader, Write};
 use std::net::{Ipv4Addr, TcpListener, TcpStream};
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 use std::sync::Arc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::thread;
@@ -64,10 +64,13 @@ fn answer(stream: &TcpStream, root: &Path, downloads: &AtomicUsize) -> io::Resul
     if method == "GET" && target.starts_with(DOWNLOADS) {
         downloads.fetch_add(1, Ordering::SeqCst);
     }
-    // Only files under `root`: a path that climbs out of it is not served.
-    let file = target
-        .strip_prefix('/')
-        .filter(|path| method == "GET" && !path.contains(".."));
+    // Only files under `root`: a path that climbs out of it, or names another root, is not served.
+    let file = target.strip_prefix('/').filter(|path| {
+        method == "GET"
+            && Path::new(path)
+                .components()
+                .all(|part| matches!(part, Component::Normal(_)))
+    });
     let body = match file.map(|path| fs::read(root.join(path))) {
         Some(Ok(body)) => Some(body),
         Some(Err(error)) if error.kind() != io::ErrorKind::NotFound => return Err(error),

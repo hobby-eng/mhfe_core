@@ -516,28 +516,30 @@ fn check_cargo_requirements(path: &str, manifest: &str, problems: &mut Vec<Strin
     let library = path == PUBLISHED_LIBRARY_MANIFEST;
     let mut in_dependencies = false;
     // The crate of a `[dependencies.<name>]` table, whose `version` key is its requirement.
-    let mut table = None;
+    let mut table: Option<String> = None;
     let mut lines = manifest.split('\n');
     while let Some(line) = lines.next() {
-        let line = line.trim();
+        let line = without_comment(line).trim();
         if line.starts_with('[') {
-            let header = line.split('#').next().unwrap_or_default().trim_end();
+            // TOML allows spaces inside a header's brackets.
+            let header: String = line.chars().filter(|c| !c.is_whitespace()).collect();
             in_dependencies = header.ends_with("dependencies]");
-            table = dependency_table(header);
+            table = dependency_table(&header).map(str::to_owned);
             continue;
         }
         // An inline table may run over several lines: it is read whole.
         let mut entry = line.to_owned();
         if entry.contains('{') && !entry.contains('}') {
             for next in lines.by_ref() {
+                let next = without_comment(next).trim();
                 entry.push(' ');
-                entry.push_str(next.trim());
+                entry.push_str(next);
                 if next.contains('}') {
                     break;
                 }
             }
         }
-        let dependency = match table {
+        let dependency = match table.as_deref() {
             Some(name) => cargo_dependency(&entry)
                 .filter(|(key, _)| *key == "version")
                 .map(|(_, requirement)| (name, requirement)),
@@ -582,29 +584,65 @@ fn is_exact(requirement: &str) -> bool {
     version_numbers(core) == Some(3)
 }
 
-/// A dependency line of Cargo.toml: its name, and its version alone or in an inline table, as
-/// `^([\w-]+)\s*=\s*(?:"([^"]*)"|\{.*?\bversion\s*=\s*"([^"]*)")` reads it.
-fn cargo_dependency(line: &str) -> Option<(&str, &str)> {
-    let name_length = line
-        .find(|character: char| !(character.is_ascii_alphanumeric() || "_-".contains(character)))
-        .unwrap_or(line.len());
-    let (name, rest) = line.split_at(name_length);
-    if name.is_empty() {
-        return None;
+/// A dependency entry of Cargo.toml without its comment: its name, and its version alone, as a
+/// dotted `<name>.version` key or in an inline table. Keys may be quoted, and a string may be a
+/// basic `"…"` or a literal `'…'` one.
+fn cargo_dependency(entry: &str) -> Option<(&str, &str)> {
+    let (name, rest) = toml_key(entry)?;
+    if let Some(dotted) = rest.strip_prefix('.') {
+        let (key, rest) = toml_key(dotted.trim_start())?;
+        if key != "version" {
+            return None;
+        }
+        let value = rest.strip_prefix('=')?.trim_start();
+        return toml_string(value).map(|version| (name, version));
     }
-    let value = rest.trim_start().strip_prefix('=')?.trim_start();
-    if let Some(quoted) = value.strip_prefix('"') {
-        return quoted.split_once('"').map(|(version, _)| (name, version));
+    let value = rest.strip_prefix('=')?.trim_start();
+    if let Some(version) = toml_string(value) {
+        return Some((name, version));
     }
     let table = value.strip_prefix('{')?;
     table.match_indices("version").find_map(|(at, word)| {
         if !starts_word(table.as_bytes(), at) {
             return None;
         }
-        let quoted = table[at + word.len()..].trim_start().strip_prefix('=')?;
-        let (version, _) = quoted.trim_start().strip_prefix('"')?.split_once('"')?;
-        Some((name, version))
+        let after = table[at + word.len()..].trim_start_matches(['"', '\'']);
+        let value = after.trim_start().strip_prefix('=')?.trim_start();
+        toml_string(value).map(|version| (name, version))
     })
+}
+
+/// A bare or quoted TOML key at the start of `text`, and what follows it, spaces skipped.
+fn toml_key(text: &str) -> Option<(&str, &str)> {
+    if let Some(quote) = text.chars().next().filter(|c| matches!(c, '"' | '\'')) {
+        let (key, rest) = text[1..].split_once(quote)?;
+        return Some((key, rest.trim_start()));
+    }
+    let length = text
+        .find(|character: char| !(character.is_ascii_alphanumeric() || "_-".contains(character)))
+        .unwrap_or(text.len());
+    (length > 0).then(|| (&text[..length], text[length..].trim_start()))
+}
+
+/// The contents of the basic or literal string at the start of `text`.
+fn toml_string(text: &str) -> Option<&str> {
+    let quote = text.chars().next().filter(|c| matches!(c, '"' | '\''))?;
+    text[1..].split_once(quote).map(|(contents, _)| contents)
+}
+
+/// A line of TOML without its comment: what precedes the first `#` outside a string.
+fn without_comment(line: &str) -> &str {
+    let mut open: Option<char> = None;
+    for (at, character) in line.char_indices() {
+        match open {
+            Some(quote) if character == quote => open = None,
+            Some(_) => {}
+            None if matches!(character, '"' | '\'') => open = Some(character),
+            None if character == '#' => return &line[..at],
+            None => {}
+        }
+    }
+    line
 }
 
 /// RUST-01 for one Cargo.toml.
@@ -858,18 +896,31 @@ mod tests {
     }
 
     #[test]
-    fn dependency_tables_commented_headers_and_multiline_tables_are_read() {
-        let manifest = "[dependencies] # the crate's own\na = \"*\"\n[dependencies.b]\n\
-                        version = \"*\"\nfeatures = [\"x\"]\n\
-                        [target.'cfg(unix)'.dependencies.c]\nversion = \"=1.2.3\"\n\
-                        [dependencies]\nd = {\n  version = \"*\",\n  default-features = false\n}\n\
-                        e = { path = \"e\" }\n[package]\nversion = \"0.1.0\"\n";
-        let refused = |name: &str| {
-            format!("xtask/Cargo.toml: {name} = \"*\" is not an exact version (CORE-25)")
-        };
-        let mut problems = Vec::new();
-        check_cargo_requirements("xtask/Cargo.toml", manifest, &mut problems);
-        assert_eq!(problems, [refused("a"), refused("b"), refused("d")]);
+    fn every_form_of_a_dependency_is_read() {
+        let tables = "[dependencies] # the crate's own\na = \"*\"\n[dependencies.b]\n\
+                      version = \"*\"\nfeatures = [\"x\"]\n\
+                      [target.'cfg(unix)'.dependencies.c]\nversion = \"=1.2.3\"\n\
+                      [dependencies]\nd = {\n  version = \"*\",\n  default-features = false\n}\n\
+                      e = { path = \"e\" }\n[package]\nversion = \"0.1.0\"\n";
+        let keys = "[ dependencies ]\na = '*'\n\"b\" = \"*\"\nc.version = \"*\"\n\
+                    c.features = [\"x\"]\nd = { # } in a comment\n  version = \"*\" }\n\
+                    e = '=1.2.3' # a comment with \"quotes\"\nf = { version = \"=1.2.3\" }\n\
+                    [dependencies.'g']\nversion = '*'\n";
+        for (manifest, names) in [
+            (tables, &["a", "b", "d"][..]),
+            (keys, &["a", "b", "c", "d", "g"][..]),
+        ] {
+            let mut problems = Vec::new();
+            check_cargo_requirements("xtask/Cargo.toml", manifest, &mut problems);
+            let refused: Vec<String> = names
+                .iter()
+                .map(|name| {
+                    format!("xtask/Cargo.toml: {name} = \"*\" is not an exact version (CORE-25)")
+                })
+                .collect();
+            assert_eq!(problems, refused);
+        }
+        assert_eq!(without_comment("a = \"#1\" # b"), "a = \"#1\" ");
     }
 
     #[test]

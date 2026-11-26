@@ -206,7 +206,8 @@ fn blobs_match(
     }
     if mismatches == 0 {
         println!(
-            "2. every packaged file equals the commit's blob (Cargo.lock and Cargo.toml.orig included)"
+            "2. every packaged file equals the commit's blob (Cargo.lock and Cargo.toml.orig included), \
+             but the generated Cargo.toml and .cargo_vcs_info.json"
         );
         return Ok(true);
     }

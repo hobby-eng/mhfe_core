@@ -49,7 +49,9 @@ requires:
 
 1. the two `.crate` files to be byte-identical;
 2. every packaged file to be the commit's blob, `Cargo.toml.orig` the commit's `Cargo.toml`, and
-   the package's `Cargo.lock` the commit's. At the release commit Cargo leaves the entry of the
+   the package's `Cargo.lock` the commit's; the two files Cargo writes itself, the normalized
+   `Cargo.toml` and `.cargo_vcs_info.json`, are left out of this comparison, and step 1's byte
+   comparison of the two packages covers them. At the release commit Cargo leaves the entry of the
    workspace member `xtask` out of the package's lockfile, so the harness compares without the
    entries of other workspace members and says so in one line;
 3. the package's files to be the tracked files of the include list of the commit's `Cargo.toml`

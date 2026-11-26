@@ -110,7 +110,11 @@
 - The tests of the operations no longer expect a secret's pages to be locked, which depends on the
   lock limit; `tests/secret_memory.rs` checks locking against that limit.
 - The code-rules gate reads every form of a dependency in `Cargo.toml`: a `[dependencies.<name>]`
-  table, a header with a comment, and an inline table over several lines.
+  table, a header with a comment, an inline table over several lines, a literal string, and a
+  quoted or dotted key.
+- The fixture registry of AUD-002's harness serves only paths below its folder, and its package
+  check says which two files Cargo writes itself and the blob comparison leaves out. AUD-002's
+  records state decisions without naming who took them.
 
 ## 0.2.0 (2026-11-01)
 

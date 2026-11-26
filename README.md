@@ -58,9 +58,10 @@ You give it a seed phrase and a password, and it gives you a container. With the
 settings, it gives you the phrase back.
 
 There are two kinds of container. The usual one always has 24 words, whatever the length of your
-phrase, and for a phrase of 12 to 21 words it tells a wrong password almost always: a wrong one
-passes its check only by chance, about once in 2^32 at worst, and then no reading of the phrase's
-length comes back, at most a 24-word one marked as not verified. A 24-word phrase has no such check.
+phrase, and for a phrase of 12 to 21 words it tells a wrong password almost always: no reading of
+the phrase's length comes back then, at most a 24-word one marked as not verified. A wrong password
+passes the check only by chance, about once in 2^32 at worst, and then gives a wrong phrase of
+that length, so a match never proves the wallet. A 24-word phrase has no such check.
 The other kind keeps the length of your phrase, so it fits a backup made for that length, but a
 wrong password then gives another valid phrase with no warning.
 
@@ -77,6 +78,9 @@ mhfe-core = "0.2"
 ```
 
 The line above names the latest release; the changelog lists what the repository has added since.
+The example below already uses the next release's API, 0.3.0, which is not published yet: until
+then it builds with `mhfe-core = { git = "https://github.com/hobby-eng/mhfe_core" }`, and with
+0.2, `encrypt` and `decrypt` return the container and the recovery themselves.
 
 A container of a phrase, and the phrase back, in short (the API documentation's example adds the
 duties a program has, such as isolating itself and asking for the password twice):
