@@ -43,6 +43,11 @@
 //! fn main() -> Result<(), Box<dyn std::error::Error>> {
 //!     let isolation = protect::Isolation::enter(); // before any secret is read
 //!     eprintln!("{isolation:?}");
+//!     // The program's own decision on what it requires; this one stops when other programs could
+//!     // read its memory, as on macOS without the hardened runtime.
+//!     if !isolation.no_memory_reading {
+//!         return Err("other programs could read the memory of this process".into());
+//!     }
 //!     let typed = read_hidden("Phrase: ");
 //!     let phrase = Phrase::read(typed.as_str().ok_or("not UTF-8")?)?;
 //!     let first = read_hidden("Password: ");
@@ -87,6 +92,7 @@ mod phrase;
 pub mod protect;
 mod recovery;
 pub mod repair;
+mod same;
 mod stack;
 mod suite;
 // The unit tests include the integration tests' corpus helpers, which name the crate so.

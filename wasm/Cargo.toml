@@ -1,0 +1,36 @@
+[package]
+name = "mhfe-core-wasm-checks"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+# The library as a browser builds it, wasm32-unknown-unknown, on the specification's published
+# profile vectors; CI's wasm job calls its `checks` in the pinned Wasmtime.
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+mhfe-core = { path = ".." }
+# Reads the vectors, as the tests do.
+serde_json = "=1.0.154"
+
+[lints.rust]
+unsafe_code = "deny"
+
+# The table of every crate (RUST-01). A check answers by stopping the module: its unwraps and
+# assertions are allowed at its top, with the reason.
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny"
+mod_module_files = "deny"
+undocumented_unsafe_blocks = "deny"
+allow_attributes_without_reason = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+
+# Its own workspace, with its own lockfile.
+[workspace]

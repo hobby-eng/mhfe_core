@@ -50,7 +50,7 @@ pub(crate) fn unpack(state: &[u8], words: usize) -> Result<&[u8], Error> {
     let (entropy, verifier) = state.split_at(entropy_of_words(words));
     if !verifier.is_empty() {
         let mut digest = Sha256::digest(entropy);
-        let matches = *verifier == digest[..verifier.len()];
+        let matches = crate::same::same(verifier, &digest[..verifier.len()]);
         digest.as_mut_slice().zeroize();
         if !matches {
             return Err(Error::VerifierMismatch);

@@ -70,6 +70,11 @@ pub enum Error {
     CreationCheckFailed,
     /// The memory for Argon2id could not be reserved.
     OutOfMemory,
+    /// A BIP39 passphrase whose NFKD is longer than any buffer of this system can be.
+    PassphraseTooLong {
+        /// The length of its NFKD in bytes, as counted; the most a count holds where it is more.
+        bytes: usize,
+    },
     /// The Argon2id engine failed.
     Argon2Failed {
         /// A return value of the reference implementation, whose numbering the native engine
@@ -137,6 +142,10 @@ impl fmt::Display for Error {
                 f.write_str("the new container did not decrypt to the original")
             }
             Self::OutOfMemory => f.write_str("the memory for Argon2id could not be reserved"),
+            Self::PassphraseTooLong { bytes } => write!(
+                f,
+                "the passphrase's NFKD of {bytes} bytes is longer than this system can hold"
+            ),
             Self::Argon2Failed { code } => write!(f, "Argon2id failed with code {code}"),
         }
     }

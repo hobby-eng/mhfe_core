@@ -109,7 +109,7 @@ impl<E: Argon2Engine> Mhfe<E> {
             else {
                 return Ok(ControlFlow::Break(()));
             };
-            if back.as_bytes() == x.as_bytes() {
+            if crate::same::same(back.as_bytes(), x.as_bytes()) {
                 Ok(ControlFlow::Continue(container))
             } else {
                 Err(Error::CreationCheckFailed)
@@ -176,7 +176,7 @@ impl<E: Argon2Engine> Mhfe<E> {
 /// (2^-ENT in suite 4). It stops a broken engine that returns its input from exposing the
 /// original.
 fn reject_fixed_point(x: &[u8], y: &[u8]) -> Result<(), Error> {
-    if x == y {
+    if crate::same::same(x, y) {
         Err(Error::FixedPoint)
     } else {
         Ok(())

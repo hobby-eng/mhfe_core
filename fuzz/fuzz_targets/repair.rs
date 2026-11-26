@@ -12,9 +12,7 @@
 use libfuzzer_sys::fuzz_target;
 use mhfe_core::Phrase;
 use mhfe_core::repair::{Card, Repaired};
-
-/// The entropy lengths of the containers of 12 to 24 words.
-const ENTROPY_BYTES: [usize; 5] = [16, 20, 24, 28, 32];
+use mhfe_core_fuzz::{ENTROPY_BYTES, phrase_of};
 
 /// Any text as a container phrase and a card: a repair is a container, and what it names lies on
 /// the phrase or the card, at most one change for each repair word.
@@ -46,12 +44,10 @@ fuzz_target!(|data: &[u8]| {
     if shape >= 0x80 {
         return any_text(rest);
     }
-    let entropy_bytes = ENTROPY_BYTES[usize::from(shape) % ENTROPY_BYTES.len()];
     let k = Card::SIZES[usize::from(shape) / ENTROPY_BYTES.len() % Card::SIZES.len()];
-    let Some((entropy, damage)) = rest.split_at_checked(entropy_bytes) else {
+    let Some((container, damage)) = phrase_of(shape, rest) else {
         return;
     };
-    let container = Phrase::from_entropy(entropy).unwrap();
     let card = Card::new(&container, k).unwrap();
     let original: Vec<&str> = container
         .as_str()

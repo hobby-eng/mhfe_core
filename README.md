@@ -8,7 +8,7 @@
 
 <p align="center">
   <img
-    src="assets/mhfe-mascot.png"
+    src="https://raw.githubusercontent.com/hobby-eng/mhfe_core/main/assets/mhfe-mascot.png"
     alt="MHFE penguin mascot carrying a cold-storage metal backup"
     width="240"
   >
@@ -47,6 +47,7 @@ most readers need first.
 - [Using it](#using-it)
 - [Security](#security)
 - [Testing](#testing)
+- [Audits](#audits)
 - [Licence](#licence)
 
 ## What it does
@@ -55,13 +56,15 @@ You give it a seed phrase and a password, and it gives you a container. With the
 settings, it gives you the phrase back.
 
 There are two kinds of container. The usual one always has 24 words, whatever the length of your
-phrase, and for a phrase of 12 to 21 words it can tell when the password is wrong. The other keeps
-the length of your phrase, so it fits a backup made for that length, but a wrong password then gives
-another valid phrase with no warning.
+phrase, and for a phrase of 12 to 21 words it tells a wrong password almost always: a wrong one
+passes its check only by chance, about once in 2^32 at worst. A 24-word phrase has no such check.
+The other kind keeps the length of your phrase, so it fits a backup made for that length, but a
+wrong password then gives another valid phrase with no warning.
 
 Three optional extras from the specification are here too: a check that lets a recovery recognise a
-24-word phrase, repair words that restore a damaged container, and a check word that catches a
-mistyped password before the long computation starts.
+24-word phrase, a 16-bit test that a wrong phrase still passes about once in 65,536; repair words
+that restore a damaged container; and a check word that catches a mistyped password before the long
+computation starts.
 
 ## Using it
 
@@ -71,6 +74,31 @@ mhfe-core = "0.2"
 ```
 
 The line above names the latest release; the changelog lists what the repository has added since.
+
+A container of a phrase, and the phrase back, in short (the API documentation's example adds the
+duties a program has, such as isolating itself and asking for the password twice):
+
+```rust
+use std::ops::ControlFlow;
+use mhfe_core::{Mhfe, Password, Phrase, Suite, WorkFactor};
+
+fn round_trip(phrase: &Phrase, password: &Password) -> Result<(), mhfe_core::Error> {
+    let mut cipher = Mhfe::new(WorkFactor::default())?; // 2 GiB, a minute or two a call
+    let go = &mut |_, _| ControlFlow::Continue(());
+    let checked = &mut |_: &Phrase| ControlFlow::Continue(());
+    let ControlFlow::Continue(container) =
+        cipher.encrypt(phrase, password, Suite::TwentyFourWords, go, checked)?
+    else {
+        return Ok(());
+    };
+    let ControlFlow::Continue(recovery) = cipher.decrypt(&container, password, None, None, go)?
+    else {
+        return Ok(());
+    };
+    assert_eq!(recovery.readings(None)?[0].phrase().as_str(), phrase.as_str());
+    Ok(())
+}
+```
 
 You need Rust 1.99 or later. A native build needs a 64-bit target; in WebAssembly, which is 32-bit,
 your program supplies Argon2id itself. No C compiler is needed. The tests run on Linux (x86-64 and
@@ -90,7 +118,7 @@ Secrets are wiped after use, and in a native build they stay on memory pages of 
 program can close itself off from the network and from other programs before it reads one. On
 Windows the network stays open, and none of this makes an everyday or compromised computer
 trustworthy. What this covers on each system, and what it does not, is in
-[SECURITY.md](SECURITY.md).
+[SECURITY.md](https://github.com/hobby-eng/mhfe_core/blob/main/SECURITY.md).
 
 ## Testing
 
@@ -102,7 +130,13 @@ and the package check run in CI. The full-cost vectors take hours:
 
 The last coverage measurement, of commit `32651c2` on 2026-11-26, ran 104 checks on Linux x86-64
 and covered **97.02%** of the measured source lines (2,279 of 2,349).
-[Coverage report](docs/COVERAGE.md)
+[Coverage report](https://github.com/hobby-eng/mhfe_core/blob/main/docs/COVERAGE.md)
+
+## Audits
+
+Every audit of the crate is in the [audit records](https://github.com/hobby-eng/mhfe_core/blob/main/docs/audits/README.md),
+with its findings and their fixes. They are reviews of the code made with AI models; no independent
+person has reviewed the code or the construction yet.
 
 ## Licence
 

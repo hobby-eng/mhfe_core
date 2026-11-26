@@ -15,6 +15,8 @@
 
 use std::fmt;
 
+use zeroize::Zeroizing;
+
 use crate::protect::Secret;
 use crate::stack;
 
@@ -40,11 +42,14 @@ const ERASED: u16 = u16::MAX;
 /// The index of the check word for the indexes of the five drawn words,
 /// `(d1 + 5 d2 + 7 d3 + 11 d4 + 13 d5) mod 7776`; `None` when an index is 7,776 or more.
 pub fn check_word(drawn: [u16; DRAWN_WORDS]) -> Option<u16> {
+    // The caller's copy of the indexes, wiped when it goes, as in WebAssembly nothing clears the
+    // stack.
+    let drawn = Zeroizing::new(drawn);
     stack::cleared(|| {
         drawn
             .iter()
             .all(|&index| usize::from(index) < LIST_SIZE)
-            .then(|| check_index(&drawn))
+            .then(|| check_index(|place| drawn[place]))
     })
 }
 
@@ -122,11 +127,13 @@ impl fmt::Debug for Check {
 }
 
 /// [`check_word`] for five indexes below 7,776.
-fn check_index(drawn: &[u16; DRAWN_WORDS]) -> u16 {
-    let sum = drawn
+/// The check word's index for the five drawn indexes that `drawn` gives by their place, read one
+/// at a time where they are kept, with no copy of them all.
+fn check_index(drawn: impl Fn(usize) -> u16) -> u16 {
+    let sum = WEIGHTS
         .iter()
-        .zip(WEIGHTS)
-        .map(|(&index, weight)| usize::from(index) * weight % LIST_SIZE)
+        .enumerate()
+        .map(|(place, weight)| usize::from(drawn(place)) * weight % LIST_SIZE)
         .sum::<usize>();
     // Below 7,776.
     (sum % LIST_SIZE) as u16
@@ -134,8 +141,9 @@ fn check_index(drawn: &[u16; DRAWN_WORDS]) -> u16 {
 
 /// The index that makes the six fit at `position`, the five others as `at` gives them.
 fn restored_index(at: impl Fn(usize) -> u16, position: usize) -> usize {
-    let drawn = std::array::from_fn(|place| if place == position { 0 } else { at(place) });
-    let check = usize::from(check_index(&drawn));
+    let check = usize::from(check_index(
+        |place| if place == position { 0 } else { at(place) },
+    ));
     if position == DRAWN_WORDS {
         return check;
     }

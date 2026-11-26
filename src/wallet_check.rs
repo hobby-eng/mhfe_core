@@ -28,7 +28,7 @@ use zeroize::Zeroize;
 use crate::nfkd::Nfkd;
 use crate::packing::{STATE_BYTES, STATE_WORDS};
 use crate::protect::Secret;
-use crate::{Phrase, stack};
+use crate::{Error, Phrase, stack};
 
 /// The domain tag, which keeps the check apart from every other hash of the seed.
 const DOMAIN: &[u8] = b"MHFE-WALLET-CHECK-SEED-1";
@@ -49,11 +49,26 @@ pub struct Seed {
 impl Seed {
     /// The BIP39 seed of `phrase` with `passphrase`, which is used in Unicode 18.0.0 NFKD: any
     /// passphrase, the empty one included, without the limits of an MHFE password. Its NFKD takes
-    /// time and memory linear in its length, and one whose NFKD the memory cannot hold, never more
-    /// than 2 GiB in WebAssembly, ends the program, as a `Secret` that cannot be made does: a host
-    /// bounds a passphrase it reads from a file or the clipboard.
-    pub fn derive(phrase: &Phrase, passphrase: &str) -> Self {
-        stack::cleared(|| Self::of(phrase, &Nfkd::of(passphrase).write()))
+    /// time and memory linear in its length, so a host bounds a passphrase it reads from a file or
+    /// the clipboard. Errors: [`Error::PassphraseTooLong`] when the NFKD is longer than any buffer
+    /// of this system can be (`isize::MAX` bytes, 2 GiB in WebAssembly), counted before anything is
+    /// written; a shorter one the system has no memory for still ends the program, as a `Secret`
+    /// that cannot be made does.
+    ///
+    /// A passphrase with a code point that an earlier Unicode left unassigned, and that BIP39
+    /// software then kept unchanged, may normalize otherwise under Unicode 18.0.0 (U+209D now
+    /// becomes `w`), and give another seed and another wallet: recovering such a wallet needs
+    /// software with its original normalization (specification, "Optional source profile").
+    pub fn derive(phrase: &Phrase, passphrase: &str) -> Result<Self, Error> {
+        stack::cleared(|| {
+            let normalized = Nfkd::of(passphrase);
+            if normalized.bytes() > isize::MAX.unsigned_abs() {
+                return Err(Error::PassphraseTooLong {
+                    bytes: normalized.bytes(),
+                });
+            }
+            Ok(Self::of(phrase, &normalized.write()))
+        })
     }
 
     /// The 64 bytes of the seed.
@@ -115,7 +130,7 @@ fn digest(seed: &[u8]) -> [u8; 32] {
 /// is wiped.
 fn seed_passes(seed: &[u8]) -> bool {
     let mut digest = digest(seed);
-    let passes = digest[..CHECK_BITS / 8].iter().all(|&byte| byte == 0);
+    let passes = crate::same::all_zero(&digest[..CHECK_BITS / 8]);
     digest.zeroize();
     passes
 }
@@ -133,7 +148,7 @@ mod tests {
     /// The seed of a case of the profile vectors.
     fn seed(case: &Value) -> Seed {
         let phrase = Phrase::read(text(case, "mnemonic")).unwrap();
-        Seed::derive(&phrase, text(case, "bip39_passphrase"))
+        Seed::derive(&phrase, text(case, "bip39_passphrase")).unwrap()
     }
 
     /// Whether `T` fails the check: its first 16 bits are not all zero.

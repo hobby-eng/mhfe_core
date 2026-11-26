@@ -23,9 +23,10 @@ const BASE_PASSES: u32 = 12;
 #[non_exhaustive]
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Suite {
-    /// Suite 3: every original of 12 to 24 words becomes a 24-word container. A 12- to 21-word
-    /// original carries a verifier, so a wrong password is detected, and every container looks the
-    /// same.
+    /// Suite 3: every original of 12 to 24 words becomes a 24-word container, and every container
+    /// looks the same. A 12- to 21-word original carries a verifier of 32 to 128 bits, which a
+    /// wrong password passes only by chance, about once in 2^32 at worst; a 24-word reading has
+    /// none and stays unverified.
     #[default]
     TwentyFourWords,
     /// Suite 4: a 12-, 15-, 18- or 21-word original becomes a container of its own length. Nothing

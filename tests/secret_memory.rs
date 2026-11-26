@@ -101,7 +101,7 @@ fn encoding_a_password_and_deriving_a_seed_take_nothing_from_the_heap() {
             before,
             "password {text:?}"
         );
-        let seed = Seed::derive(&phrase, text);
+        let seed = Seed::derive(&phrase, text).unwrap();
         assert_eq!(
             ALLOCATIONS.load(Ordering::Relaxed),
             before,

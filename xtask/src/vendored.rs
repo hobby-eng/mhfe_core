@@ -29,6 +29,10 @@ pub(crate) fn run(root: &Path) -> Result<(), Failure> {
         digests_of(&root.join(VENDOR).join(tree), "", &mut digests)?;
         let document = read(&root.join(VENDOR).join(format!("{tree}.md")))?;
         let recorded = recorded_digests(&String::from_utf8_lossy(&document), file);
+        // A document without the digest would compare equal to an empty tree.
+        if recorded.is_empty() {
+            problems.push(format!("{VENDOR}/{tree}.md records no SHA-256 of {file}"));
+        }
         problems.extend(differences(tree, &digests, &recorded));
         checked += digests
             .iter()

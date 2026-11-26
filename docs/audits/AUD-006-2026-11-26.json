@@ -1125,5 +1125,25 @@
     "Android and iOS built and linted only.",
     "Full-cost vectors not rerun; vectors.yml runs them on a tag.",
     "Evidence logs are local only."
+  ],
+  "followUp": [
+    {
+      "date": "2026-11-26",
+      "by": "AUD-007",
+      "findingId": "AUD-006-API001",
+      "note": "A size checked before the allocation followed in the commit that fixes AUD-007's findings: Seed::derive refuses a passphrase whose NFKD no buffer of the system can hold with PassphraseTooLong. An allocation the system refuses below that size still ends the program, as secret-protection-core 0.2.0 offers no fallible secret allocation."
+    },
+    {
+      "date": "2026-11-26",
+      "by": "AUD-007",
+      "findingId": "AUD-006-DOC003",
+      "note": "The measurement is of 32651c2; the documents that record it came in 06d7d00, which changed only documentation and audit records."
+    },
+    {
+      "date": "2026-11-26",
+      "by": "AUD-007",
+      "findingId": "AUD-006-DOC007",
+      "note": "The 144 KiB are the most that the four measured calls took on Linux x86-64 with Rust 1.99.1, in a child process of their own; other calls, systems and toolchains were not measured."
+    }
   ]
 }

@@ -1,7 +1,8 @@
 //! The public API is the list of docs/public-api.txt: the items that src/lib.rs and its public
 //! modules make public, read from the sources, each with its kind, its path and its `cfg` and
-//! `non_exhaustive` attributes. The check also refuses `#[macro_export]` and `#[doc(hidden)]`
-//! anywhere in src/, and a public enum without `#[non_exhaustive]`, but for the enums of
+//! `non_exhaustive` attributes. The check also refuses `macro_export` and `doc(hidden)` in any
+//! attribute in src/, `cfg_attr` included, a public item of a form it cannot read, and a public
+//! enum without `#[non_exhaustive]`, but for the enums of
 //! EXHAUSTIVE. It reads the sources as rustfmt writes them: an item of a module at the start of a
 //! line, its attributes on the lines just above it. An item that a `pub use` takes from a crate of
 //! EXTERNAL, whose sources it does not read, is listed with the kind `use`.
@@ -41,8 +42,9 @@ const KINDS: &[&str] = &[
 /// The attributes that the list gives with an item: every `#[cfg(…)]`, and `#[non_exhaustive]`.
 const CFG: &str = "#[cfg(";
 const NON_EXHAUSTIVE: &str = "#[non_exhaustive]";
-/// The attributes that make public items without listing them, or hide public items.
-const REFUSED_ATTRIBUTES: &[&str] = &["#[macro_export]", "#[doc(hidden)]"];
+/// The attributes that make public items without listing them, or hide public items, refused in
+/// any attribute line, so also under `cfg_attr`.
+const REFUSED_ATTRIBUTES: &[&str] = &["macro_export", "doc(hidden)"];
 /// The modules a `pub use` may not start from: the check follows a path down from its file only.
 const UNREAD_MODULES: &[&str] = &["crate", "self", "super"];
 /// The crates whose items a `pub use` may pass on as they are: the protection crate, whose
@@ -86,9 +88,15 @@ pub(crate) fn run(root: &Path) -> Result<(), Failure> {
 fn check(sources: &BTreeMap<String, String>, list: &str) -> Result<usize, Vec<String>> {
     let mut problems = Vec::new();
     for (file, text) in sources {
-        for attribute in REFUSED_ATTRIBUTES {
-            if text.contains(attribute) {
-                problems.push(format!("{file}: {attribute} is refused"));
+        let attribute_lines = text
+            .split('\n')
+            .map(str::trim_start)
+            .filter(|line| line.starts_with("#"));
+        for line in attribute_lines {
+            for attribute in REFUSED_ATTRIBUTES {
+                if line.contains(attribute) {
+                    problems.push(format!("{file}: {attribute} is refused"));
+                }
             }
         }
     }
@@ -235,6 +243,14 @@ impl Api<'_> {
     /// The public items of the module file `file`; a module declared without its file is reported.
     fn items_of(&mut self, file: &str) -> Vec<Item> {
         if let Some(text) = self.sources.get(file) {
+            // A public item of a form the reader does not know is refused, never passed over.
+            for line in text.split('\n') {
+                if line.starts_with("pub ") && public_item(line).is_none() {
+                    self.problems.push(format!(
+                        "{file}: a public item the check cannot read: {line}"
+                    ));
+                }
+            }
             return public_items(text);
         }
         self.problems.push(format!("{file}: no such file"));
@@ -498,13 +514,27 @@ use mhfe_core::protect::Buffer
         );
         sources.insert(
             "src/macros.rs".to_owned(),
-            "#[macro_export]\nmacro_rules! a {}\n".to_owned(),
+            "#[cfg_attr(test, macro_export)]\nmacro_rules! a {}\n".to_owned(),
         );
         assert_eq!(
             check(&sources, SAMPLE_LIST),
             Err(vec![
-                "src/hidden.rs: #[doc(hidden)] is refused".to_owned(),
-                "src/macros.rs: #[macro_export] is refused".to_owned(),
+                "src/hidden.rs: doc(hidden) is refused".to_owned(),
+                "src/macros.rs: macro_export is refused".to_owned(),
+            ])
+        );
+    }
+
+    #[test]
+    fn a_public_item_of_a_form_it_cannot_read_is_refused() {
+        let mut sources = sample();
+        let lib = format!("{}pub async fn wait() {{}}\n", sources["src/lib.rs"]);
+        sources.insert("src/lib.rs".to_owned(), lib);
+        assert_eq!(
+            check(&sources, SAMPLE_LIST),
+            Err(vec![
+                "src/lib.rs: a public item the check cannot read: pub async fn wait() {}"
+                    .to_owned()
             ])
         );
     }

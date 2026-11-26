@@ -44,6 +44,19 @@ pub(crate) fn run(root: &Path) -> Result<(), Failure> {
         "-D",
         "warnings",
     ]))?;
+    // The checks built for wasm32-unknown-unknown, a workspace of their own with their own lockfile.
+    step(cargo(root).args(["fmt", "--manifest-path", "wasm/Cargo.toml", "--check"]))?;
+    step(cargo(root).args([
+        "clippy",
+        "--locked",
+        "--manifest-path",
+        "wasm/Cargo.toml",
+        "--target",
+        "wasm32-unknown-unknown",
+        "--",
+        "-D",
+        "warnings",
+    ]))?;
     // The fuzz targets, a workspace of their own with their own lockfile (RUST-18).
     step(cargo(root).args(["fmt", "--manifest-path", "fuzz/Cargo.toml", "--check"]))?;
     step(cargo(root).args([

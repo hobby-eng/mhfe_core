@@ -30,7 +30,7 @@ use crate::Failure;
 /// Folders not read: Git's, the builds', the fuzzers' corpora, findings and coverage, the test
 /// corpora, the specification's repository and the vendored trees, which are data here, and the
 /// audit records, which are frozen.
-const SKIPPED: [&str; 11] = [
+const SKIPPED: [&str; 12] = [
     ".git",
     "node_modules",
     "target",
@@ -38,6 +38,7 @@ const SKIPPED: [&str; 11] = [
     "fuzz/corpus",
     "fuzz/artifacts",
     "fuzz/coverage",
+    "wasm/target",
     "docs/audits",
     "tests/fixtures",
     "tests/spec",
@@ -46,12 +47,14 @@ const SKIPPED: [&str; 11] = [
 const MOST_LINES: usize = 800;
 /// The files whose lines of code CORE-15 counts: a file by its path from the root, or a folder by
 /// its path with a final slash.
-const COUNTED: [&str; 6] = [
+const COUNTED: [&str; 8] = [
     "build.rs",
     "src/",
     "tests/",
     "xtask/src/",
     "fuzz/fuzz_targets/",
+    "fuzz/src/",
+    "wasm/src/",
     ".github/workflows/",
 ];
 

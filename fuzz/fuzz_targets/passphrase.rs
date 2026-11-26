@@ -9,26 +9,21 @@
 
 use bip39::{Language, Mnemonic};
 use libfuzzer_sys::fuzz_target;
-use mhfe_core::Phrase;
 use mhfe_core::wallet_check::Seed;
+use mhfe_core_fuzz::phrase_of;
 use unicode_normalization::UnicodeNormalization;
-
-/// The entropy lengths of the phrases of 12 to 24 words.
-const ENTROPY_BYTES: [usize; 5] = [16, 20, 24, 28, 32];
 
 fuzz_target!(|data: &[u8]| {
     let Some((&shape, rest)) = data.split_first() else {
         return;
     };
-    let entropy_bytes = ENTROPY_BYTES[usize::from(shape) % ENTROPY_BYTES.len()];
-    let Some((entropy, passphrase)) = rest.split_at_checked(entropy_bytes) else {
+    let Some((phrase, passphrase)) = phrase_of(shape, rest) else {
         return;
     };
     let Ok(passphrase) = std::str::from_utf8(passphrase) else {
         return;
     };
-    let phrase = Phrase::from_entropy(entropy).unwrap();
-    let seed = Seed::derive(&phrase, passphrase);
+    let seed = Seed::derive(&phrase, passphrase).unwrap();
     let mnemonic = Mnemonic::parse_in_normalized(Language::English, phrase.as_str()).unwrap();
     let normalized: String = passphrase.nfkd().collect();
     assert_eq!(seed.as_bytes(), &mnemonic.to_seed_normalized(&normalized));

@@ -42,13 +42,13 @@ fn the_wallet_check_cases_pass_and_fail_as_published() {
         assert_eq!(entropy[..], hex(text(case, "entropy_hex")), "{id}");
         let phrase = Phrase::from_entropy(&entropy).unwrap();
         assert_eq!(phrase.as_str(), text(case, "mnemonic"), "{id}");
-        let seed = Seed::derive(&phrase, text(case, "bip39_passphrase"));
+        let seed = Seed::derive(&phrase, text(case, "bip39_passphrase")).unwrap();
         assert_eq!(seed.passes(), case["passes"].as_bool(), "{id}");
     }
     assert_eq!(cases.len(), 4);
     // The check is defined for 24 words only.
     let twelve = Phrase::from_entropy(&[0; 16]).unwrap();
-    assert_eq!(Seed::derive(&twelve, "TREZOR").passes(), None);
+    assert_eq!(Seed::derive(&twelve, "TREZOR").unwrap().passes(), None);
 }
 
 /// Each case's card of every size is the published one, and a case that names its transcript holds

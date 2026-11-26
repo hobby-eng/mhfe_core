@@ -9,7 +9,11 @@
   finds wrong words algebraically, where the crate's own tried every set of places, which took a
   time that depended on where the damage was; the field's tables are no longer on the heap.
 - In WebAssembly, where nothing clears the stack, the repair profile wipes the word numbers it
-  holds on the stack before it returns.
+  holds on the stack before it returns, and the password check wipes the indexes it is given.
+- `wallet_check::Seed::derive` returns a `Result`: `Error::PassphraseTooLong` refuses a passphrase
+  whose NFKD is longer than any buffer of the system can be, counted before anything is written.
+- The verifier, the wallet check's digest and the cipher's states are compared in a time that
+  depends on their length alone.
 - A call that clears the stack needs up to 144 KiB of free stack, the repair calls the most, as
   reed-solomon-core clears inside them too.
 - `wallet_check::draw` is gone: the crate draws no new seed phrases. A host that draws a phrase
@@ -89,6 +93,12 @@
 - CI runs the tests on Intel macOS.
 - CI runs the tests on Windows with the GNU toolchain.
 - On macOS, CI runs the isolation tests again under the hardened runtime.
+- CI runs the profiles built for wasm32-unknown-unknown, a browser's target, on the published
+  vectors in Wasmtime.
+- The public-API gate refuses a public item it cannot read, and `macro_export` or `doc(hidden)`
+  under `cfg_attr`; the vendored gate refuses a document that records no digest.
+- The recovery fuzz target checks every answer against the specification's length rules, and the
+  password-check target checks made passwords with an erased or a wrong word.
 - The RustSec check reads the fuzz targets' lockfile too.
 
 ## 0.2.0 (2026-11-01)

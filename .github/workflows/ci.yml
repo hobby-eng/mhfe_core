@@ -169,7 +169,8 @@ jobs:
 
   # WebAssembly has no native engine. The tests run under WASI in a pinned wasmtime, with the
   # corpora mapped at the path they were built with; the crate-doc example, which is native, is
-  # left out. The checks job lints wasm32.
+  # left out. The profiles also run built for wasm32-unknown-unknown, a browser's target. The checks
+  # job lints wasm32.
   wasm:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
@@ -201,6 +202,16 @@ jobs:
           tests="$GITHUB_WORKSPACE/tests"
           export CARGO_TARGET_WASM32_WASIP1_RUNNER="wasmtime run --dir $tests::$tests"
           cargo test --locked --target wasm32-wasip1 --tests
+      # The profiles built for a browser's target, which imports nothing, on the specification's
+      # published vectors: every one of the 28 checks of wasm/src/lib.rs must pass.
+      - name: Run the checks built for wasm32-unknown-unknown
+        run: |
+          cargo build --locked --release --manifest-path wasm/Cargo.toml \
+            --target wasm32-unknown-unknown
+          module=wasm/target/wasm32-unknown-unknown/release/mhfe_core_wasm_checks.wasm
+          passed="$(wasmtime run --invoke checks "$module")"
+          test "$passed" = 28
+          echo "wasm32-unknown-unknown: $passed checks passed"
 
   # The oldest Rust the manifest's rust-version accepts.
   msrv:

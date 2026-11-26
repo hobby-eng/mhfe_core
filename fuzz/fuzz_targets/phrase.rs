@@ -12,19 +12,16 @@
 
 use libfuzzer_sys::fuzz_target;
 use mhfe_core::Phrase;
+use mhfe_core_fuzz::phrase_of;
 
-/// The entropy lengths of the phrases of 12 to 24 words.
-const ENTROPY_BYTES: [usize; 5] = [16, 20, 24, 28, 32];
 /// What may stand between two words.
 const SPACES: [&str; 4] = [" ", "  ", "\t", "\r\n"];
 
 /// A phrase from `data` written as a person may write it: it must read as itself.
 fn written(shape: u8, data: &[u8]) {
-    let entropy_bytes = ENTROPY_BYTES[usize::from(shape) % ENTROPY_BYTES.len()];
-    let Some((entropy, styles)) = data.split_at_checked(entropy_bytes) else {
+    let Some((phrase, styles)) = phrase_of(shape, data) else {
         return;
     };
-    let phrase = Phrase::from_entropy(entropy).unwrap();
     let mut text = String::new();
     for (index, word) in phrase.as_str().split(' ').enumerate() {
         let style = styles.get(index).copied().unwrap_or(0);
