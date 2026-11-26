@@ -160,7 +160,11 @@ fn the_check_words_are_the_published_ones() {
                 .bytes()
                 .fold(0, |index, digit| index * 6 + u16::from(digit - b'1'))
         });
-        assert_eq!(password_check::check_word(drawn), Some(check), "{password}");
+        assert_eq!(
+            password_check::check_word(&drawn),
+            Some(check),
+            "{password}"
+        );
         let words: Vec<&str> = drawn
             .iter()
             .chain([&check])
@@ -179,7 +183,7 @@ fn the_check_words_are_the_published_ones() {
         assert_eq!(word, text(erasure, "recovered"));
     }
     assert_eq!(erasures.len(), 1);
-    assert_eq!(password_check::check_word([0, 0, 7776, 0, 0]), None);
+    assert_eq!(password_check::check_word(&[0, 0, 7776, 0, 0]), None);
 }
 
 #[test]

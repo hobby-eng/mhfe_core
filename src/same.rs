@@ -1,6 +1,9 @@
-//! Comparisons of bytes derived from a secret in constant time, by RustCrypto's `ctutils`, whose
-//! comparisons are built on the `cmov` crate's predication: no exit at the first difference and no
-//! branch on a byte. Lengths are public here.
+//! Comparisons of bytes derived from a secret, by RustCrypto's `ctutils`, with no exit at the first
+//! difference; the lengths are public here. On x86, x86-64 and AArch64 its `cmov` crate compares in
+//! assembly, with `cmov` and `csel`, and the release builds of these two functions for x86-64 and
+//! AArch64 Linux branch only on the lengths. Elsewhere, WebAssembly included, `cmov` uses portable
+//! code that it calls best effort: a compiler, or the engine that runs WebAssembly, may still
+//! branch on a byte.
 
 use ctutils::CtEq;
 

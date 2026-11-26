@@ -23,17 +23,22 @@ A password or passphrase is normalized (NFKD) directly into its `Secret`, so no 
 ordinary memory: `tests/secret_memory.rs` counts the heap allocations while this happens and finds
 none. Each typed word is read into an 8-byte buffer on the stack, which is wiped afterwards, and a
 longer word is refused without being copied. Repair words are computed on the stack too.
+reed-solomon-core 0.2.0 makes one more copy of a word number in a step of its arithmetic and does
+not wipe it; it lies on the stack that the call clears afterwards, and in WebAssembly it stays like
+the rest. A later release of that crate is to remove it.
 
 The `blake2`, `hmac` and `sha2` libraries wipe their internal state when they finish. The `bip39`
 library does not: when it reads or writes a phrase or computes a seed, its intermediate values stay
 on the stack. So every round, and every public function that computes with a secret, overwrites 128
 KiB of the stack below its frame when it is done. The exceptions are `Repaired::changes` and the
 functions of `protect` and the engine. How deep these calls write has not been measured, so this is
-best effort. Such a call needs up to 144 KiB of free stack, the repair calls the most, as
-reed-solomon-core clears inside them too: on a smaller thread stack, such as musl's default of 128
-KiB, it ends the process. In WebAssembly nothing is overwritten, as a stack
-that runs over there has no guard page and would write into other memory: what these functions
-leave stays in the instance's memory until later calls overwrite it or the host ends the instance.
+best effort. Such a call needs more than 128 KiB of free stack: the four measured on Linux x86-64,
+for a phrase, a password, a card and a repair, in release and debug builds, took up to 144 KiB, the
+repair calls the most, as reed-solomon-core clears inside them too. Other systems were not
+measured. On a smaller thread stack, such as musl's default of 128 KiB, it ends the process. In
+WebAssembly nothing is overwritten, as a stack that runs over there has no guard page and would
+write into other memory: what these functions leave stays in the instance's memory until later
+calls overwrite it or the host ends the instance.
 
 Argon2id runs on four threads of the engine's own, the lanes and the first and last hash, so the
 caller's stack stays out of it. RustCrypto's `argon2` keeps H0, its hashes and the blocks of its
@@ -74,6 +79,10 @@ reference implementation's error numbers, never text that was passed in.
 - Free memory. `NativeArgon2::new` reserves the work area without estimating what is free, and a
   reservation the system grants can still end the process when it is used (overcommit, the
   out-of-memory or low-memory killer, jetsam). The program checks free memory first.
+- Memory for a passphrase. `wallet_check::Seed::derive` writes its NFKD into one `Secret` of its
+  length, and a second as long when combining marks need reordering; a system with no memory for
+  them ends the program, as secret-protection-core 0.2.0 makes a `Secret` that cannot fail. A
+  passphrase longer than any buffer of the system is refused before.
 - The settings of an operation. While Argon2id runs, another process can see how much memory the
   process uses, on Linux in `/proc/PID/status` even when it cannot read the memory itself, and from
   it the memory level; the time each round takes then gives the PIM. The specification lets the

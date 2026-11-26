@@ -52,8 +52,10 @@ impl Seed {
     /// time and memory linear in its length, so a host bounds a passphrase it reads from a file or
     /// the clipboard. Errors: [`Error::PassphraseTooLong`] when the NFKD is longer than any buffer
     /// of this system can be (`isize::MAX` bytes, 2 GiB in WebAssembly), counted before anything is
-    /// written; a shorter one the system has no memory for still ends the program, as a `Secret`
-    /// that cannot be made does.
+    /// written. The NFKD is written into a `Secret` of its length and, when combining marks need
+    /// reordering, a second one as long; a system with no memory for either ends the program, as
+    /// secret-protection-core 0.2.0 makes a `Secret` that cannot fail, and the refusal of such a
+    /// passphrase waits for one that reports the failure.
     ///
     /// A passphrase with a code point that an earlier Unicode left unassigned, and that BIP39
     /// software then kept unchanged, may normalize otherwise under Unicode 18.0.0 (U+209D now

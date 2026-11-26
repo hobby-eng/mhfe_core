@@ -43,7 +43,7 @@ const KINDS: &[&str] = &[
 const CFG: &str = "#[cfg(";
 const NON_EXHAUSTIVE: &str = "#[non_exhaustive]";
 /// The attributes that make public items without listing them, or hide public items, refused in
-/// any attribute line, so also under `cfg_attr`.
+/// any attribute, its continuation lines included, so also under `cfg_attr`.
 const REFUSED_ATTRIBUTES: &[&str] = &["macro_export", "doc(hidden)"];
 /// The modules a `pub use` may not start from: the check follows a path down from its file only.
 const UNREAD_MODULES: &[&str] = &["crate", "self", "super"];
@@ -88,13 +88,9 @@ pub(crate) fn run(root: &Path) -> Result<(), Failure> {
 fn check(sources: &BTreeMap<String, String>, list: &str) -> Result<usize, Vec<String>> {
     let mut problems = Vec::new();
     for (file, text) in sources {
-        let attribute_lines = text
-            .split('\n')
-            .map(str::trim_start)
-            .filter(|line| line.starts_with("#"));
-        for line in attribute_lines {
+        for whole in attributes_of(text) {
             for attribute in REFUSED_ATTRIBUTES {
-                if line.contains(attribute) {
+                if whole.contains(attribute) {
                     problems.push(format!("{file}: {attribute} is refused"));
                 }
             }
@@ -123,6 +119,29 @@ fn check(sources: &BTreeMap<String, String>, list: &str) -> Result<usize, Vec<St
     } else {
         Err(problems)
     }
+}
+
+/// The attributes of `text`, each with its continuation lines: from a line that starts with `#`
+/// to the line that closes its brackets.
+fn attributes_of(text: &str) -> Vec<String> {
+    let mut attributes = Vec::new();
+    let mut open: Option<(String, usize)> = None;
+    for line in text.split('\n').map(str::trim_start) {
+        let (mut attribute, depth) = match open.take() {
+            Some(pending) => pending,
+            None if line.starts_with('#') => (String::new(), 0),
+            None => continue,
+        };
+        attribute.push_str(line);
+        let opened = line.matches('[').count();
+        let closed = line.matches(']').count();
+        match (depth + opened).checked_sub(closed) {
+            Some(left) if left > 0 => open = Some((attribute, left)),
+            _ => attributes.push(attribute),
+        }
+    }
+    attributes.extend(open.map(|(attribute, _)| attribute));
+    attributes
 }
 
 /// The reader of the public items: the sources it reads them from, and what it found wrong.
@@ -516,11 +535,17 @@ use mhfe_core::protect::Buffer
             "src/macros.rs".to_owned(),
             "#[cfg_attr(test, macro_export)]\nmacro_rules! a {}\n".to_owned(),
         );
+        sources.insert(
+            "src/wrapped.rs".to_owned(),
+            "#[cfg_attr(\n    all(test, feature = \"x\"),\n    doc(hidden)\n)]\nfn a() {}\n"
+                .to_owned(),
+        );
         assert_eq!(
             check(&sources, SAMPLE_LIST),
             Err(vec![
                 "src/hidden.rs: doc(hidden) is refused".to_owned(),
                 "src/macros.rs: macro_export is refused".to_owned(),
+                "src/wrapped.rs: doc(hidden) is refused".to_owned(),
             ])
         );
     }

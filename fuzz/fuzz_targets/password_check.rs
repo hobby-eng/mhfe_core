@@ -33,7 +33,7 @@ fn made(data: &[u8]) {
         index(g, h),
         index(i, j),
     ];
-    let check = check_word(drawn).unwrap();
+    let check = check_word(&drawn).unwrap();
     let indexes: Vec<u16> = drawn.into_iter().chain([check]).collect();
     let words: Vec<&str> = indexes
         .iter()

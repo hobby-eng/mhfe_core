@@ -77,7 +77,7 @@ fn password_check(passed: &mut u32) {
                 .bytes()
                 .fold(0, |index, digit| index * 6 + u16::from(digit - b'1'))
         });
-        let check = check_word(drawn).unwrap();
+        let check = check_word(&drawn).unwrap();
         assert_eq!(u64::from(check), case["check_index"].as_u64().unwrap());
         let words: Vec<&str> = drawn
             .iter()

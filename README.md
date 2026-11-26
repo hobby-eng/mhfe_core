@@ -43,12 +43,14 @@ most readers need first.
 
 ## Contents
 
-- [What it does](#what-it-does)
-- [Using it](#using-it)
-- [Security](#security)
-- [Testing](#testing)
-- [Audits](#audits)
-- [Licence](#licence)
+| Section                       | What it covers                                                      |
+| ----------------------------- | ------------------------------------------------------------------- |
+| [What it does](#what-it-does) | The two kinds of container and the three optional extras            |
+| [Using it](#using-it)         | The dependency, an example, the Rust version and the systems tested |
+| [Security](#security)         | What the crate protects, and where the details are                  |
+| [Testing](#testing)           | The tests, the gates, the full-cost vectors and the coverage        |
+| [Audits](#audits)             | The audit records                                                   |
+| [Licence](#licence)           | The crate's licences and those of what it uses                      |
 
 ## What it does
 
@@ -96,11 +98,17 @@ fn round_trip(phrase: &Phrase, password: &Password) -> Result<Option<bool>, mhfe
     else {
         return Ok(None);
     };
-    // The reading of the length the owner knows, compared without showing either phrase.
+    // The reading of the phrase's own length, compared without showing either phrase: with 24
+    // words stated, a shorter reading that matches comes first.
     let readings = recovery.readings(Some(phrase.words()))?;
-    Ok(Some(readings.first().is_some_and(|reading| reading.phrase().as_str() == phrase.as_str())))
+    let own = readings.iter().find(|reading| reading.phrase().words() == phrase.words());
+    Ok(Some(own.is_some_and(|reading| reading.phrase().as_str() == phrase.as_str())))
 }
 ```
+
+A program that shows a 24-word reading to a person also runs the wallet check on it,
+`wallet_check::Seed::derive` with the passphrase they type or the empty one, and reports its result
+(REC-3 of the specification), as the container does not say whether the phrase was made with it.
 
 You need Rust 1.99 or later. A native build needs a 64-bit target; in WebAssembly, which is 32-bit,
 your program supplies Argon2id itself. No C compiler is needed. The tests run on Linux (x86-64 and

@@ -15,8 +15,6 @@
 
 use std::fmt;
 
-use zeroize::Zeroizing;
-
 use crate::protect::Secret;
 use crate::stack;
 
@@ -41,10 +39,10 @@ const ERASED: u16 = u16::MAX;
 
 /// The index of the check word for the indexes of the five drawn words,
 /// `(d1 + 5 d2 + 7 d3 + 11 d4 + 13 d5) mod 7776`; `None` when an index is 7,776 or more.
-pub fn check_word(drawn: [u16; DRAWN_WORDS]) -> Option<u16> {
-    // The caller's copy of the indexes, wiped when it goes, as in WebAssembly nothing clears the
-    // stack.
-    let drawn = Zeroizing::new(drawn);
+///
+/// The indexes are borrowed and read one at a time, so the call makes no copy of them all; the
+/// caller wipes its own array.
+pub fn check_word(drawn: &[u16; DRAWN_WORDS]) -> Option<u16> {
     stack::cleared(|| {
         drawn
             .iter()
@@ -178,7 +176,7 @@ mod tests {
 
     /// The password of the five words at `drawn`, with their check word.
     fn password(drawn: [u16; DRAWN_WORDS]) -> String {
-        let check = check_word(drawn).unwrap();
+        let check = check_word(&drawn).unwrap();
         let indexes = drawn.into_iter().chain([check]);
         let words: Vec<&str> = indexes.map(|index| EFF_WORDS[usize::from(index)]).collect();
         words.join(" ")

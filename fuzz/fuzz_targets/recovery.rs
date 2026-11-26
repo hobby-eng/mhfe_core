@@ -1,8 +1,9 @@
-//! A phrase of any length encrypted and decrypted with a stand-in for Argon2id, in the suite the
-//! input chooses, and its recovered state read with any stated length: the answer is the one the
-//! specification's length rules give, written here apart from the crate's own code; each reading
-//! reads back as itself and is verified exactly when its length's verifier matched, and the
-//! original comes back whenever its length is among the readings.
+//! A phrase of any length encrypted and decrypted with a stand-in for Argon2id, in the suite
+//! the input chooses, and its recovered state read with any stated length: a short phrase's own
+//! length is among those detected, the answer is the one the specification's length rules give,
+//! written here apart from the crate's own code; each reading reads back as itself and is
+//! verified exactly when its length's verifier matched, and the original comes back whenever
+//! its length is among the readings.
 #![no_main]
 #![allow(
     clippy::unwrap_used,
@@ -109,6 +110,20 @@ fuzz_target!(|data: &[u8]| {
     // 0 states no length; 1 to 30 state one, valid or not.
     let stated = (*stated % 31 != 0).then_some(usize::from(*stated % 31));
     let detected = recovery.detected_lengths();
+    // Apart from the length rules: a short phrase in a 24-word container is found by its own
+    // length's verifier, whatever else matches by chance, and only short lengths are named, each
+    // once and in ascending order; a container of a phrase's own length names none.
+    if container.words() == 24 {
+        assert!(original.words() == 24 || detected.contains(&original.words()));
+        assert!(detected.windows(2).all(|pair| pair[0] < pair[1]));
+        assert!(
+            detected
+                .iter()
+                .all(|words| WORD_COUNTS[..4].contains(words))
+        );
+    } else {
+        assert!(detected.is_empty());
+    }
     match (
         recovery.readings(stated),
         expected(container.words(), stated, detected),

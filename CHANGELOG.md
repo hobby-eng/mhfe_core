@@ -9,13 +9,19 @@
   finds wrong words algebraically, where the crate's own tried every set of places, which took a
   time that depended on where the damage was; the field's tables are no longer on the heap.
 - In WebAssembly, where nothing clears the stack, the repair profile wipes the word numbers it
-  holds on the stack before it returns, and the password check wipes the indexes it is given.
+  holds on the stack before it returns; no test sees whether an optimized build keeps another copy.
+- `password_check::check_word` borrows the five indexes and reads them one at a time, making no
+  copy of them all; the caller wipes its array.
 - `wallet_check::Seed::derive` returns a `Result`: `Error::PassphraseTooLong` refuses a passphrase
-  whose NFKD is longer than any buffer of the system can be, counted before anything is written.
-- The verifier, the wallet check's digest and the cipher's states are compared with ctutils, in a
-  time that depends on their length alone.
-- A call that clears the stack needs up to 144 KiB of free stack, the repair calls the most, as
-  reed-solomon-core clears inside them too.
+  whose NFKD is longer than any buffer of the system can be, counted before anything is written. A
+  shorter one the system has no memory for still ends the program, as secret-protection-core 0.2.0
+  makes a `Secret` that cannot fail.
+- The verifier, the wallet check's digest and the cipher's states are compared with ctutils, with
+  no exit at the first difference: on x86-64 and AArch64 in assembly that branches only on the
+  length, elsewhere, WebAssembly included, with portable code that ctutils calls best effort.
+- A call that clears the stack needs more than 128 KiB of free stack: the four measured on Linux
+  x86-64 took up to 144 KiB, the repair calls the most, as reed-solomon-core clears inside them
+  too. Other systems were not measured.
 - `wallet_check::draw` is gone: the crate draws no new seed phrases. A host that draws a phrase
   until it passes the wallet check does so itself and checks it with `Seed::passes`.
 - A cancelled operation is no longer an error: `Mhfe::encrypt` and `Mhfe::decrypt` return
