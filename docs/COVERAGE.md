@@ -1,14 +1,14 @@
 # Test coverage
 
-The Linux x86-64 run on 2026-11-26 covered **97.02%** (2,279 of 2,349 measured source lines). All
-104 checks passed: 77 unit tests, 3 isolation checks, 5 secret-memory checks, 3 password tests, 7
+The Linux x86-64 run on 2026-11-26 covered **96.84%** (2,298 of 2,373 measured source lines). All
+105 checks passed: 78 unit tests, 3 isolation checks, 5 secret-memory checks, 3 password tests, 7
 profile tests, 5 suite 3 tests, 3 suite 4 tests and the doctest. The full-cost test, which takes
 hours, was left out as always.
 
 ## Measurement
 
-Rust 1.99.1 and cargo-llvm-cov 0.9.1 measured commit `32651c2`
-(`32651c2eaf540c647bd93c91a6932638accdc9c5`), before the release of 0.3.0, with
+Rust 1.99.1 and cargo-llvm-cov 0.9.1 measured commit `1fe8761`
+(`1fe87612b259f9acd8bf7a7b824b20d438cc6297`), before the release of 0.3.0, with
 secret-protection-core 0.2.0 and reed-solomon-core 0.2.0 from crates.io as Cargo.lock names them.
 The commit that adds this report changes only documentation and audit records, so the measured
 code is unchanged.
@@ -24,20 +24,21 @@ reed-solomon-core among them, and the code of other systems are outside the deno
 | ------------------- | -------------: | ------: | -------: |
 | `cipher.rs`         |            291 |     269 |   92.44% |
 | `engine/native.rs`  |            166 |     160 |   96.39% |
-| `error.rs`          |             40 |      16 |   40.00% |
-| `feistel.rs`        |            366 |     365 |   99.73% |
+| `error.rs`          |             42 |      16 |   38.10% |
+| `feistel.rs`        |            365 |     364 |   99.73% |
 | `nfkd.rs`           |            153 |     153 |  100.00% |
-| `packing.rs`        |            107 |     107 |  100.00% |
-| `password.rs`       |            155 |     154 |   99.35% |
+| `packing.rs`        |            106 |     106 |  100.00% |
+| `password.rs`       |            154 |     153 |   99.35% |
 | `password_check.rs` |            105 |     104 |   99.05% |
-| `phrase.rs`         |            268 |     268 |  100.00% |
+| `phrase.rs`         |            267 |     267 |  100.00% |
 | `recovery.rs`       |            235 |     232 |   98.72% |
 | `repair.rs`         |            187 |     176 |   94.12% |
 | `repair/code.rs`    |             99 |      99 |  100.00% |
+| `same.rs`           |             19 |      19 |  100.00% |
 | `suite.rs`          |             83 |      83 |  100.00% |
 | `test_support.rs`   |             17 |      17 |  100.00% |
-| `wallet_check.rs`   |             77 |      76 |   98.70% |
-| Total               |          2,349 |   2,279 |   97.02% |
+| `wallet_check.rs`   |             84 |      80 |   95.24% |
+| Total               |          2,373 |   2,298 |   96.84% |
 
 `error.rs` is mostly the `Display` texts of the refusals, and the tests compare the refusals as
 values. CI also runs the tests on Linux ARM64, macOS and Windows, and in WebAssembly under WASI, and
