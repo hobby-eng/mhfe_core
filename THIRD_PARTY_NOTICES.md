@@ -41,8 +41,8 @@ Direct dependencies, each for one need:
 - `unicode-normalization` 0.1.26, `(MIT OR Apache-2.0) AND Unicode-3.0`: the NFKD of a password
   and a passphrase, with Unicode 18.0.0's tables.
 - `zeroize` 1.9.2, `Apache-2.0 OR MIT`: wiping.
-- `ctutils` 0.4.6, `Apache-2.0 OR MIT`: comparisons of bytes derived from a secret in constant
-  time. `digest` already brings it, so it adds no code.
+- `ctutils` 0.4.6, `Apache-2.0 OR MIT`: comparisons of bytes derived from a secret, with no exit at
+  the first difference. `digest` already brings it, so it adds no code.
 - `secret-protection-core` 0.2.0, `MIT OR Apache-2.0`: the memory pages of secrets and of the
   Argon2id work area, the isolation of the process, the secret writer and the clearing of stacks.
 - `reed-solomon-core` 0.2.0, `MIT OR Apache-2.0`: the Reed–Solomon code of the repair words.

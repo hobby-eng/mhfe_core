@@ -5,8 +5,8 @@ limits; it is an evidence report, not a certification or a proof that no other d
 Audit numbers run in one sequence for this repository, and a finding keeps its ID in every later
 reference.
 
-Each audit has a Markdown report, its JSON twin in the shape of the workspace's audit schema, and a
-folder `AUD-NNN-harnesses/` with the harnesses a reader can rerun. Its raw evidence (logs, command
+Each audit has a Markdown report and its JSON twin in the shape of the workspace's audit schema,
+and, where it wrote harnesses a reader can rerun, a folder `AUD-NNN-harnesses/` with them. Its raw evidence (logs, command
 records, checksums and the validation of the report) stays in `AUD-NNN-evidence/` on the auditor's
 machine, which git ignores.
 

@@ -16,8 +16,12 @@ records this crate's releases. `tests/fixtures/unicode18-ucd/` is Unicode's
 - Toolchain: Rust 1.99.1 from `rust-toolchain.toml`, and dprint 0.63.0 for the Markdown, JSON,
   TOML and YAML (CORE-21), with the plugins and their SHA-256 that `dprint.json` pins. No Node.js.
   The fuzz targets in `fuzz/`, a workspace with its own lockfile, run with `nightly-2026-11-13` and
-  cargo-fuzz 0.13.2: `cargo +nightly-2026-11-13 fuzz run --fuzz-dir fuzz <target>`. Their
-  libfuzzer-sys compiles libFuzzer, so `cargo xtask check`, which lints them, needs a C++ compiler.
+  cargo-fuzz 0.13.2: `cargo +nightly-2026-11-13 fuzz run --fuzz-dir fuzz <target>`, with
+  `--target x86_64-unknown-linux-gnu` where cargo-fuzz was built for musl. Their libfuzzer-sys
+  compiles libFuzzer, so `cargo xtask check`, which lints them, needs a C++ compiler.
+- The profiles built for the browser's target, `wasm/`, a workspace with its own lockfile:
+  `cargo build --locked --release --manifest-path wasm/Cargo.toml --target wasm32-unknown-unknown`,
+  then `wasmtime run --invoke checks` on the module, which must answer 28, as CI does.
 - Tools (TOOL-01): the `xtask` crate of the workspace, run as `cargo xtask <task>`; it is not part
   of the package. Every new tool, gate or check is a task there, in Rust.
 - Fast gates (CORE-43), as CI runs them: `cargo xtask check`.
@@ -36,14 +40,16 @@ records this crate's releases. `tests/fixtures/unicode18-ucd/` is Unicode's
   drafts the release), `audit.yml` (RustSec for the three lockfiles, the crate's, `fuzz/` and
   `wasm/`, when a manifest or a lockfile changes, weekly and on request).
 
-On the development computer, builds, tests and Clippy run through a memory guard,
-`../tmp/memguard.sh <command>`: a local tool, not part of this repository.
+On the development computer, builds, tests, Clippy and fuzzing follow the workspace's machine-wide
+resource policy, CORE-53 of the coding guide.
 
 ## Audits
 
 An audit, a review of findings or a remediation follow-up of this repository follows the workspace's
 audit procedure in `../.github/audits/`: `FULL_AUDIT_GUIDE_V2.md` (the checks and their order;
 section 17 for Rust crates and every target they are built for), `AUDIT_STANDARD.md`,
-`AUDIT_TEMPLATE.md` and `audit-report.schema.json`. `docs/audits/TARGETS.md` lists the targets,
-their runners and the fuzzing budgets that section 17 asks for. Reports, their JSON twins and their
+`AUDIT_TEMPLATE.md`, `audit-report.schema.json` and its Rust profile
+`audit-report-rust.schema.json`; before a major release, the major-release audit of
+`FULL_AUDIT_GUIDE_V3.md`. `docs/audits/TARGETS.md` lists the targets, their runners and the fuzzing
+budgets that section 17 asks for. Reports, their JSON twins and their
 harnesses stay in this repository's `docs/audits/`.

@@ -65,6 +65,12 @@ No secret leaves the crate except the results a program asks for. Every type tha
 prints as hidden in `Debug` and has no `Display`. Errors carry counts, positions, settings and the
 reference implementation's error numbers, never text that was passed in.
 
+Bytes derived from a secret, the verifier, the wallet check's digest and the cipher's states, are
+compared with ctutils, which does not stop at the first difference. On x86-64 and AArch64 it
+compares in assembly, and the release builds of these comparisons branch only on their lengths,
+which are public. Elsewhere, WebAssembly included, ctutils uses portable code that it calls best
+effort, and the engine that compiles WebAssembly may still branch on a byte.
+
 ## What the crate cannot protect
 
 - The text a program passes in, and what it does with a result. A `String` read from a terminal is

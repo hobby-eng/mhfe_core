@@ -40,8 +40,9 @@ test = false
 doc = false
 bench = false
 
-# Containers decrypted with a stand-in engine and read with any stated length: each reading reads
-# back and is verified exactly when its verifier matched.
+# Containers decrypted with a stand-in engine and read with any stated length: a short phrase's own
+# length is detected, the readings follow the specification's length rules, and each reads back and
+# is verified exactly when its verifier matched.
 [[bin]]
 name = "recovery"
 path = "fuzz_targets/recovery.rs"
@@ -58,7 +59,8 @@ test = false
 doc = false
 bench = false
 
-# Text read under the password-check profile: a word it offers makes six words that fit.
+# Text read under the password-check profile: a word it offers makes six words that fit; made
+# passwords with a word erased or wrong get the word that fits, or are noticed.
 [[bin]]
 name = "password_check"
 path = "fuzz_targets/password_check.rs"

@@ -117,8 +117,9 @@ A program that shows a 24-word reading to a person also runs the wallet check on
 
 You need Rust 1.99 or later. A native build needs a 64-bit target; in WebAssembly, which is 32-bit,
 your program supplies Argon2id itself. No C compiler is needed. The tests run on Linux (x86-64 and
-ARM64), macOS (Apple silicon and Intel), Windows (MSVC and GNU) and WebAssembly (WASI in Wasmtime);
-Android and iOS builds are compiled and linted, but no runner tests them yet.
+ARM64), macOS (Apple silicon and Intel), Windows (MSVC and GNU) and WebAssembly (WASI, and the
+profiles built for a browser's target, in Wasmtime); Android and iOS builds are compiled and linted,
+but no runner tests them yet.
 
 The crate is a library: your program asks for the phrase and the password, shows the result and
 warns the person where the specification asks for it. The example in the
@@ -141,7 +142,9 @@ Clone with `git clone --recurse-submodules`: the test vectors come from the spec
 repository. `cargo test --locked` runs the fast tests, and `cargo xtask check` runs the gates, the
 lints and the fast tests of the CI's main job on one computer; the other targets, the minimum Rust
 and the package check run in CI. The full-cost vectors take hours:
-`cargo test --locked --release --test full_cost -- --ignored --nocapture`.
+`cargo test --locked --release --test full_cost -- --ignored --nocapture`. Six fuzz targets in
+`fuzz/` read what a person gives the crate, from a phrase to a container with its card; the release
+workflow runs each for 90 seconds before it packages a version.
 
 The last coverage measurement, of commit `1fe8761` on 2026-11-26, ran 105 checks on Linux x86-64
 and covered **96.84%** of the measured source lines (2,298 of 2,373).

@@ -85,9 +85,9 @@
   without `get-task-allow`: refusing a debugger alone leaves `task_for_pid` open.
 - In a child of `fork`, a `Secret` of the parent reports no protection, and the child ends at the
   first access to its bytes.
-- In WebAssembly nothing clears the stack after a call: a stack that runs over there has no guard
-  page. What a computation leaves on it stays in the instance's memory until it is overwritten or
-  the instance ends. Buffers are still wiped when they are dropped.
+- In WebAssembly nothing clears the stack after a call, as clearing could run past the stack's end.
+  What a computation leaves on it stays in the instance's memory until it is overwritten or the
+  instance ends. Buffers are still wiped when they are dropped.
 
 ### Repository
 
@@ -102,7 +102,8 @@
 - CI runs the profiles built for wasm32-unknown-unknown, a browser's target, on the published
   vectors in Wasmtime.
 - The public-API gate refuses a public item it cannot read, and `macro_export` or `doc(hidden)`
-  under `cfg_attr`; the vendored gate refuses a document that records no digest.
+  under `cfg_attr`, an attribute over several lines included; the vendored gate refuses a document
+  that records no digest.
 - The recovery fuzz target checks every answer against the specification's length rules, and the
   password-check target checks made passwords with an erased or a wrong word.
 - The RustSec check reads the lockfiles of the fuzz targets and of the WebAssembly checks too;
