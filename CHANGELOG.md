@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- The repair words are computed and repaired by reed-solomon-core 0.2.0, the same code over
+  GF(2^11) with the first root alpha and a step of 1: cards and repairs are unchanged. Its decoder
+  finds wrong words algebraically, where the crate's own tried every set of places, which took a
+  time that depended on where the damage was; the field's tables are no longer on the heap.
+- The release workflow packages the crate in a job that can neither write nor sign. Only the
+  attestation and the release draft hold those rights, and they run no code of the repository.
+- Four fuzz targets read what a person gives the crate: a phrase, a password, a container with its
+  card, and a password under the password-check profile; the release workflow runs each for 90
+  seconds before it packages a tag. CI also runs the tests on Intel macOS and on Windows with the
+  GNU toolchain, and on macOS the isolation tests again under the hardened runtime.
 - `wallet_check::draw` is gone: the crate draws no new seed phrases. A host that draws a phrase
   until it passes the wallet check does so itself and checks it with `Seed::passes`.
 - A cancelled operation is no longer an error: `Mhfe::encrypt` and `Mhfe::decrypt` return
@@ -61,6 +71,8 @@
   says what came of it: on Linux and Android a processor that needs no limit counts as limited, and
   a limit refused or left unreported reads as refused or unknown; on Windows it is the policy as
   read back.
+- On macOS `no_memory_reading` is true only for a program signed with the hardened runtime and
+  without `get-task-allow`: refusing a debugger alone leaves `task_for_pid` open.
 - In a child of `fork`, a `Secret` of the parent reports no protection, and the child ends at the
   first access to its bytes.
 - In WebAssembly nothing clears the stack after a call: a stack that runs over there has no guard

@@ -43,6 +43,7 @@ Direct dependencies, each for one need:
 - `zeroize` 1.9.2, `Apache-2.0 OR MIT`: wiping.
 - `secret-protection-core` 0.2.0, `MIT OR Apache-2.0`: the memory pages of secrets and of the
   Argon2id work area, the isolation of the process, the secret writer and the clearing of stacks.
+- `reed-solomon-core` 0.2.0, `MIT OR Apache-2.0`: the Reed–Solomon code of the repair words.
 - `rayon` 1.12.0, `MIT OR Apache-2.0`, on native targets: the native engine's own pool of threads
   for the Argon2id lanes.
 
@@ -55,7 +56,7 @@ Crates they bring in:
   `digest` 0.11.3, `either` 1.19.0, `enumflags2` 0.7.12 (on Linux), `hybrid-array` 0.4.15,
   `landlock` 0.4.8 (on Linux), `libc` 0.2.191 (on Unix systems), `rayon-core` 1.13.0, `thiserror`
   2.0.21 (on Linux), `typenum` 1.20.1, `windows-link` 0.2.1 and `windows-sys` 0.61.2 (on Windows).
-- `Zlib OR Apache-2.0 OR MIT`: `tinyvec` 1.13.3.
+- `Zlib OR Apache-2.0 OR MIT`: `bytemuck` 1.25.2, `tinyvec` 1.13.3.
 - At build time only, `MIT OR Apache-2.0` or `Apache-2.0 OR MIT`: `zeroize_derive` 1.5.0,
   `enumflags2_derive` 0.7.12 and `thiserror-impl` 2.0.21 (for Linux), `proc-macro2` 1.0.107,
   `quote` 1.0.47, `syn` 2.0.119 and 3.0.9 (3.0.9 for Linux); and `unicode-ident` 1.0.27,

@@ -43,6 +43,18 @@ pub(crate) fn run(root: &Path) -> Result<(), Failure> {
         "-D",
         "warnings",
     ]))?;
+    // The fuzz targets, a workspace of their own with their own lockfile (RUST-18).
+    step(cargo(root).args(["fmt", "--manifest-path", "fuzz/Cargo.toml", "--check"]))?;
+    step(cargo(root).args([
+        "clippy",
+        "--locked",
+        "--manifest-path",
+        "fuzz/Cargo.toml",
+        "--all-targets",
+        "--",
+        "-D",
+        "warnings",
+    ]))?;
     step(
         cargo(root)
             .args(["doc", "--locked", "--no-deps", "-p", "mhfe-core"])

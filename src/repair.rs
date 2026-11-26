@@ -26,14 +26,14 @@
 //! the container phrase and guarded like it. On its own it leaves about 2^(11(n - k) - n/3)
 //! candidate containers: 2^168 for 24 words and 8 repair words, only 2^40 for 12 words.
 
-mod field;
+mod code;
 
 use std::fmt;
 
 use crate::phrase::{self, WORD_COUNTS};
 use crate::protect::Secret;
 use crate::{Phrase, stack};
-use field::{Field, MAX_PARITY, MAX_SYMBOLS};
+use code::{MAX_PARITY, MAX_SYMBOLS};
 
 /// Stands, in what a [`Repaired`] records as read, for a token that is no word: no word number
 /// reaches it.
@@ -66,7 +66,7 @@ impl Card {
             }
             let mut parity = [0u16; MAX_PARITY];
             let parity = &mut parity[..words];
-            Field::new().parity(&data[..container.words()], parity);
+            code::parity(&data[..container.words()], parity);
             let list = parity.iter().map(|&number| phrase::word(number));
             Ok(Self {
                 text: phrase::text_of(words, list),
@@ -141,7 +141,7 @@ impl Repaired {
             let (received, unreadable) = (&received[..symbols], &unreadable[..erased]);
             let mut corrected = [0u16; MAX_SYMBOLS];
             let corrected = &mut corrected[..symbols];
-            if !Field::new().repair(received, unreadable, card_words, corrected) {
+            if !code::repair(received, unreadable, card_words, corrected) {
                 return Err(Error::NotPossible);
             }
             // Damage beyond the code's bound can end in another codeword; the container's BIP39

@@ -61,7 +61,9 @@ mhfe-core = "0.2"
 The line above names the latest release; the changelog lists what the repository has added since.
 
 You need Rust 1.99 or later. A native build needs a 64-bit target; in WebAssembly, which is 32-bit,
-your program supplies Argon2id itself. No C compiler is needed.
+your program supplies Argon2id itself. No C compiler is needed. The tests run on Linux (x86-64 and
+ARM64), macOS (Apple silicon and Intel), Windows (MSVC and GNU) and WebAssembly (WASI in Wasmtime);
+Android and iOS builds are compiled and linted, but no runner tests them yet.
 
 The crate is a library: your program asks for the phrase and the password, shows the result and
 warns the person where the specification asks for it. The example in the

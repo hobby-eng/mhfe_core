@@ -1,0 +1,68 @@
+[package]
+name = "mhfe-core-fuzz"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "=0.4.10"
+mhfe-core = { path = ".." }
+# The NFKD a password's encoding must equal, from the tables the crate pins.
+unicode-normalization = "=0.1.26"
+
+# Text read as a phrase: what is read reads back as itself.
+[[bin]]
+name = "phrase"
+path = "fuzz_targets/phrase.rs"
+test = false
+doc = false
+bench = false
+
+# Text encoded as a password: what is accepted is its NFKD.
+[[bin]]
+name = "password"
+path = "fuzz_targets/password.rs"
+test = false
+doc = false
+bench = false
+
+# Containers and their cards damaged, and any text as a container and a card: damage within the
+# bound is repaired, and a repair is a container.
+[[bin]]
+name = "repair"
+path = "fuzz_targets/repair.rs"
+test = false
+doc = false
+bench = false
+
+# Text read under the password-check profile: a word it offers makes six words that fit.
+[[bin]]
+name = "password_check"
+path = "fuzz_targets/password_check.rs"
+test = false
+doc = false
+bench = false
+
+[lints.rust]
+unsafe_code = "forbid"
+
+# The table of every crate (RUST-01). A fuzz target answers by stopping the run: each one allows
+# unwraps and panics at its top, with the reason.
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny"
+mod_module_files = "deny"
+undocumented_unsafe_blocks = "deny"
+allow_attributes_without_reason = "deny"
+dbg_macro = "deny"
+print_stdout = "deny"
+print_stderr = "deny"
+
+# Its own workspace: the crate under test keeps its own.
+[workspace]

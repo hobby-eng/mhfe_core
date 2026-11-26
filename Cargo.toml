@@ -38,6 +38,10 @@ zeroize = "1.9"
 # rests on it, so a new version of it reaches the programs that use this crate only with a release
 # of this crate tested with it.
 secret-protection-core = "=0.2.0"
+# The code of the repair words, MHFE-REPAIR-1: the cyclic Reed–Solomon code over GF(2^11), one
+# card a word, on the caller's memory (`CyclicWords`). Its default feature `protect` clears the
+# stack after its calls through the same secret-protection-core. Exact, not a caret, as above.
+reed-solomon-core = "=0.2.0"
 
 [target.'cfg(not(target_arch = "wasm32"))'.dependencies]
 # Argon2id for the native engine; a WebAssembly host supplies its own. Exact, not a caret: every tag
@@ -79,7 +83,7 @@ harness = false
 # harness under docs/audits/ is a crate of its own, with its own lockfile.
 [workspace]
 members = ["xtask"]
-exclude = ["docs/audits"]
+exclude = ["docs/audits", "fuzz"]
 
 [lints.rust]
 unsafe_code = "deny" # not "forbid": the work area's view as Argon2 blocks allows it (RUST-07)

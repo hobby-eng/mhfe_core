@@ -47,26 +47,49 @@ jobs:
         run: cargo xtask check
 
   # The fast tests on each other system the crate runs on natively (the checks job runs them on
-  # x86-64 Linux).
+  # x86-64 Linux). macos-15-intel is the Intel macOS runner GitHub still offers; on Windows both
+  # toolchains run the tests: MSVC, and GNU, which links with MinGW, as a program cross-built on
+  # Linux does.
   native:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-24.04-arm, macos-latest, windows-latest]
+        include:
+          - os: ubuntu-24.04-arm
+          - os: macos-latest
+          - os: macos-15-intel
+          - os: windows-latest
+          - os: windows-latest
+            target: x86_64-pc-windows-gnu
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     # Code for one system alone is compiled only on that system, so warnings fail the job.
     env:
       RUSTFLAGS: -D warnings
+      TARGET: ${{ matrix.target }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           submodules: true
       - name: Install the pinned Rust toolchain
-        run: rustup show
+        shell: bash
+        run: |
+          rustup show
+          if [ -n "$TARGET" ]; then rustup target add "$TARGET"; fi
       - name: Run the fast tests
-        run: cargo test --locked
+        shell: bash
+        run: cargo test --locked ${TARGET:+--target "$TARGET"}
+      # macOS confirms that no other process reads the memory only under the hardened runtime: the
+      # isolation program again, signed ad hoc with it.
+      - name: Run the isolation tests under the hardened runtime
+        if: runner.os == 'macOS'
+        run: |
+          set -euo pipefail
+          binary=$(cargo test --locked --no-run --test isolation --message-format=json \
+            | jq -r 'select(.executable != null) | .executable')
+          codesign --sign - --force --options runtime "$binary"
+          MHFE_CORE_TEST_HARDENED=1 "$binary"
 
   # Windows with MinGW, the toolchain of a Windows program cross-built on Linux.
   cross:

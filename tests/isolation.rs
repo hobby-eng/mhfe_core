@@ -179,10 +179,12 @@ fn expect_whole_process(isolation: Isolation) {
     );
     #[cfg(target_os = "linux")]
     linux::expect_whole_process(isolation);
+    // macOS confirms that no other process reads the memory only for a program signed with the
+    // hardened runtime, which CI gives this one in a run of its own.
     #[cfg(target_os = "macos")]
     assert!(
         isolation.no_core_dumps
-            && isolation.no_memory_reading
+            && isolation.no_memory_reading == hardened()
             && isolation.no_new_sockets
             && isolation.no_file_changes,
         "{isolation:?}"
@@ -194,6 +196,12 @@ fn expect_whole_process(isolation: Isolation) {
         isolation.no_memory_reading && !isolation.no_core_dumps && !isolation.no_file_changes,
         "{isolation:?}"
     );
+}
+
+/// Whether CI signed this program with the hardened runtime, as it does in a run of its own.
+#[cfg(target_os = "macos")]
+fn hardened() -> bool {
+    std::env::var_os("MHFE_CORE_TEST_HARDENED").is_some()
 }
 
 /// Another program of the same user cannot read the memory of the isolated process.
