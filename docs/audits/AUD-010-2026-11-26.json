@@ -1,0 +1,968 @@
+{
+  "schemaVersion": 1,
+  "auditId": "AUD-010",
+  "auditNumber": 10,
+  "date": "2026-11-26",
+  "title": "Independent full-scope v2 audit of mhfe-core on main (00c070c)",
+  "reviewer": {
+    "name": "GitHub Copilot independent audit session",
+    "model": "gemini-4-carbon",
+    "reasoningEffort": "high"
+  },
+  "snapshot": {
+    "commit": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+    "commitComplete": true,
+    "branch": "main",
+    "workingTree": "clean",
+    "sourceFingerprint": "tree:6c4bf4dea1771f5768763d8355fa2a58994427ef;tests/spec:4535e3d9e62dd2979b2aee4d2a5233c93d2cc3ef"
+  },
+  "scope": "Whole snapshot of mhfe-core at 00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72: src/, tests/, xtask/, wasm/, fuzz/, build.rs, manifests, all three lockfiles, GitHub Actions workflows, documentation, and pinned upstream sources of reed-solomon-core 0.2.0 and secret-protection-core 0.2.0.",
+  "procedureHashes": {
+    "FULL_AUDIT_GUIDE_V2.md": "a1d9b30c3b6cbe0cb1bb597652993380b06c65b8bedaef5c82ce23fb73933b44",
+    "AUDIT_STANDARD.md": "cb022824fb61bba3a59c5bf138f533aaffb0796f34476a54286a21236685ef4d",
+    "AUDIT_TEMPLATE.md": "6dc3bcf05df0f058ec39eee4b528c8a49b2b1044e5c42a71f0845fb62c504e0d",
+    "audit-report.schema.json": "49360df3a7e8e39657e10270f76f47bee5a1801f8e76941536415f35c0376fe5",
+    "audit-report-rust.schema.json": "9a3c9114d1d4a2aa0eedb874b73186e583de898d712dcdb009b328287f7c3600",
+    "docs/audits/TARGETS.md": "146f05f10e49b2354a70d978ada7e3dc5fd4700c3356c4cc717c385ca7e105ff"
+  },
+  "verdict": "INCOMPLETE",
+  "auditKind": "ordinary",
+  "releasePhase": null,
+  "targetMatrix": [
+    {
+      "package": "mhfe-core + xtask",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "debug",
+      "features": "default",
+      "environment": "Linux 7.0 x86-64 host; GitHub ubuntu-24.04",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "native",
+      "checks": "166 ok test lines locally including all isolation and secret_memory child roles; CI checks job passed.",
+      "evidence": "AUD-010-evidence/cargo-xtask-check.log (exit 0, SHA-256 4f89c63925131c3f8f9e9ee2a7f161ac2bc52992c947bd82fab45e71160c8909); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core + xtask",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "release",
+      "features": "default",
+      "environment": "Linux 7.0 x86-64 host",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "native",
+      "checks": "166 ok test lines on first execution, confirming the AUD-009-ARC001 fix.",
+      "evidence": "AUD-010-evidence/clippy-host-release.log (exit 0, SHA-256 022b6716b692d1a87acd4a78b557b033bf6d1b62792284c6cde0383116f804d4); AUD-010-evidence/cargo-test-release.log (exit 0, SHA-256 4cd8d230063b0312e4d59de16f5cb71ad53ce1486e3b6f8bef57b511117f1cfd)"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-unknown-linux-gnu",
+      "profile": "debug",
+      "features": "default",
+      "environment": "GitHub ubuntu-24.04-arm",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "native",
+      "checks": "Fast unit, integration, isolation and secret_memory suites on ARM64 Linux.",
+      "evidence": "AUD-010-evidence/clippy-aarch64-unknown-linux-gnu.log (exit 0, SHA-256 c89422049308f6dd170d47d50102ed42f34868ebc69a8cb25b3b09d49c69eda9); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-apple-darwin",
+      "profile": "debug",
+      "features": "default",
+      "environment": "GitHub macos-latest (ordinary and hardened runtime)",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "native",
+      "checks": "Fast suites on 16 KiB pages and hardened-runtime isolation rerun.",
+      "evidence": "AUD-010-evidence/clippy-aarch64-apple-darwin.log (exit 0, SHA-256 1db5137826edecc8e6929e5c94e6b87a61d93686cc27831984d905eb5f9a3c39); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-apple-darwin",
+      "profile": "debug",
+      "features": "default",
+      "environment": "GitHub macos-15-intel (ordinary and hardened runtime)",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "native",
+      "checks": "Fast suites on 4 KiB pages and hardened-runtime isolation rerun.",
+      "evidence": "AUD-010-evidence/clippy-x86_64-apple-darwin.log (exit 0, SHA-256 f9e98fc811b49c678676cd94f3cb96b309256ffda7335e9eb20e844555b7ca67); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-pc-windows-msvc",
+      "profile": "debug",
+      "features": "default",
+      "environment": "GitHub windows-latest MSVC",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "native",
+      "checks": "Fast suites including Windows DACL, mitigation policies and WorkArea lock checks.",
+      "evidence": "AUD-010-evidence/clippy-x86_64-pc-windows-msvc.log (exit 0, SHA-256 9ee6326b3f64f639f5582b61faa66544c540cfc9affb079178d58689b48a7ac3); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-pc-windows-gnu",
+      "profile": "debug",
+      "features": "default",
+      "environment": "GitHub windows-latest MinGW and ubuntu-24.04 cross-link",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "native",
+      "checks": "Cross-linked on Linux with MinGW and executed natively on Windows GNU.",
+      "evidence": "AUD-010-evidence/clippy-x86_64-pc-windows-gnu.log (exit 0, SHA-256 f1e0297407d071bedefa02dbe9a852e5b780ff2617910e4d1217114bda46f722); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "wasm32-unknown-unknown",
+      "profile": "debug",
+      "features": "default",
+      "environment": "Bare library build without host engine",
+      "required": false,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": null,
+      "checks": "Library rlib compilation and Clippy; execution supplied by the mhfe-core-wasm-checks row.",
+      "evidence": "AUD-010-evidence/clippy-wasm32-unknown-unknown.log (exit 0, SHA-256 a13905646e2aed93ec6ea9ed6ac91490a4e01f91af0215c3965279a910612149); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core-wasm-checks",
+      "target": "wasm32-unknown-unknown",
+      "profile": "release",
+      "features": "default",
+      "environment": "Wasmtime v49.0.2 in CI and Node.js v26.12.1 V8 locally",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "Wasmtime and Node.js V8",
+      "checks": "28 bare-WASM checks passed with 0 imports and 4 exports.",
+      "evidence": "AUD-010-evidence/clippy-wasm-checks-release.log (exit 0, SHA-256 d5657efb91056c85d4aff7fc532b8187ed5aa4d5da924e33315ad42fc2bef9cd); AUD-010-evidence/wasm-checks-v8-node.log (exit 0, SHA-256 78f60159156c3dde3bcd4c20116521612e6f3cd5779c0530d9595e716d906995); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "wasm32-wasip1",
+      "profile": "debug",
+      "features": "default",
+      "environment": "GitHub Wasmtime v49.0.2 (SHA-256 pinned)",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "runner": "Wasmtime",
+      "checks": "Fast test suite in Wasmtime including portable profiles and no-op isolation report.",
+      "evidence": "AUD-010-evidence/clippy-wasm32-wasip1.log (exit 0, SHA-256 069cdc900031b64bcf71eeae506c0fed81fb0e32333ac20d42e764190a313d8b); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-linux-android",
+      "profile": "debug",
+      "features": "default",
+      "environment": "Android NDK build only",
+      "required": false,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": null,
+      "checks": "Clippy locally and in CI; test binaries linked against Android NDK in CI (AUD-006-ARC004).",
+      "evidence": "AUD-010-evidence/clippy-aarch64-linux-android.log (exit 0, SHA-256 34e891395fbcda04a3172cc7b39760b5f602a0ec56f9a5e42e897394ca74fd1a); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-linux-android",
+      "profile": "debug",
+      "features": "default",
+      "environment": "Android NDK build only",
+      "required": false,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": null,
+      "checks": "Clippy and test binaries linked against Android NDK in CI (AUD-006-ARC004).",
+      "evidence": "https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641; AUD-010-evidence/gh-ci-run-45859679641.log (SHA-256 a15ea2c04b1f8bdc54ffc8affc31647e0c3025d0a03f7064cbe537454fff434d)"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-apple-ios",
+      "profile": "debug",
+      "features": "default",
+      "environment": "macOS Xcode iOS SDK build only",
+      "required": false,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": null,
+      "checks": "Clippy locally and in CI; test binaries linked against iOS SDK in CI (AUD-006-ARC004).",
+      "evidence": "AUD-010-evidence/clippy-aarch64-apple-ios.log (exit 0, SHA-256 870d7fec77a255bf694206ef931ee226f1fe8e22868399bfb2c9c041bb03cafd); https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-apple-ios-sim",
+      "profile": "debug",
+      "features": "default",
+      "environment": "Cross Clippy only (not yet built in CI)",
+      "required": false,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "not-run",
+      "run": "not-run",
+      "runner": null,
+      "checks": "Library Clippy passed locally on aarch64-apple-ios-sim (AUD-006-ARC004).",
+      "evidence": "AUD-010-evidence/clippy-aarch64-apple-ios-sim.log (exit 0, SHA-256 870d7fec77a255bf694206ef931ee226f1fe8e22868399bfb2c9c041bb03cafd)"
+    },
+    {
+      "package": "mhfe-core-fuzz / phrase",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "fuzzing (nightly-2026-11-13, AddressSanitizer)",
+      "features": "default",
+      "environment": "Linux 7.0 x86-64 host, cargo-fuzz 0.13.2",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": "native",
+      "checks": "37.99 active s smoke run (27,118 runs, 675 edges, cmin 875 -> 295, 0 crashes); 300 s ordinary-audit budget not run locally.",
+      "evidence": "AUD-010-evidence/clippy-fuzz.log (a1390564...); AUD-010-evidence/fuzz-run-phrase.log (a2921b60...); AUD-010-evidence/fuzz-run-phrase-part2.log (0185cc8b...); AUD-010-evidence/fuzz-cmin-phrase.log (e1e5f2d0...)"
+    },
+    {
+      "package": "mhfe-core-fuzz / password",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "fuzzing (nightly-2026-11-13, AddressSanitizer)",
+      "features": "default",
+      "environment": "Linux 7.0 x86-64 host, cargo-fuzz 0.13.2",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": "native",
+      "checks": "37.00 active s smoke run (1,256,600 runs, 2,182 edges, cmin 10,022 -> 5,119, 0 crashes); 300 s ordinary-audit budget not run locally.",
+      "evidence": "AUD-010-evidence/clippy-fuzz.log (a1390564...); AUD-010-evidence/fuzz-run-password.log (e5656788...); AUD-010-evidence/fuzz-cmin-password.log (fde8d134...)"
+    },
+    {
+      "package": "mhfe-core-fuzz / passphrase",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "fuzzing (nightly-2026-11-13, AddressSanitizer)",
+      "features": "default",
+      "environment": "Linux 7.0 x86-64 host, cargo-fuzz 0.13.2",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": "native",
+      "checks": "37.00 active s smoke run (4,947 runs, 754 edges, cmin 114 -> 83, 0 crashes); 300 s ordinary-audit budget not run locally.",
+      "evidence": "AUD-010-evidence/clippy-fuzz.log (a1390564...); AUD-010-evidence/fuzz-run-passphrase.log (8a5d1bc0...); AUD-010-evidence/fuzz-cmin-passphrase.log (7eeac746...)"
+    },
+    {
+      "package": "mhfe-core-fuzz / recovery",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "fuzzing (nightly-2026-11-13, AddressSanitizer)",
+      "features": "default",
+      "environment": "Linux 7.0 x86-64 host, cargo-fuzz 0.13.2",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": "native",
+      "checks": "36.86 active s smoke run (43,692 runs, 1,193 edges, cmin 272 -> 110, 0 crashes; thermal-pause slow-unit replayed in 2 ms); 300 s ordinary-audit budget not run locally.",
+      "evidence": "AUD-010-evidence/clippy-fuzz.log (a1390564...); AUD-010-evidence/fuzz-run-recovery.log (586b24af...); AUD-010-evidence/fuzz-run-recovery-part2.log (198194f5...); AUD-010-evidence/fuzz-replay-recovery-slow-unit.log (faf51d36...)"
+    },
+    {
+      "package": "mhfe-core-fuzz / repair",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "fuzzing (nightly-2026-11-13, AddressSanitizer)",
+      "features": "default",
+      "environment": "Linux 7.0 x86-64 host, cargo-fuzz 0.13.2",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": "native",
+      "checks": "30.99 active s smoke run (146,105 runs, 1,227 edges, cmin 1,161 -> 363, 0 crashes); 300 s ordinary-audit budget not run locally.",
+      "evidence": "AUD-010-evidence/clippy-fuzz.log (a1390564...); AUD-010-evidence/fuzz-run-repair.log (f10641b8...); AUD-010-evidence/fuzz-cmin-repair.log (d6e5ad60...)"
+    },
+    {
+      "package": "mhfe-core-fuzz / password_check",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "fuzzing (nightly-2026-11-13, AddressSanitizer)",
+      "features": "default",
+      "environment": "Linux 7.0 x86-64 host, cargo-fuzz 0.13.2",
+      "required": true,
+      "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "runner": "native",
+      "checks": "37.00 active s smoke run (156,855 runs, 346 edges, cmin 194 -> 66, 0 crashes); 300 s ordinary-audit budget not run locally.",
+      "evidence": "AUD-010-evidence/clippy-fuzz.log (a1390564...); AUD-010-evidence/fuzz-run-password_check.log (ee61dad8...); AUD-010-evidence/fuzz-cmin-password_check.log (34a3392f...)"
+    }
+  ],
+  "checks": [
+    {
+      "command": "cargo xtask check",
+      "outcome": "passed",
+      "counts": "166 ok lines (copies, code-rules, rustfmt, dprint, host/wasm32/fuzz Clippy, rustdoc, fast tests)",
+      "evidence": "AUD-010-evidence/cargo-xtask-check.log (SHA-256 4f89c63925131c3f8f9e9ee2a7f161ac2bc52992c947bd82fab45e71160c8909)"
+    },
+    {
+      "command": "cargo test --locked --workspace --release",
+      "outcome": "passed",
+      "counts": "166 ok lines on first run",
+      "evidence": "AUD-010-evidence/cargo-test-release.log (SHA-256 4cd8d230063b0312e4d59de16f5cb71ad53ce1486e3b6f8bef57b511117f1cfd)"
+    },
+    {
+      "command": "GitHub Actions ci.yml on 00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "outcome": "passed",
+      "counts": "13 / 13 jobs passed",
+      "evidence": "https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641; AUD-010-evidence/gh-ci-run-45859679641.log (SHA-256 a15ea2c04b1f8bdc54ffc8affc31647e0c3025d0a03f7064cbe537454fff434d)"
+    },
+    {
+      "command": "GitHub Actions audit.yml on 00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "outcome": "passed",
+      "counts": "3 / 3 lockfiles passed RustSec",
+      "evidence": "https://github.com/hobby-eng/mhfe_core/actions/runs/45859679583; AUD-010-evidence/gh-rustsec-run-45859679583.log (SHA-256 091e0dbed8c0dc90539141e577e12ff0d2f00c6857901df5dcb26ddd66342076)"
+    },
+    {
+      "command": "cargo audit -n -f <lockfile> across Cargo.lock, fuzz/Cargo.lock, wasm/Cargo.lock and harness Cargo.lock",
+      "outcome": "passed",
+      "counts": "1,575 advisories checked; 0 vulnerabilities or warnings",
+      "evidence": "AUD-010-evidence/cargo-audit-root.log (9fe8bd1e...); AUD-010-evidence/cargo-audit-fuzz.log (1956f637...); AUD-010-evidence/cargo-audit-wasm.log (b5aa8897...); AUD-010-evidence/harness-cargo-audit.log (5fcb3dba...)"
+    },
+    {
+      "command": "cargo deny --locked check advisories bans sources across root, fuzz/ and wasm/",
+      "outcome": "passed",
+      "counts": "All 3 workspaces clean",
+      "evidence": "AUD-010-evidence/cargo-deny-root.log (94298611...); AUD-010-evidence/cargo-deny-fuzz.log (1e35a89e...); AUD-010-evidence/cargo-deny-wasm.log (5516ccfe...)"
+    },
+    {
+      "command": "Cross-target Clippy across all TARGETS.md triples and profiles",
+      "outcome": "passed",
+      "counts": "13 local Clippy logs plus x86_64-linux-android in CI run 45859679641",
+      "evidence": "AUD-010-evidence/clippy-*.log; https://github.com/hobby-eng/mhfe_core/actions/runs/45859679641"
+    },
+    {
+      "command": "cargo +1.99.0 check --locked --all-targets",
+      "outcome": "passed",
+      "counts": "Declared MSRV 1.99.0 compiles cleanly",
+      "evidence": "AUD-010-evidence/msrv-1-99-0-check.log (SHA-256 85d8d4858820739207b9b696f6bcf6970b4681e835b02af951edcce407af5d62)"
+    },
+    {
+      "command": "Bare wasm32-unknown-unknown build and Node.js v26.12.1 V8 execution (wasm/)",
+      "outcome": "passed",
+      "counts": "28 checks passed, 0 imports, 4 exports",
+      "evidence": "AUD-010-evidence/wasm-checks-build.log (bf3dd168...); AUD-010-evidence/wasm-checks-v8-node.log (78f60159...)"
+    },
+    {
+      "command": "cargo package --locked --list and cargo publish --dry-run --locked",
+      "outcome": "passed",
+      "counts": "32 packaged files; dry-run clean",
+      "evidence": "AUD-010-evidence/cargo-package-list.log (05926668...); AUD-010-evidence/cargo-publish-dry-run.log (e7debf12...)"
+    },
+    {
+      "command": "cargo semver-checks against v0.2.0",
+      "outcome": "passed",
+      "counts": "0 breaking changes; additive protect::Issue matches 0.2.0 -> 0.3.0 bump",
+      "evidence": "AUD-010-evidence/cargo-semver-checks-v0-2-0.log (65727ba7...); AUD-010-evidence/cargo-semver-diff-v0-2-0.log (376f2389...)"
+    },
+    {
+      "command": "Documented cargo llvm-cov coverage run",
+      "outcome": "passed",
+      "counts": "105 checks, 0 warnings: 96.84% lines (2,298 / 2,373), 97.07% regions (4,175 / 4,301), 97.27% functions (321 / 330)",
+      "evidence": "AUD-010-evidence/cargo-llvm-cov-documented.log (SHA-256 348df6956042653e94d29bd6a0c0cd54898c2f322bf8741edaf716d5ec9e35eb)"
+    },
+    {
+      "command": "x86-64 ASM and wasm32 LLVM-IR constant-time and zeroize codegen inspection",
+      "outcome": "passed",
+      "counts": "cmovne/vblendvpb/wasm.select verified on secret lookups; volatile wipes preserved",
+      "evidence": "AUD-010-evidence/codegen-emit-asm-and-wasm-ir.log (SHA-256 5378b49129389fd27b248fabcb4eb6f67feda91d4d6e6a77117d3e448cc8d006)"
+    },
+    {
+      "command": "Host Miri (-Zmiri-strict-provenance and -Zmiri-tree-borrows) on syscall-free unit tests",
+      "outcome": "passed",
+      "counts": "9 unit tests passed under both aliasing models; Secret paths blocked at libc::sigfillset",
+      "evidence": "AUD-010-evidence/miri-host-strict-provenance.log (8ac18962...); AUD-010-evidence/miri-host-tree-borrows.log (87e77b63...); AUD-010-evidence/miri-secret-sigfillset-blocker.log (9e17fb44...)"
+    },
+    {
+      "command": "AUD-010-harnesses/audit-probes (clippy, run, test, and Miri Strict Provenance + Tree Borrows)",
+      "outcome": "passed",
+      "counts": "Reproduces AUD-010-ARC001; verifies slice_as_blocks + Argon2id and CyclicWords across 20 card shapes under Miri",
+      "evidence": "AUD-010-evidence/harness-clippy.log (443e7c22...); AUD-010-evidence/harness-run.log (fcd5d5f8...); AUD-010-evidence/harness-miri-strict-provenance.log (bae6de24...); AUD-010-evidence/harness-miri-tree-borrows.log (0a9805da...)"
+    },
+    {
+      "command": "cargo +nightly-2026-11-13 fuzz run and cmin across all 6 targets (AddressSanitizer)",
+      "outcome": "not-run",
+      "counts": "30.99-37.99 active s/target smoke run completed (1,635,317 total runs, 0 crashes, lockfiles untouched); 300 s/target ordinary budget not run locally",
+      "evidence": "AUD-010-evidence/fuzz-campaign-summary.json; AUD-010-evidence/fuzz-run-*.log; AUD-010-evidence/fuzz-cmin-*.log"
+    }
+  ],
+  "coverage": [
+    {
+      "checkId": "CHECK-SEC-001",
+      "group": "SEC / Secret ownership and zeroization",
+      "scope": "src/**, secret-protection-core 0.2.0",
+      "method": "Source trace, secret_memory integration suite and Debug redaction check",
+      "outcome": "passed",
+      "evidence": "Secrets live in Secret<T>, WorkArea or Zeroizing; Debug is redacted on every secret-holding type."
+    },
+    {
+      "checkId": "CHECK-SEC-002",
+      "group": "SEC / Browser CSP, storage and transport",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Pure Rust library crate without HTML, DOM or storage code."
+    },
+    {
+      "checkId": "CHECK-SEC-003",
+      "group": "SEC / Network egress and offline boundary",
+      "scope": "Cargo.lock, wasm/Cargo.lock, src/**",
+      "method": "Dependency graph and WASM import-table inspection",
+      "outcome": "passed",
+      "evidence": "Zero networking dependencies; bare wasm32 binary has 0 host imports."
+    },
+    {
+      "checkId": "CHECK-SEC-004",
+      "group": "SEC / Entropy, suites and Feistel protocol",
+      "scope": "src/{mhfe,feistel,packing,suite,wallet}.rs",
+      "method": "Line-by-line specification v0.7.0 comparison and vector replay",
+      "outcome": "passed",
+      "evidence": "Caller supplies 16-byte salt; domain tags, LE round counter, split/swap and KeyMaterial wipe match specification v0.7.0."
+    },
+    {
+      "checkId": "CHECK-SEC-005",
+      "group": "SEC / Secret residue and constant-time operations",
+      "scope": "src/**, x86-64 ASM, wasm32 LLVM-IR",
+      "method": "Codegen inspection and upstream source trace",
+      "outcome": "passed",
+      "evidence": "Branchless cmovne/vblendvpb/wasm.select verified; upstream reed-solomon-core 0.2.0 copy tracked under AUD-007-SEC002."
+    },
+    {
+      "checkId": "CHECK-SEC-006",
+      "group": "SEC / Browser extension and clipboard APIs",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Library crate without browser API bindings."
+    },
+    {
+      "checkId": "CHECK-SEC-007",
+      "group": "SEC / Input bounds and availability",
+      "scope": "src/{phrase,password,passphrase,repair,mhfe}.rs",
+      "method": "Boundary analysis, unit tests and ASan fuzzing",
+      "outcome": "passed",
+      "evidence": "Word counts, indices (< 2048), Argon2 bounds, card marks and checked_mul(4) NFKD pre-check verified."
+    },
+    {
+      "checkId": "CHECK-SEC-008",
+      "group": "SEC / Grants and mechanisms (CORE-55)",
+      "scope": "src/protect.rs, src/engine/native.rs, .github/workflows/*.yml",
+      "method": "Grant inventory and step-order trace",
+      "outcome": "passed",
+      "evidence": "All OS and CI grants audited with step ordering verified; no privilege window found."
+    },
+    {
+      "checkId": "CHECK-SEC-009",
+      "group": "SEC / Rust soundness across targets",
+      "scope": "src/engine/native.rs, docs/audits/AUD-010-harnesses/audit-probes",
+      "method": "Unsafe ledger, host Miri and isolated Block/CyclicWords Miri",
+      "outcome": "blocked",
+      "evidence": "Sole unsafe block verified under Miri Strict Provenance and Tree Borrows in audit-probes; full-crate Miri blocked by secret-protection-core libc::sigfillset."
+    },
+    {
+      "checkId": "CHECK-SEC-010",
+      "group": "SEC / Same-user attacker and process state",
+      "scope": "src/protect.rs, tests/isolation.rs, SECURITY.md",
+      "method": "Source review and Linux/macOS/Windows CI isolation runs",
+      "outcome": "passed",
+      "evidence": "Linux dumpable/user-ns/seccomp, macOS hardened PT_DENY_ATTACH and Windows DACL verified."
+    },
+    {
+      "checkId": "CHECK-FUN-001",
+      "group": "FUN / BIP39 words, checksum and NFKD",
+      "scope": "src/{phrase,packing,passphrase}.rs",
+      "method": "Specification vectors, Unicode 18.0.0 table and fuzzing",
+      "outcome": "passed",
+      "evidence": "Constant-time word lookup, bit packing, checksum mask and NFKD normalization match published vectors."
+    },
+    {
+      "checkId": "CHECK-FUN-002",
+      "group": "FUN / HD derivation paths",
+      "scope": "src/wallet.rs",
+      "method": "Source review and BIP32 master-fingerprint vectors",
+      "outcome": "passed",
+      "evidence": "Master key HMAC-SHA512('Bitcoin seed') -> HASH160(pubkey)[..4] verified; child path derivation out of scope."
+    },
+    {
+      "checkId": "CHECK-FUN-003",
+      "group": "FUN / BIP85 and message signing",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Not part of mhfe-core."
+    },
+    {
+      "checkId": "CHECK-FUN-004",
+      "group": "FUN / Script and address encodings",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Not part of mhfe-core."
+    },
+    {
+      "checkId": "CHECK-FUN-005",
+      "group": "FUN / PSBT and transaction signing",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Not part of mhfe-core."
+    },
+    {
+      "checkId": "CHECK-FUN-006",
+      "group": "FUN / MHFE containers, check words and repair",
+      "scope": "src/{mhfe,check_word,repair,password_check}.rs",
+      "method": "Vector corpora, boundary tests, Miri and ASan fuzzing",
+      "outcome": "passed",
+      "evidence": "Suites 3 and 4, check words, password check and GF(2^11) Reed-Solomon parity/repair verified."
+    },
+    {
+      "checkId": "CHECK-FUN-007",
+      "group": "FUN / Online providers",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Offline library crate."
+    },
+    {
+      "checkId": "CHECK-API-001",
+      "group": "API / Dependency contracts and invariants",
+      "scope": "reed-solomon-core, secret-protection-core, secp256k1",
+      "method": "Source trace of every internal expect and error mapping",
+      "outcome": "passed",
+      "evidence": "Every internal expect proved unreachable from validated inputs; zero-key secp256k1 branch well-defined."
+    },
+    {
+      "checkId": "CHECK-API-002",
+      "group": "API / Cancellation and callback flow",
+      "scope": "src/mhfe.rs, src/engine.rs",
+      "method": "Source review and cancellation unit tests",
+      "outcome": "passed",
+      "evidence": "ControlFlow::Break aborts cleanly and wipes intermediate state."
+    },
+    {
+      "checkId": "CHECK-API-003",
+      "group": "API / Public API surface and semver",
+      "scope": "docs/public-api.txt, cargo semver-checks",
+      "method": "xtask code-rules and semver diff against v0.2.0",
+      "outcome": "passed",
+      "evidence": "0 breaking changes against v0.2.0; additive protect::Issue matches 0.3.0 minor bump."
+    },
+    {
+      "checkId": "CHECK-API-004",
+      "group": "API / Cross-target interoperability",
+      "scope": "Native x86-64/ARM64/macOS/Windows, WASI, bare WASM",
+      "method": "Specification v0.7.0 vectors across host, Wasmtime and V8",
+      "outcome": "passed",
+      "evidence": "Byte-identical container words, tags, check words and repairs across all tested targets."
+    },
+    {
+      "checkId": "CHECK-API-005",
+      "group": "API / Platform fallbacks and OOM boundaries",
+      "scope": "build.rs, src/passphrase.rs, src/protect.rs",
+      "method": "32-bit guard review and boundary unit tests",
+      "outcome": "passed",
+      "evidence": "32-bit native targets rejected in build.rs; > isize::MAX returns Error::SecretFull; upstream OOM abort remains AUD-006-API001."
+    },
+    {
+      "checkId": "CHECK-BLD-001",
+      "group": "BLD / Manifests, MSRV and compiler flags",
+      "scope": "Cargo.toml, wasm/Cargo.toml, fuzz/Cargo.toml",
+      "method": "msrv-1-99-0-check, xtask code-rules and security lints",
+      "outcome": "passed",
+      "evidence": "Compiles cleanly under rustc 1.99.0 and 1.99.1; strict Clippy lints pass."
+    },
+    {
+      "checkId": "CHECK-BLD-002",
+      "group": "BLD / Cross-target matrix",
+      "scope": "All targets in docs/audits/TARGETS.md",
+      "method": "Local cross Clippy and GitHub Actions CI run 45859679641",
+      "outcome": "passed",
+      "evidence": "All matrix rows passed Clippy; all required non-fuzz rows linked and passed runtime suites."
+    },
+    {
+      "checkId": "CHECK-BLD-003",
+      "group": "BLD / Lockfiles, advisories and licences",
+      "scope": "Cargo.lock, fuzz/Cargo.lock, wasm/Cargo.lock",
+      "method": "cargo audit, cargo deny and CI run 45859679583",
+      "outcome": "passed",
+      "evidence": "All three lockfiles passed cargo audit (1,575 advisories) and cargo deny check advisories bans sources."
+    },
+    {
+      "checkId": "CHECK-BLD-004",
+      "group": "BLD / Shipped WebAssembly bundle",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "mhfe-core publishes Rust sources only (32 files)."
+    },
+    {
+      "checkId": "CHECK-BLD-005",
+      "group": "BLD / Workflows, action pins and packaging",
+      "scope": ".github/workflows/*.yml, cargo publish --dry-run",
+      "method": "verify-action-pins.mjs, workflow audit and dry-run",
+      "outcome": "passed",
+      "evidence": "Every GitHub Action SHA-pinned; attestation and release permissions isolated."
+    },
+    {
+      "checkId": "CHECK-BLD-006",
+      "group": "BLD / Every target linked and run",
+      "scope": "docs/audits/TARGETS.md",
+      "method": "Local runs and CI run 45859679641",
+      "outcome": "passed",
+      "evidence": "All required native and WASM targets linked and ran; optional Android/iOS runtime remains AUD-006-ARC004."
+    },
+    {
+      "checkId": "CHECK-BLD-007",
+      "group": "BLD / Dynamic analysis minimum",
+      "scope": "fuzz/, host Miri, audit-probes Miri",
+      "method": "31-38 s ASan fuzzing, cmin and Miri runs",
+      "outcome": "blocked",
+      "evidence": "0 crashes in 1,635,317 ASan runs, but 300 s/target ordinary budget not run locally and full-crate Miri blocked by sigfillset."
+    },
+    {
+      "checkId": "CHECK-UI-001",
+      "group": "UI / Viewports and files",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Headless Rust library crate."
+    },
+    {
+      "checkId": "CHECK-UI-002",
+      "group": "UI / Navigation and state",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Headless Rust library crate."
+    },
+    {
+      "checkId": "CHECK-UI-003",
+      "group": "UI / Secret visibility and QR",
+      "scope": "none",
+      "method": "Scope check",
+      "outcome": "not-applicable",
+      "evidence": "Headless Rust library crate."
+    },
+    {
+      "checkId": "CHECK-ARC-001",
+      "group": "ARC / Module boundaries and ownership",
+      "scope": "src/**, xtask/**, wasm/**, fuzz/**",
+      "method": "Architecture and visibility review",
+      "outcome": "passed",
+      "evidence": "Clean separation between protocol, OS protection, Reed-Solomon math and build gates."
+    },
+    {
+      "checkId": "CHECK-ARC-002",
+      "group": "ARC / Duplication and dead code",
+      "scope": "Whole repository",
+      "method": "cargo xtask copies and Clippy -D warnings",
+      "outcome": "passed",
+      "evidence": "Zero unintended copies and zero unused items."
+    },
+    {
+      "checkId": "CHECK-ARC-003",
+      "group": "ARC / Test fidelity and release stability",
+      "scope": "src/**, tests/**, fuzz/**",
+      "method": "First-run release suite, coverage and oracle review",
+      "outcome": "passed",
+      "evidence": "AUD-009-ARC001 fixed; cargo test --locked --workspace --release passed on first run (166 ok lines); 96.84% line coverage."
+    },
+    {
+      "checkId": "CHECK-ARC-004",
+      "group": "ARC / Workspace coding rules and gates",
+      "scope": "xtask/src/code_rules.rs",
+      "method": "Rule-by-rule audit and adversarial gate probing",
+      "outcome": "failed",
+      "evidence": "AUD-010-ARC001: check_cargo_requirements skips TOML dependency sub-tables, commented headers and multiline inline specs."
+    },
+    {
+      "checkId": "CHECK-DOC-001",
+      "group": "DOC / Capability and security claims",
+      "scope": "README.md, SECURITY.md, src/repair/code.rs",
+      "method": "Cross-check against source and upstream crates",
+      "outcome": "failed",
+      "evidence": "AUD-010-DOC001: src/repair/code.rs retains unqualified stack-only and complete-wiping claim on WebAssembly."
+    },
+    {
+      "checkId": "CHECK-DOC-002",
+      "group": "DOC / Metadata, notices and links",
+      "scope": "Cargo.toml, THIRD_PARTY_NOTICES.md, docs/**",
+      "method": "Link check, notice comparison and cargo package",
+      "outcome": "passed",
+      "evidence": "Relative links resolve and third-party notices match Cargo.lock."
+    },
+    {
+      "checkId": "CHECK-DOC-003",
+      "group": "DOC / Audit index and instructions",
+      "scope": "AGENTS.md, docs/audits/**",
+      "method": "Cross-check against AUD-002..AUD-009 and audit.yml",
+      "outcome": "passed",
+      "evidence": "AUD-009-DOC001 fixed: AGENTS.md and audit.yml name all three lockfiles."
+    },
+    {
+      "checkId": "CHECK-DOC-004",
+      "group": "DOC / Per-target claims and coverage freshness",
+      "scope": "SECURITY.md, docs/COVERAGE.md, docs/audits/TARGETS.md",
+      "method": "Codegen, stack and llvm-cov verification",
+      "outcome": "passed",
+      "evidence": "SECURITY.md repaired (AUD-009-DOC002 fixed); docs/COVERAGE.md cites 32651c2 (AUD-010-DOC002 informational)."
+    }
+  ],
+  "grants": [
+    {
+      "location": "src/protect.rs:28-107",
+      "grant": "secret-protection-core process isolation (protect::apply)",
+      "purpose": "Disable core dumps and ptrace, drop capabilities in Linux user namespace, and apply seccomp filter",
+      "admits": "Linux unshare(CLONE_NEWUSER) transiently grants namespace capabilities until dropped",
+      "narrowestForm": "PR_SET_DUMPABLE(0) and PR_SET_NO_NEW_PRIVS(1) run before namespace creation, capabilities drop immediately, then seccomp installs",
+      "whyNoNarrower": "Kernel requires user namespace for unprivileged seccomp/capability bounding without root",
+      "order": "Single-threaded before secret input or worker startup; if dumpable fails, namespace step does not run",
+      "findingId": null
+    },
+    {
+      "location": "src/engine/native.rs:61-168",
+      "grant": "secret-protection-core WorkArea and private Rayon worker pool",
+      "purpose": "Allocate, lock and wipe Argon2id arena and parallel worker stacks",
+      "admits": "OS RLIMIT_MEMLOCK may decline page locking (is_locked() == false)",
+      "narrowestForm": "Expose NativeArgon2::is_locked() so callers requiring mlock can refuse before reading secrets",
+      "whyNoNarrower": "Unprivileged processes cannot override kernel RLIMIT_MEMLOCK",
+      "order": "Allocate and 64-byte-align WorkArea before spawning workers; wipe worker stacks and arena on every call",
+      "findingId": null
+    },
+    {
+      "location": "src/engine/native.rs:155-168",
+      "grant": "Raw byte-to-argon2::Block mutable slice cast (blocks)",
+      "purpose": "Pass WorkArea memory to argon2::Argon2::hash_password_into_with_memory",
+      "admits": "Misaligned or mis-sized pointer cast would be undefined behaviour",
+      "narrowestForm": "Sole unsafe block in crate (unsafe_code = deny); 64-byte alignment enforced in NativeArgon2::new and verified under Miri",
+      "whyNoNarrower": "argon2::Block exposes no safe zero-copy constructor from &mut [u8]",
+      "order": "Alignment checked at construction, count computed as area.len() / Block::SIZE, exclusive &mut borrow preserved",
+      "findingId": null
+    },
+    {
+      "location": "src/stack.rs:1-25",
+      "grant": "Best-effort native stack overwrite (stack::overwrite)",
+      "purpose": "Overwrite 128 KiB of caller and worker stack frames after secret operations",
+      "admits": "No-op on wasm32 and bounded to 128 KiB on native targets",
+      "narrowestForm": "Combined with Secret<T> and Zeroizing ownership; target limits documented in SECURITY.md",
+      "whyNoNarrower": "Safe Rust and WebAssembly provide no portable frame-erasure primitive",
+      "order": "Runs after inner secret owners drop and across all Rayon worker threads before returning",
+      "findingId": "AUD-010-DOC001"
+    },
+    {
+      "location": ".github/workflows/{ci,audit,vectors}.yml and .github/workflows/release.yml",
+      "grant": "permissions: contents: read",
+      "purpose": "Check out repository and spec submodule to run checks and build package",
+      "admits": "Build scripts and proc-macros execute with read access to repository contents",
+      "narrowestForm": "persist-credentials: false on checkouts; zero write or OIDC scopes in build/test jobs",
+      "whyNoNarrower": "Checkout requires contents: read",
+      "order": "Checks, fuzzing and packaging finish before attestation or release jobs run",
+      "findingId": null
+    },
+    {
+      "location": ".github/workflows/release.yml:97-118",
+      "grant": "permissions: id-token: write, attestations: write",
+      "purpose": "Sign GitHub build provenance for mhfe-core crate archive",
+      "admits": "Could attest another artifact if untrusted code executed in the same job",
+      "narrowestForm": "Dedicated attest job performs no repository checkout and runs no project code",
+      "whyNoNarrower": "actions/attest-build-provenance requires id-token: write and attestations: write",
+      "order": "Downloads packaged .crate archive after build/check/fuzz jobs succeed, then signs provenance",
+      "findingId": null
+    },
+    {
+      "location": ".github/workflows/release.yml:120-143",
+      "grant": "permissions: contents: write",
+      "purpose": "Create draft GitHub release with crate archive and SHA-256 checksum",
+      "admits": "Token permits repository content/tag writes during that job",
+      "narrowestForm": "Dedicated release job runs no repository build code and uses SHA-pinned actions",
+      "whyNoNarrower": "GitHub Actions has no narrower release-only permission scope",
+      "order": "Runs last after attest job succeeds",
+      "findingId": null
+    }
+  ],
+  "priorFindings": [
+    {
+      "id": "AUD-009-ARC001",
+      "status": "verified",
+      "fixCommit": "7e7e3f9",
+      "evidence": "Unconditional Secret::is_locked() assertions removed from operation tests; cargo test --locked --workspace --release passed on first run (166 ok lines)."
+    },
+    {
+      "id": "AUD-009-DOC001",
+      "status": "verified",
+      "fixCommit": "7e7e3f9",
+      "evidence": "AGENTS.md:35 and .github/workflows/audit.yml name Cargo.lock, fuzz/Cargo.lock and wasm/Cargo.lock."
+    },
+    {
+      "id": "AUD-009-DOC002",
+      "status": "verified",
+      "fixCommit": "7e7e3f9",
+      "evidence": "SECURITY.md:26-44 accurately scopes reed-solomon-core 0.2.0 copies and WebAssembly stack/linear-memory behaviour; residual comment in src/repair/code.rs:4-9 is recorded as AUD-010-DOC001."
+    },
+    {
+      "id": "AUD-007-SEC002",
+      "status": "open",
+      "fixCommit": null,
+      "evidence": "Open upstream in reed-solomon-core 0.2.0 (by-value Copy of Lanes([u16; MAX_LANES]) in zip(made)); documented in SECURITY.md:26-29."
+    },
+    {
+      "id": "AUD-006-API001",
+      "status": "open",
+      "fixCommit": null,
+      "evidence": "Oversized lengths (> isize::MAX) return Error::SecretFull, while allocator failure for representable NFKD buffers aborts inside secret-protection-core 0.2.0; documented in SECURITY.md:46-50."
+    },
+    {
+      "id": "AUD-006-ARC004",
+      "status": "deferred",
+      "fixCommit": null,
+      "evidence": "Android and iOS targets are linted and cross-linked without device/emulator execution; documented in docs/audits/TARGETS.md."
+    }
+  ],
+  "findings": [
+    {
+      "id": "AUD-010-ARC001",
+      "category": "ARC",
+      "kind": "finding",
+      "title": "xtask Cargo manifest version gate skips TOML dependency sub-tables, commented headers, multiline",
+      "severity": "low",
+      "status": "open",
+      "releaseBlocking": false,
+      "affected": [
+        "xtask/src/code_rules.rs:515-568"
+      ],
+      "evidence": "docs/audits/AUD-010-harnesses/audit-probes/src/main.rs:195-261; AUD-010-evidence/harness-run.log (SHA-256 fcd5d5f8f656c23105576b77a94ebdc042a40b927b8756f8805a28ea59989cb6); AUD-010-evidence/harness-test.log (SHA-256 4f5a2d8721a52904c1135120bf8eaec7fd04de544d85e21cd53f6cc53398244f).",
+      "reproduction": "Run CARGO_TARGET_DIR=target/aud-010-harnesses cargo test --locked --manifest-path docs/audits/AUD-010-harnesses/audit-probes/Cargo.toml, which invokes xtask/src/code_rules.rs directly on a synthetic manifest using [dependencies.subtable-wildcard], [dependencies] # comment, and a multiline inline table.",
+      "expected": "cargo xtask code-rules enforces CORE-25 version-pinning requirements across every valid Cargo TOML dependency syntax.",
+      "observed": "check_cargo_requirements sets in_dependencies = line.ends_with(\"dependencies]\") without stripping header comments or matching [dependencies.<pkg>] sub-tables, and cargo_dependency inspects single lines only, allowing all three wildcard forms to pass unflagged while catching plain single-line wildcards.",
+      "impact": "Future manifest edits using TOML dependency sub-tables, commented section headers or multiline inline tables bypass automatic CORE-25 enforcement in CI. All four active manifests at 00c070c currently satisfy CORE-25.",
+      "recommendedFix": "Strip unquoted # comments before checking TOML section headers, handle or forbid [dependencies.<pkg>] / [dev-dependencies.<pkg>] / [build-dependencies.<pkg>] sub-tables, and join multiline { ... } inline tables before extracting version.",
+      "requiredVerification": "Add unit tests in xtask/src/code_rules.rs for sub-tables, commented dependency headers and multiline inline tables, then run cargo xtask check."
+    },
+    {
+      "id": "AUD-010-DOC001",
+      "category": "DOC",
+      "kind": "finding",
+      "title": "src/repair/code.rs comment still claims stack-only storage and complete wiping on WebAssembly",
+      "severity": "low",
+      "status": "open",
+      "releaseBlocking": false,
+      "affected": [
+        "src/repair/code.rs:4-9",
+        "SECURITY.md:26-44"
+      ],
+      "evidence": "src/repair/code.rs:4-9 compared against SECURITY.md:26-44 and reed-solomon-core-0.2.0/src/field/lanes.rs:67.",
+      "reproduction": "Read src/repair/code.rs:4-9 alongside SECURITY.md:26-29 and reed-solomon-core 0.2.0's Copy type Lanes([u16; MAX_LANES]) passed by value to zip(made).",
+      "expected": "Module comments and SECURITY.md agree on secret-erasure guarantees and do not claim stronger WebAssembly wiping than pinned dependencies provide (DOC-06, DOC-07).",
+      "observed": "src/repair/code.rs:4-9 still states unconditionally that every value computed from word numbers is held in fixed arrays on the stack and wiped when it goes out of use on WebAssembly, whereas reed-solomon-core 0.2.0 leaves an unzeroized Lanes copy (AUD-007-SEC002) and wasm32 frame/register placement is compiler-controlled.",
+      "impact": "Maintainers reading src/repair/code.rs see an overstated internal erasure guarantee that contradicts the repaired text in SECURITY.md.",
+      "recommendedFix": "Update src/repair/code.rs:4-9 to describe mhfe-core's fixed Zeroizing buffers accurately, note reed-solomon-core 0.2.0's residual unzeroized copy, and reference SECURITY.md for WebAssembly memory behaviour.",
+      "requiredVerification": "Compare src/repair/code.rs with SECURITY.md and run cargo xtask check."
+    }
+  ],
+  "observations": [
+    {
+      "id": "AUD-010-DOC002",
+      "category": "DOC",
+      "kind": "observation",
+      "title": "Published coverage figures cite commit 32651c2 (97.02%); 00c070c measures 96.84% lines",
+      "severity": "info",
+      "status": "open",
+      "releaseBlocking": false,
+      "affected": [
+        "README.md:133-135",
+        "docs/COVERAGE.md:1-42"
+      ],
+      "evidence": "AUD-010-evidence/cargo-llvm-cov-documented.log (SHA-256 348df6956042653e94d29bd6a0c0cd54898c2f322bf8741edaf716d5ec9e35eb).",
+      "reproduction": "Run the documented cargo llvm-cov command from docs/COVERAGE.md on commit 00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72.",
+      "expected": "Coverage documentation labels its measured commit while development continues and is refreshed before release (DOC-09).",
+      "observed": "docs/COVERAGE.md accurately labels 32651c2 (97.02%, 2,279 / 2,349 lines, 104 checks); on 00c070c (105 checks), measured coverage is 96.84% lines (2,298 / 2,373), 97.07% regions (4,175 / 4,301) and 97.27% functions (321 / 330).",
+      "impact": "Informational only; labelling complies with DOC-09 until the 0.3.0 release refresh.",
+      "recommendedFix": "Refresh docs/COVERAGE.md and README.md on the final 0.3.0 release candidate.",
+      "requiredVerification": "Re-run the documented cargo llvm-cov command and match its counts in README.md and docs/COVERAGE.md."
+    },
+    {
+      "id": "AUD-010-DOC003",
+      "category": "DOC",
+      "kind": "observation",
+      "title": "README.md suite 3 wrong-password summary omits the unverified 24-word reading without a count",
+      "severity": "info",
+      "status": "open",
+      "releaseBlocking": false,
+      "affected": [
+        "README.md:69-72"
+      ],
+      "evidence": "README.md:69-72 compared with src/mhfe.rs Recovery::readings.",
+      "reproduction": "Read README.md:69-72 alongside Recovery::readings(None) in src/mhfe.rs.",
+      "expected": "Overview prose notes when suite 3 wrong-password detection requires the caller to supply the expected word count.",
+      "observed": "README.md:69-72 states that for a phrase of 12 to 21 words suite 3 tells a wrong password almost always, without noting there that calling Recovery::readings(None) still yields an unverified 24-word Reading (is_verified() == false).",
+      "impact": "Informational clarity improvement for callers reading the overview before the API rustdoc.",
+      "recommendedFix": "Add a brief clause in README.md:69-72 noting that without a stated word count suite 3 also returns an unverified 24-word reading.",
+      "requiredVerification": "Check wording in README.md against Recovery::readings rustdoc and run dprint check."
+    }
+  ],
+  "remediation": [
+    {
+      "id": "AUD-010-ARC001",
+      "status": "open",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "Open at 00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72; reproduced by docs/audits/AUD-010-harnesses/audit-probes."
+    },
+    {
+      "id": "AUD-010-DOC001",
+      "status": "open",
+      "fixCommit": null,
+      "verificationCommit": null,
+      "evidence": "Open at 00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72."
+    }
+  ],
+  "limitations": [
+    "Local AddressSanitizer fuzzing ran 30.99 to 37.99 active seconds per target (1,635,317 total executions, 0 crashes) rather than the 300-second per-target ordinary-audit budget in docs/audits/TARGETS.md.",
+    "Miri cannot execute secret-protection-core 0.2.0's libc::sigfillset FFI call, blocking full-crate Miri runs on Secret and WorkArea paths; all 9 syscall-free unit tests and the isolated slice_as_blocks + Argon2id and CyclicWords harness passed under both -Zmiri-strict-provenance and -Zmiri-tree-borrows.",
+    "Full-cost Argon2id vector replay (tests/full_cost.rs) was not run locally.",
+    "Android (aarch64-linux-android, x86_64-linux-android) and iOS (aarch64-apple-ios, aarch64-apple-ios-sim) were linted and/or cross-linked without emulator or device runtime execution (AUD-006-ARC004).",
+    "Two upstream 0.2.0 dependency limitations remain open until their next releases: reed-solomon-core 0.2.0's unzeroized Copy of Lanes (AUD-007-SEC002) and secret-protection-core 0.2.0's abort on NFKD allocation failure (AUD-006-API001)."
+  ]
+}

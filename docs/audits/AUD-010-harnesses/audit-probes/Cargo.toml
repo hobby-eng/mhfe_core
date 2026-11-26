@@ -1,0 +1,27 @@
+[package]
+name = "aud010-audit-probes"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99"
+description = "Audit probes for AUD-010: xtask dependency-gate bypass and Miri checks of slice_as_blocks and CyclicWords"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dependencies]
+argon2 = { version = "=0.6.0", default-features = false }
+reed-solomon-core = { version = "=0.2.0", default-features = false }
+
+[workspace]
+
+[lints.rust]
+unsafe_code = "deny"
+unreachable_pub = "deny"
+
+[lints.clippy]
+all = { level = "deny", priority = -1 }
+unwrap_used = "deny"
+expect_used = "deny"
+panic = "deny"
+too_many_lines = "deny"
+mod_module_files = "deny"
+undocumented_unsafe_blocks = "deny"

@@ -1,0 +1,4333 @@
+{
+  "schemaVersion": 1,
+  "auditId": "AUD-011",
+  "auditNumber": 11,
+  "date": "2026-11-26",
+  "title": "Full mhfe-core audit of main at aeefbdf",
+  "reviewer": {
+    "name": "Codex coordinator and independent protocol, release and claims reviewers",
+    "model": "gpt-6.2-sol",
+    "reasoningEffort": null
+  },
+  "verdict": "FAIL",
+  "auditKind": "ordinary",
+  "releasePhase": null,
+  "snapshot": {
+    "commit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+    "commitComplete": true,
+    "tree": "e9f9a7d305dea53747a989e016d0c52964fe32af",
+    "workingTree": "Earlier AUD-010 records and pre-existing audit index edits excluded from the audited Git tree and preserved. Source, tests, workflows and locks match the named commit.",
+    "sourceFingerprint": "816b2006a3a94e4dcf0773da081049b300272eb778d9245010a36dc89d89ee58",
+    "executionInputsFingerprint": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+    "specification": "4535e3d9e62dd2979b2aee4d2a5233c93d2cc3ef"
+  },
+  "scope": {
+    "fullSource": true,
+    "files": [
+      {
+        "path": ".cargo/config.toml",
+        "kind": "blob",
+        "oid": "91c5fb8dc36c7f0294a348b32ebd4558a3e3bd42",
+        "sha256": "e6a1d700f2fd9f4a1672eabb2eb2c4d0f5e27c517affc924117a3c018958814f",
+        "owner": "release",
+        "lines": 3
+      },
+      {
+        "path": ".gitattributes",
+        "kind": "blob",
+        "oid": "41a7d564dfd7c9366397f394a1bf35e85d54605e",
+        "sha256": "9194f2697ffccf6cdc853eb8b0b421b772f313d5c0d9183139d9f88efd8ffa8d",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": ".github/workflows/audit.yml",
+        "kind": "blob",
+        "oid": "bffc6f251c225488d7d126e597c4479faf164f87",
+        "sha256": "56cc7aac2b9d5b36321ece985b3fa86f971de17810584b96a781b7a997a89cc0",
+        "owner": "release",
+        "lines": 59
+      },
+      {
+        "path": ".github/workflows/ci.yml",
+        "kind": "blob",
+        "oid": "b8262266a94053b1bd08d12b6a501f77406dc707",
+        "sha256": "1cc302bdc5dc09a283a6cd827e005eeb4e2d80e5d1e5656acc432c23a1bedaa7",
+        "owner": "release",
+        "lines": 252
+      },
+      {
+        "path": ".github/workflows/release.yml",
+        "kind": "blob",
+        "oid": "4c125461e7e7dc098b1d813733979268c0ccd057",
+        "sha256": "dc6a59bfcfc51bd76c98282115068cbaf445b6402a14a3fffb9cf91946e7d153",
+        "owner": "release",
+        "lines": 144
+      },
+      {
+        "path": ".github/workflows/vectors.yml",
+        "kind": "blob",
+        "oid": "5ceadc26a657698ba7dd28eff21dac4141127a4e",
+        "sha256": "11f1fb7298c3cc6842dd5b34928cde54bc51971d6bef4fe0e2e7bb9597466a3b",
+        "owner": "release",
+        "lines": 40
+      },
+      {
+        "path": ".gitignore",
+        "kind": "blob",
+        "oid": "6f755bb3684bf0b72b37d60c583e7e85dbeaf379",
+        "sha256": "f935c2afefc0b700771a128eaac5f4e98b9670f327dec3f4654ce1c7f329c6c2",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": ".gitmodules",
+        "kind": "blob",
+        "oid": "8eb229fd8a0e78f330830aeb273fcc99e6ebb691",
+        "sha256": "87ab01679da668f90293055a81a2e6450294ef2ca290c33bdc94085ae0234c7a",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "AGENTS.md",
+        "kind": "blob",
+        "oid": "032f39490c417674d64e6b97af54bdbdec00703f",
+        "sha256": "b3ec23d6d87c8484d7116d2351d7d1f130dfee227fc03cd54b452fa08f347946",
+        "owner": "claims",
+        "lines": 49
+      },
+      {
+        "path": "CHANGELOG.md",
+        "kind": "blob",
+        "oid": "71306fbbd6b9506966bd309992518f7c8ecf2ed6",
+        "sha256": "a96d93adb3b650b65e9e44dfa024ef62367dc2ef7e1cbb44aa3f0d5578ce78c2",
+        "owner": "claims",
+        "lines": 165
+      },
+      {
+        "path": "Cargo.lock",
+        "kind": "blob",
+        "oid": "8cc48df6c70e9af7af9d51adc77c30136a528611",
+        "sha256": "a24487158cc0d2228a3a0dc99021034bc2d018903e7d69ef936585ec4797f8fa",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "Cargo.toml",
+        "kind": "blob",
+        "oid": "19b2648446b10a162244b376ce9d648ea22e303c",
+        "sha256": "d372d6382dd8fc87985b5eadbabaa0de9851274d86dd2b909587320f8a6a3153",
+        "owner": "release",
+        "lines": 102
+      },
+      {
+        "path": "LICENSE-APACHE",
+        "kind": "blob",
+        "oid": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+        "sha256": "cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "LICENSE-MIT",
+        "kind": "blob",
+        "oid": "aeff1b495ab30e70441d70fe4a102811eb2676d5",
+        "sha256": "89c9c1f7cbbbb67060b354dab442571f2935669c284291338b3f9bc4bec23712",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "README.md",
+        "kind": "blob",
+        "oid": "c7837953d867f30dcc9f65547c47e1e40d93a8ba",
+        "sha256": "aba7c25454a0ecb6d7b21416a912916959b8924bb286db07351cfdf5f5518868",
+        "owner": "claims",
+        "lines": 159
+      },
+      {
+        "path": "SECURITY.md",
+        "kind": "blob",
+        "oid": "aa31f2a476e1b9d8326d2cd40e1c1fdca4d92ac2",
+        "sha256": "b5f7282bf4900b6ac8388e2d0293ccf8b84fe44331b058f0f438165f8a3c649f",
+        "owner": "claims",
+        "lines": 157
+      },
+      {
+        "path": "THIRD_PARTY_NOTICES.md",
+        "kind": "blob",
+        "oid": "03d5a89ce1b38cf27103809e0156b4a71c9f11d9",
+        "sha256": "f9038f1da8eca451babade5e304ae5ad40f5851aeb56da011a476df05f89998d",
+        "owner": "claims",
+        "lines": 69
+      },
+      {
+        "path": "assets/mhfe-mascot.png",
+        "kind": "blob",
+        "oid": "769736aa91170deeec776a8ad013aee76c5c96f9",
+        "sha256": "627e949b252f553d702ff75cdc5894874f0c112520e6d66f3683b270384d3b28",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "build.rs",
+        "kind": "blob",
+        "oid": "c9ce0707d5123583067751b1e2e056d337a245f1",
+        "sha256": "e5a44a6197e69a13468ec5cb344f7e611c2f7b3af591e31accf56240bd161f4d",
+        "owner": "release",
+        "lines": 35
+      },
+      {
+        "path": "clippy.toml",
+        "kind": "blob",
+        "oid": "44622e450e18915e019d30978083ce5e42a5e5ed",
+        "sha256": "77c27170a7ae407192c539f88a5e7f480375a94afea08677beebde27302c950c",
+        "owner": "release",
+        "lines": 6
+      },
+      {
+        "path": "docs/COVERAGE.md",
+        "kind": "blob",
+        "oid": "d6de115a34da0fd09b07063c297aa0da9813852a",
+        "sha256": "4f79dc35680d75f96047460ac5376d66229f57d1533bb3c7b1eaa2bfecb7d620",
+        "owner": "claims",
+        "lines": 63
+      },
+      {
+        "path": "docs/README.md",
+        "kind": "blob",
+        "oid": "fb52a55e563707592e3b1ffbc5e0905209ce84b7",
+        "sha256": "d64941e12a4740b8d5949099b0b8706f4577fa3323ba2141fe6fba689cd58592",
+        "owner": "claims",
+        "lines": 13
+      },
+      {
+        "path": "docs/audits/AUD-002-2026-10-27.json",
+        "kind": "blob",
+        "oid": "d63db1e89e2fa83c4c13747b5d6befe5e82fef71",
+        "sha256": "69904a67968df2519386f4b5bb461680a3818761c7e2892ae6421be23f586f6d",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-2026-10-27.md",
+        "kind": "blob",
+        "oid": "3eb0628393f7fbb619acc4131b7c019ab1328245",
+        "sha256": "71794d447e1bb42a0d74273684a001347bc677be27dee7fdf590d67f815cce94",
+        "owner": "claims",
+        "lines": 809
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/README.md",
+        "kind": "blob",
+        "oid": "7de4c92611c8d86bef97b3df4fea669ba917eb37",
+        "sha256": "442747455daf4158229b41fba5102f6c9c92b23de897ec3559eb3bfb8b3c9079",
+        "owner": "claims",
+        "lines": 299
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/Cargo.lock",
+        "kind": "blob",
+        "oid": "a79f7304f889e40e1d4698445179e0f1c95645d9",
+        "sha256": "60834d1a87291735ea9fb31b1114f4c4eeba3eeca074aa9ae84105f1fe057d18",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/Cargo.toml",
+        "kind": "blob",
+        "oid": "227788c3ec356de8f9f24928815c1f7efbcb90ed",
+        "sha256": "471ffb4bc639b6e59cf39d80edc1965e03bb62dd1f8ab1a491c36ff5d120d77f",
+        "owner": "release",
+        "lines": 28
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/README.md",
+        "kind": "blob",
+        "oid": "266034d75deca55aab1ba6eb8aab92f3503f45fd",
+        "sha256": "432cf60d031dab3fa9db66fe350885feeecc42547b402b9d4d0e07c2cbfb0adb",
+        "owner": "claims",
+        "lines": 149
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/copies-with-tests/Cargo.lock",
+        "kind": "blob",
+        "oid": "71db28bf5f735a822cf9b285af368426a2522442",
+        "sha256": "a0f6badb6aee36f81a858ea459ebc191f6b9404b10259e939d0e1a2dfee82e0a",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/copies-with-tests/Cargo.toml",
+        "kind": "blob",
+        "oid": "4616f920f02e535018489627f2823237140caef7",
+        "sha256": "1792384e8389157b7404acd7c22f0753b3be15a97daa527ca28f914f09c51dc7",
+        "owner": "release",
+        "lines": 24
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/copies-with-tests/clippy.toml",
+        "kind": "blob",
+        "oid": "8bfef8fee5011c5bd6e8eeca7e607e545507af58",
+        "sha256": "1a1da47c1a5061f2fc8fbe09186a69bb745bbc916c69abb3c184d1b31a8c0683",
+        "owner": "release",
+        "lines": 6
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/copies-with-tests/src/main.rs",
+        "kind": "blob",
+        "oid": "58ba85229f9559d9180a72df14c2aac7496f9188",
+        "sha256": "0d1fb2af6b1294a73de36634d6c384133acc67a9a6e6ce58422be0a562959614",
+        "owner": "protocol",
+        "lines": 124
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/src/main.rs",
+        "kind": "blob",
+        "oid": "e08b6570662ce840aa012780592aa4409421256f",
+        "sha256": "6824c46cb6f36df390c579150d29cebec34de6bc0a414043ce7607f19a9be5de",
+        "owner": "protocol",
+        "lines": 52
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/src/probes.rs",
+        "kind": "blob",
+        "oid": "2fede737f7937265544158c985832f48d79756f5",
+        "sha256": "bf30e74c7159f6f2b53d9221405170ffb20c8b0934c811f33b9dff1a0b2104d0",
+        "owner": "protocol",
+        "lines": 173
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/api/src/public_surface.rs",
+        "kind": "blob",
+        "oid": "a5c8226f74f83a942d40015d2b600e6330704476",
+        "sha256": "92e91dd4eec443cdd89c9382c7a7b67b357cc8044abf77c90ac41c70fd09204b",
+        "owner": "protocol",
+        "lines": 344
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/Cargo.lock",
+        "kind": "blob",
+        "oid": "e2c5ee751c049185c483a17da1a190dfadf2a767",
+        "sha256": "8a7e19a25a4c7bf23634076bcf59743ae117aef33c97a8312a3f66e1b5530d2b",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/Cargo.toml",
+        "kind": "blob",
+        "oid": "26b6ddf912f0e757a9952d6b647c3b1c1055b7c4",
+        "sha256": "57b099f8e9eed420533b0e56915bb656ca8497d9fa4f5438bfb343e0acecc7f5",
+        "owner": "release",
+        "lines": 30
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/README.md",
+        "kind": "blob",
+        "oid": "fbcbdb67dc6a8ce36a6216369049d7e8572b1cea",
+        "sha256": "bccafbbc6a3902e681e729c09bbca03bb363da7e5c7d54883cbd47d24248fb39",
+        "owner": "claims",
+        "lines": 236
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/clippy.toml",
+        "kind": "blob",
+        "oid": "8c90d64adf1e2294a63b66d6b689d6c4677ca414",
+        "sha256": "e913547acea8c92d6d17c2d86aa435ea8563a1b1459754a62430a0bc942d4f69",
+        "owner": "release",
+        "lines": 6
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/lockfile_provenance.rs",
+        "kind": "blob",
+        "oid": "062cb0c39f031e52f2cc1005e6852dff644ebd42",
+        "sha256": "b11392f5ef963f212d33cc03a28e15b53b94aec4a2a914a3a60d29cc1ae2a44a",
+        "owner": "protocol",
+        "lines": 261
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/macos_clippy_gap.rs",
+        "kind": "blob",
+        "oid": "f335ac9b0858086f3931c34491d985670339c411",
+        "sha256": "3f351511ea76c72434d42beef1701c34d751c226b8266d0e959e409a0af77157",
+        "owner": "protocol",
+        "lines": 254
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/main.rs",
+        "kind": "blob",
+        "oid": "28e09c7131a7d0997ed5b3aad2baaac8b6c84016",
+        "sha256": "fb8b8c29aab3938ddbdc82da06fcf1ede6e1eb5914e587e917f5f37b826bff7e",
+        "owner": "protocol",
+        "lines": 85
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/package_reproducible.rs",
+        "kind": "blob",
+        "oid": "7004b282b2c85d414ffa0e8e4025f5c218b82b23",
+        "sha256": "2d21a4c6e64b7ec275c9f77f638dc09df47f448b9dc5c67ebfdcf71cf3472c20",
+        "owner": "protocol",
+        "lines": 336
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/release_tag_step.rs",
+        "kind": "blob",
+        "oid": "e5304a961d47440bdd4afe4cbc4cf9e929d5d091",
+        "sha256": "2228f679e3e2f0f7de4169cdb06b1342894c41780eb6e60ea5c2d2b63ed07544",
+        "owner": "protocol",
+        "lines": 161
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/republished_version.rs",
+        "kind": "blob",
+        "oid": "394bc21bde75e45548a38f2aff2bf4e30e98c078",
+        "sha256": "d8ca1e5e2412d6c8aefe68a35725caf951a4039d90c9b68a715127b1839c0a8c",
+        "owner": "protocol",
+        "lines": 267
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/tools.rs",
+        "kind": "blob",
+        "oid": "45b6098a093e48a1c82f23f2462d1641cca2ac03",
+        "sha256": "e29c63ff92aa2404524bbfda4da324ffb893bce9bc4b2cab3e5a8643d4b1749f",
+        "owner": "protocol",
+        "lines": 178
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/vendored_upstream.rs",
+        "kind": "blob",
+        "oid": "bdf3ab48bdb11c297905bb90eda7ca2aadbf8b4a",
+        "sha256": "ea1397c1dee97d8cfc5083ec959858aeac738329b16877ba40e9cd0dd60b4efb",
+        "owner": "protocol",
+        "lines": 160
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/build/src/windows_features_needed.rs",
+        "kind": "blob",
+        "oid": "5e3fc9e627e31914e560cf4bb24eea6ce545407e",
+        "sha256": "e286491a3936322163b99a196b31ea96de4ca537c44f6f331e39991ccb191b10",
+        "owner": "protocol",
+        "lines": 173
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/docs/Cargo.lock",
+        "kind": "blob",
+        "oid": "4896a6f9743b777a95f60d4cb56bb51589ba4d3b",
+        "sha256": "192926912c06584b84a17e7e099465d918cbaeb4ef6b9ff4b97912b6c786aa9c",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/docs/Cargo.toml",
+        "kind": "blob",
+        "oid": "fd89fb35c8e468b94ac1b31351436af4372e6639",
+        "sha256": "3fa608741459e3bce4978cdcd84a1a18417c12b3af2cd570b2ae89cea0de00ff",
+        "owner": "release",
+        "lines": 27
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/docs/README.md",
+        "kind": "blob",
+        "oid": "579d86b1e7e35767522f6efb156e6761037a9f15",
+        "sha256": "a90d9a8acabd591727b7070c7cc0da0e989323c8780a32634febd4e466b6bd9e",
+        "owner": "claims",
+        "lines": 73
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/docs/src/main.rs",
+        "kind": "blob",
+        "oid": "c1f60e60662bfcccf2f82c7b78c762640bd5aa28",
+        "sha256": "2f0799ea6a0405fb77e16d863a2e39e5244457d3c388c578d69f8c28ac60ffbb",
+        "owner": "claims",
+        "lines": 321
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/docs/src/notes.rs",
+        "kind": "blob",
+        "oid": "cbab261dbe93911a2c87e8388f88729ddadfda2b",
+        "sha256": "a8a0ab6f922eb7a62275336808910d72ca5256c703078ccf16f6eb03ea4d5403",
+        "owner": "claims",
+        "lines": 44
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/README.md",
+        "kind": "blob",
+        "oid": "3afd21dcc565afadf59d3b31396dcc4c5685bc79",
+        "sha256": "c16c878ba6ac488f223bf8138b88cc8136cbbc39704bb09bfd7312c9d7edd68d",
+        "owner": "claims",
+        "lines": 119
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/adapter/Cargo.lock",
+        "kind": "blob",
+        "oid": "e0bdc7a7cf8cc2f589e952a13f90519e639327c2",
+        "sha256": "92df93b34548086a698aeeacb75941cc26b820c88d6f61bceeb055ddec578b58",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/adapter/Cargo.toml",
+        "kind": "blob",
+        "oid": "90c8ada70014ba125102b6b7c1fb6606db3a980f",
+        "sha256": "260462dc6ec47b07f3b0897169f5b4637d3d7b5886772cdd4a6e60dc6a14f173",
+        "owner": "release",
+        "lines": 27
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/adapter/src/main.rs",
+        "kind": "blob",
+        "oid": "d6656115b8a4d1c89d010eb5644697ae0f1ccbd7",
+        "sha256": "1c146e588b9e6b31081b430489813d5db35cbc2decd236e1e0bd97f708af04b5",
+        "owner": "protocol",
+        "lines": 375
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/adapter/src/nfkd_cost.rs",
+        "kind": "blob",
+        "oid": "88f64a305208d0995c9c2821d4d2e9a294d6ae10",
+        "sha256": "d413d5a29e9f50ebc4f90b70ab2f3b816cf70f3a85ba05f8228bc33789f8c39d",
+        "owner": "protocol",
+        "lines": 62
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/differential.py",
+        "kind": "blob",
+        "oid": "18ce4d35ae5a003bac024b8b0c0d2860ac395653",
+        "sha256": "da6887b71ee16d4eb03aebc5d1ba414cab541ffd901adb47a2c45548cdc87df4",
+        "owner": "claims",
+        "lines": 587
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/mhfe_ref.py",
+        "kind": "blob",
+        "oid": "286cfe1e040ef45711a372c73d05d8c0b926d5cc",
+        "sha256": "a65047190a4163e7182996d5dc48f37c7198a63fef951ff61db329107f4c6aca",
+        "owner": "claims",
+        "lines": 439
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/replay_vectors.py",
+        "kind": "blob",
+        "oid": "2736c2e8448af0c62d9e05eab740ead6ccc3cddf",
+        "sha256": "d4b63e9a9ebc568196d819d3ff8d49001ede0ba25a8e7921aac8ba182681ab94",
+        "owner": "claims",
+        "lines": 401
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/run.sh",
+        "kind": "blob",
+        "oid": "19f4b71805ed076eec3da1e82867f2329a8bf360",
+        "sha256": "df4b9608e591929e3caae73022d42f592b8a91408b95040fcf08f54cec61c409",
+        "owner": "claims",
+        "lines": 36
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/protocol/unicode_check.py",
+        "kind": "blob",
+        "oid": "e154bb67c8b8b8ce929337163bd89945ae7a62a3",
+        "sha256": "789b7aeef4d31a9e6d7de3169e69650f3616f6ee5521df6abef20c05bd482acc",
+        "owner": "claims",
+        "lines": 145
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/record/Cargo.lock",
+        "kind": "blob",
+        "oid": "72c5feae6e36099c1743f215cfa79e37547ef3cb",
+        "sha256": "bf3be9bb6104cc52000e83d3abbe880e38c9e2f0da6e0879dece0731ad497d18",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/record/Cargo.toml",
+        "kind": "blob",
+        "oid": "7c6dc1cb374143e5236ba8b81ddea4a43445202d",
+        "sha256": "811c1c8d3cfcfd26c335ab6005118ed0a88871fb163ac95e88e1951e51ac9757",
+        "owner": "release",
+        "lines": 29
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/record/README.md",
+        "kind": "blob",
+        "oid": "380799d8cd0bcae737ca3731eb1dbd553d8ec6cb",
+        "sha256": "9e3caaf384e8d86da29414299f8b7040b5f368390643ad5e852be0e9179ba6c4",
+        "owner": "claims",
+        "lines": 66
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/record/clippy.toml",
+        "kind": "blob",
+        "oid": "f910e2c346ce457191f05c72691c765b744e267c",
+        "sha256": "bc65ea08da3135dc5455ad1f82ea2c5f7dbb95d52d143710a1d920fdeb210ecd",
+        "owner": "release",
+        "lines": 2
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/record/src/files.rs",
+        "kind": "blob",
+        "oid": "e9d0f6067c3878a7f62363e95b250edf27c52b1c",
+        "sha256": "3207a5ef84bbabbf01dadc8804a7748d34f2b8c20f032ff7e00890f2ecc29a33",
+        "owner": "protocol",
+        "lines": 299
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/record/src/findings.rs",
+        "kind": "blob",
+        "oid": "c39b33775250b8f792e7adbc3a19071c13b65021",
+        "sha256": "0de61ba0f4086785caa64708b6abaedc2f056bcbffed372a7b4807be99c8b9ba",
+        "owner": "protocol",
+        "lines": 200
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/record/src/main.rs",
+        "kind": "blob",
+        "oid": "6339dbf9625f63bc87ce604501be1a92daef8458",
+        "sha256": "6a0dbfbc01032f97e11b68a9549ba0e56f9c96dc6bd6d623d5055fe87e72fa3f",
+        "owner": "protocol",
+        "lines": 238
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/record/src/schema.rs",
+        "kind": "blob",
+        "oid": "b1cae57da9606cc76c711d4a2ac6908299a0016b",
+        "sha256": "dfaa6d6553c5b087a24ef3ff34d04e522034288a74a703ff9dc8c1883f20650a",
+        "owner": "protocol",
+        "lines": 156
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/security/Cargo.lock",
+        "kind": "blob",
+        "oid": "022b3679feb80d61069232e51f2ac57e4af15bbe",
+        "sha256": "b50cb01ea24aa1caeb7c7c0810e8a4c6434d222dbf134a31ef7432a8d1d20f60",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/security/Cargo.toml",
+        "kind": "blob",
+        "oid": "da86164dfdcdd514319c0a850401a3d63cb03ca5",
+        "sha256": "29a82495ee248f7c1b554413f554c8ea42c4cc2d71290a21a538687ba015da75",
+        "owner": "release",
+        "lines": 34
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/security/README.md",
+        "kind": "blob",
+        "oid": "0cc1cbf224e3aa8183fe47b8e906f43cee295da3",
+        "sha256": "a5b69dd53b6b02d368012856f74ac6af67bc8532112248e777542cb1736c861c",
+        "owner": "claims",
+        "lines": 72
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/security/src/input_bounds.rs",
+        "kind": "blob",
+        "oid": "1c565f46bc93517b240a323d96112b85f7a70175",
+        "sha256": "604603463bd60364527ae576b25080aa7f293e248c342eb553874e6674d3608e",
+        "owner": "claims",
+        "lines": 149
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/security/src/isolation_probe.rs",
+        "kind": "blob",
+        "oid": "ba18801c43f791bf5d4938f2cad8ae66f14b6e16",
+        "sha256": "579db285a8bfe51df51a1eb50ddeb21343c44c8bb995786efaf38b6df42ce964",
+        "owner": "claims",
+        "lines": 378
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-nfkd/Cargo.lock",
+        "kind": "blob",
+        "oid": "8cc8ee591c50af517d2fb18542dab7f866235120",
+        "sha256": "f9477815a96582d0abac3a26fa7e792a727dc1a72af644bc523f239dbe4fd32d",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-nfkd/Cargo.toml",
+        "kind": "blob",
+        "oid": "63a8d8f431bf8ff9a90aa0fc797ddbe9269e0090",
+        "sha256": "b9b7e6612b535bce9bc20a1f853d6b6ae38bd1933d13f522b185a79de78a7dfe",
+        "owner": "release",
+        "lines": 25
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-nfkd/README.md",
+        "kind": "blob",
+        "oid": "36c148c8e284d03a571c5cf6ff46bead14033bb2",
+        "sha256": "52995fa6c9f139618475bab0f400b10c28e0b09d0f3cbac9ed37fdbae69091eb",
+        "owner": "claims",
+        "lines": 46
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-nfkd/src/main.rs",
+        "kind": "blob",
+        "oid": "2c4a001949c8825bcdfa66245d05070193e193d7",
+        "sha256": "44aa9632ba00a9518d2f194bc9ea9f8ab26660291807b13a5184de735d5bbb43",
+        "owner": "claims",
+        "lines": 120
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-stack/Cargo.lock",
+        "kind": "blob",
+        "oid": "9c2bfff1e88d222342a140e1dcc9f8754430f8a7",
+        "sha256": "74e7f0f484c1a55717acd300fc82ac5bb34d765ba015f46ae468dc317e37f6d4",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-stack/Cargo.toml",
+        "kind": "blob",
+        "oid": "bd0ce415a2fb4907e6d5ecaeca56c11a0827900c",
+        "sha256": "bf3156d27d6b4019c8079bfa0acba73d5b11da5bacc0a97a4754a52ff37b59c9",
+        "owner": "release",
+        "lines": 27
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-stack/README.md",
+        "kind": "blob",
+        "oid": "e769d1339aa7f3dcabcc23c7cd3fbd6b0de96348",
+        "sha256": "e2acb185c16363a0e3ede793c3bf3dbf2209cf8604d8b167ea4994697d9d6b54",
+        "owner": "claims",
+        "lines": 47
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-stack/src/main.rs",
+        "kind": "blob",
+        "oid": "07512a4b6ba86ae0494b484e24d0ed2be0c0d39c",
+        "sha256": "24d4d2df9a8cf6bc02f9bf2fd5157e33e902c3f704b55241f661cb3d3630eba4",
+        "owner": "claims",
+        "lines": 233
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-trunc/Cargo.lock",
+        "kind": "blob",
+        "oid": "f5448a05e0befd9345d2c9573c8449b38e68f05b",
+        "sha256": "1c44ee477133210d83c039fe639885972961b7b79079e250e1f0ffc975a338b9",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-trunc/Cargo.toml",
+        "kind": "blob",
+        "oid": "30f0b6a41ca2bc36f8f7e5513811b9f603813eae",
+        "sha256": "4f152f7820ddbd11175f2d0b7ead174221f52284bdd82274a57112095ce296d4",
+        "owner": "release",
+        "lines": 24
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-trunc/README.md",
+        "kind": "blob",
+        "oid": "a4763319ee9b7e9e97905b9b8831698fb4d6e84c",
+        "sha256": "f0f49743f9e586346491199dc2d2e5bf739297dd9ede6ecee1e37f3e6c946f2d",
+        "owner": "claims",
+        "lines": 35
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-api-trunc/src/main.rs",
+        "kind": "blob",
+        "oid": "1c630c5840d77bb14761c8cc809fb60de29c02b0",
+        "sha256": "e4d62c36051f8b229f4d9c0bf51620e8feb70605a4b4bab972b94893b6d61857",
+        "owner": "claims",
+        "lines": 66
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-arc-unsafe/Cargo.lock",
+        "kind": "blob",
+        "oid": "c3e6f5a618cd497156a34e8ab3fa666735e8e31e",
+        "sha256": "0f71c04f65e508c1754126aae150a6df580a5d176f23fc718641915d798af3a1",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-arc-unsafe/Cargo.toml",
+        "kind": "blob",
+        "oid": "2988e1b78de7e27907a787c6af47936e208d4211",
+        "sha256": "fbf32203cc4a921f43a169a3fe044c71a0d2e851fd86a2e3bd02f6015d74fa51",
+        "owner": "release",
+        "lines": 21
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-arc-unsafe/README.md",
+        "kind": "blob",
+        "oid": "80598c7ca595ac61d49ba71ae358a23cd878b3aa",
+        "sha256": "1082aae78dfda270fa66843e8c2d22f08a73d2f9b944b6ba7f02e252be95061b",
+        "owner": "claims",
+        "lines": 69
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-arc-unsafe/clippy.toml",
+        "kind": "blob",
+        "oid": "fa1f57ede1ce3ca0fcbaefee2dc2fc7749cad550",
+        "sha256": "74fe1adb9aa5d8e14c804a5dad043b644052b998a12fbb7e5b56aaea3e8dba4d",
+        "owner": "release",
+        "lines": 6
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-arc-unsafe/src/main.rs",
+        "kind": "blob",
+        "oid": "1b58d9069f0ca1f8f68675832b8cb17b3c30ac40",
+        "sha256": "3f059df3fcdf6d94e4acb7b23fb53e1aaab2c02f5e1e75bfd6bdf89cc3b1fae3",
+        "owner": "claims",
+        "lines": 239
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-gate/Cargo.lock",
+        "kind": "blob",
+        "oid": "710b58802b19e91cf11719505284d7dae87efd66",
+        "sha256": "f1da8d34d43b8da173647b40097d63bad43457a3fbac23822813daff2f9164a1",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-gate/Cargo.toml",
+        "kind": "blob",
+        "oid": "0fd23462f88bc9a4d68eb84027b25810e94a5ab6",
+        "sha256": "8c3f76b91f7ce9d210d1034252f404d83b8e18fb0a88357e1b2d775d0e52e908",
+        "owner": "release",
+        "lines": 21
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-gate/README.md",
+        "kind": "blob",
+        "oid": "a734cc43e909070aa3ccbe18585b599e44507825",
+        "sha256": "357aa1421dc500c7ad8d7b03614faed6aaea60945cbee1007632a890dc59ea43",
+        "owner": "claims",
+        "lines": 82
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-gate/clippy.toml",
+        "kind": "blob",
+        "oid": "fa1f57ede1ce3ca0fcbaefee2dc2fc7749cad550",
+        "sha256": "74fe1adb9aa5d8e14c804a5dad043b644052b998a12fbb7e5b56aaea3e8dba4d",
+        "owner": "release",
+        "lines": 6
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-gate/src/main.rs",
+        "kind": "blob",
+        "oid": "90d38f0f086944b5399b8c9e207a8cba5ca63b8b",
+        "sha256": "7347eb9c1304b13811cc6161dfdd3c9dcd2e4973aee62161ae3137a4808ab27d",
+        "owner": "claims",
+        "lines": 286
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-republish/Cargo.lock",
+        "kind": "blob",
+        "oid": "146e4733f65bde660046fedf2d2486fa27d9041e",
+        "sha256": "fe29551174b822d3973538d0025077d7cd283a9c0115fff478005fa0188cf009",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-republish/Cargo.toml",
+        "kind": "blob",
+        "oid": "fc5e7ed565c090751f77531b8947be4baaa6a4d0",
+        "sha256": "4f5cd51fa3de60c3c6d0cc40d29d8be1e0ec51d52f54d982c42869964830dc7c",
+        "owner": "release",
+        "lines": 25
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-republish/README.md",
+        "kind": "blob",
+        "oid": "5fd5cd0dfb251dab77d72de0c17798ad3c276213",
+        "sha256": "fdd0572e2102c35f0989482faa0eeec33bdc2d4980a30429786ff29214832726",
+        "owner": "claims",
+        "lines": 70
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-republish/clippy.toml",
+        "kind": "blob",
+        "oid": "fa1f57ede1ce3ca0fcbaefee2dc2fc7749cad550",
+        "sha256": "74fe1adb9aa5d8e14c804a5dad043b644052b998a12fbb7e5b56aaea3e8dba4d",
+        "owner": "release",
+        "lines": 6
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-republish/src/main.rs",
+        "kind": "blob",
+        "oid": "8f1003c06c26eaaca91684c05676bd56d75fa404",
+        "sha256": "eb5488cac24fd01b440c47c068ee6412597b30853288d8e599d911d2f5688edd",
+        "owner": "claims",
+        "lines": 315
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-bld-republish/src/registry.rs",
+        "kind": "blob",
+        "oid": "9080f12dde1f00519b10725dc75995c50c0e6f71",
+        "sha256": "7d79858ec615a51e7dee24f9212c830a0bf6cb97cd0fd3f1c50a80682d0b9477",
+        "owner": "claims",
+        "lines": 91
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-build-cidup/Cargo.lock",
+        "kind": "blob",
+        "oid": "a61d04c330f585b4d9f10ae5b734080b9e5a5eff",
+        "sha256": "97c086e790aa0db8a5ffc39c817458a968d890950996c69c541f992835c9072b",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-build-cidup/Cargo.toml",
+        "kind": "blob",
+        "oid": "1eaeb337ee822e2b3bf7f5ceba50589b5560e9a9",
+        "sha256": "303f12a7f50134f4ecb86e4c1875bebeedf35dddfb4a6d57bf24af050f6e0a1e",
+        "owner": "release",
+        "lines": 21
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-build-cidup/README.md",
+        "kind": "blob",
+        "oid": "4f48628ecb04ae24a3b5c70379cebda1a022c479",
+        "sha256": "8fed161a35827c9a198a8c827f475b260be79fd5f72ae0e91b9af49dd9c977b8",
+        "owner": "claims",
+        "lines": 91
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-build-cidup/clippy.toml",
+        "kind": "blob",
+        "oid": "fa1f57ede1ce3ca0fcbaefee2dc2fc7749cad550",
+        "sha256": "74fe1adb9aa5d8e14c804a5dad043b644052b998a12fbb7e5b56aaea3e8dba4d",
+        "owner": "release",
+        "lines": 6
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-build-cidup/src/main.rs",
+        "kind": "blob",
+        "oid": "dabed91c1738ff02e17e2806d43cc4c36e3f4b87",
+        "sha256": "bda30edd79b11b48fc2f8ce89e937b22662b23da6ccfa50191ef1a6ccf1dbec7",
+        "owner": "claims",
+        "lines": 323
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-pvr/Cargo.lock",
+        "kind": "blob",
+        "oid": "31eb6a8aef774ade994d095487f5f0f16618bdb7",
+        "sha256": "f53c1f400285e765771ee650a461705366183c7590c22973c95254a4dd2bf822",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-pvr/Cargo.toml",
+        "kind": "blob",
+        "oid": "a50855fc5e9035e8e5cdc52cc9f14370ff7e609c",
+        "sha256": "3a6f6b9a6550908b8b73c9b26e04ff17fcf2bc853021170eceaab5c8ce059b80",
+        "owner": "release",
+        "lines": 24
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-pvr/README.md",
+        "kind": "blob",
+        "oid": "f6283d773ebb348f2256d1c5a556c4323a4c6783",
+        "sha256": "2d7bbb94e42fb1c37d9b1d658caf0b54aa939fe76c44186737fd172417155910",
+        "owner": "claims",
+        "lines": 56
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-pvr/src/main.rs",
+        "kind": "blob",
+        "oid": "9b97f4e02a02a3476bfb79c03b54f7d1c636910d",
+        "sha256": "9512a1b8728e0f6399e1bef1d289f27b2d6bae941e5a1ecd70e1f252f13937f5",
+        "owner": "claims",
+        "lines": 212
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-wer/Cargo.lock",
+        "kind": "blob",
+        "oid": "b8eae0b61e402753d133b851a3fe1533c45df306",
+        "sha256": "7801c1b992f9835dcd586699211f48ad277eec7087856e34801445969c84627e",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-wer/Cargo.toml",
+        "kind": "blob",
+        "oid": "d5132be286464b6a27850ca96ad37e20c551212e",
+        "sha256": "d1635b7818c1d9b10fd2645a03d2fa8328c04b194be41f447893012d06cbd5fb",
+        "owner": "release",
+        "lines": 24
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-wer/README.md",
+        "kind": "blob",
+        "oid": "0c8aba05b3b130a3da5f857e8ac35cc3bc4a7a98",
+        "sha256": "194e8c31b6064d43e1c494c0d89b92a447849879245362caaaa416de0dc711d5",
+        "owner": "claims",
+        "lines": 62
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-wer/src/main.rs",
+        "kind": "blob",
+        "oid": "aa09984d52288b25c8f561d835ec5421e870e188",
+        "sha256": "717a77cab720ffead9cc23556fbd7ad42169c444c1be19250b6925f1cdf44f5d",
+        "owner": "claims",
+        "lines": 328
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-withdrawn/Cargo.lock",
+        "kind": "blob",
+        "oid": "38aa741ebc1212922c7176984dfa4b967b73604f",
+        "sha256": "22d645f52fbb82938fd1ca90b433567c8738889ae738236d14bf7b0784f29ea1",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-withdrawn/Cargo.toml",
+        "kind": "blob",
+        "oid": "e38848b8c7f404122dafd8c6079a95150e3d39f5",
+        "sha256": "b795cf25953da331e0b78721769fe944c3c693b4ac02edda6fec1339ece61ef9",
+        "owner": "release",
+        "lines": 24
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-withdrawn/README.md",
+        "kind": "blob",
+        "oid": "4667d838c3c7535e6bafffb39d15e70161be711a",
+        "sha256": "5b3cf04e36aa46f6023ab82425a2684ebe81e8910e64676c18608d6bc870f749",
+        "owner": "claims",
+        "lines": 61
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-doc-withdrawn/src/main.rs",
+        "kind": "blob",
+        "oid": "a33ad7fba592aa3534507d211f9847e814d624c9",
+        "sha256": "81af08b404e4d862c549cd515740b147fbef138f60ba3577f46d95737054d043",
+        "owner": "claims",
+        "lines": 188
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-fun-nfkd/Cargo.lock",
+        "kind": "blob",
+        "oid": "d02edfd7b7ea228037f64ac8dd10cf083326182e",
+        "sha256": "7a5642095d45a2cb87cdac13138245c9415a1e150b576d2adc6dc27ee547afc3",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-fun-nfkd/Cargo.toml",
+        "kind": "blob",
+        "oid": "421ca1c6acb99d52e14e3f4dba342137d90db22b",
+        "sha256": "6b1702eed88a6680fe1ef916c6c45def0caf8b4f9c00038d100244672af72876",
+        "owner": "release",
+        "lines": 28
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-fun-nfkd/README.md",
+        "kind": "blob",
+        "oid": "f3e83a4d2ce2d3e805aa7d0989b719cc3365efb3",
+        "sha256": "0592383ace4606cf0a9259837969f5100bd46b14e887264106545c8128ac9483",
+        "owner": "claims",
+        "lines": 43
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-fun-nfkd/src/main.rs",
+        "kind": "blob",
+        "oid": "1684c52eb28455898ef1bacc2ebed3907e7a305e",
+        "sha256": "89455cf1b7e1b2cbb511d614bc386b4683d970618ac977cfca8b61877d8afac1",
+        "owner": "claims",
+        "lines": 164
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-sec-nfkd/Cargo.lock",
+        "kind": "blob",
+        "oid": "418b900f9554caddad47de7db35a089952cfd22e",
+        "sha256": "9dcae7579a643c0750b31d33d191cdc9bdb668d33780a23f22480b95e0eae2e9",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-sec-nfkd/Cargo.toml",
+        "kind": "blob",
+        "oid": "d49b782bd3f54ff45cc09a5a9358ca77c4656a97",
+        "sha256": "c8228d82a5b2622a901358dc506a0b198d5f44798b05d474f49a66d825bd9c81",
+        "owner": "release",
+        "lines": 28
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-sec-nfkd/README.md",
+        "kind": "blob",
+        "oid": "122a70c2b66ce45e306fe8f9f0401d5efd9ddf0f",
+        "sha256": "c032f64ef00854a0613b9d715022313567d8ce194aa5ede2c7482c8cbd11826e",
+        "owner": "claims",
+        "lines": 43
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/skeptic-sec-nfkd/src/main.rs",
+        "kind": "blob",
+        "oid": "ebe45a632e7989e13b76225d6240ad6744889dde",
+        "sha256": "50453aff58ba793bc23e4b841cef27b173e963ecbdd89ad88e4b15cc7ea447e0",
+        "owner": "claims",
+        "lines": 133
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/Cargo.lock",
+        "kind": "blob",
+        "oid": "4ca1d5fd263a093c83dce661bb5ee47c32928c21",
+        "sha256": "bdb0ede5d3f8cc52c71a4dd6f6010d31a2cef424bdd1ba5c9c06a04389941676",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/Cargo.toml",
+        "kind": "blob",
+        "oid": "50021e8c6f3a306e34b67934827d7a8937545ec6",
+        "sha256": "ccd15e913a658da8fa2613fe6105b8cd46ce6a846dd008d1b02d19e0ab28ee44",
+        "owner": "release",
+        "lines": 22
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/README.md",
+        "kind": "blob",
+        "oid": "92667cf2d0a4e2b491830fc4b05c359a1c2f511a",
+        "sha256": "856f8d049a9387f6a859d9d29423db707094f1fc105469fbead3c7ec8279f28a",
+        "owner": "claims",
+        "lines": 120
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/clippy.toml",
+        "kind": "blob",
+        "oid": "f910e2c346ce457191f05c72691c765b744e267c",
+        "sha256": "bc65ea08da3135dc5455ad1f82ea2c5f7dbb95d52d143710a1d920fdeb210ecd",
+        "owner": "release",
+        "lines": 2
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/nfkd-shapes/Cargo.lock",
+        "kind": "blob",
+        "oid": "dd75ddd114d9bf05243a6dc93903308f59948a1e",
+        "sha256": "ecbc2898a3a3509b2abc1b8f6cdee17f5b56741b6852996c0944a44d05a6b064",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/nfkd-shapes/Cargo.toml",
+        "kind": "blob",
+        "oid": "36bb4c8095e8c70975b8be2ee3936d8800e5c988",
+        "sha256": "7daffd6b5b4c784d3310426400319bef49cdce3791d83759fa073cb2dd928600",
+        "owner": "release",
+        "lines": 28
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/nfkd-shapes/README.md",
+        "kind": "blob",
+        "oid": "357f73d4b772a04d25f86eae153db83609e2fba9",
+        "sha256": "d7a3b942a814ea620e61b22b60eed27311e79d3714a08dda77ec23731a67e712",
+        "owner": "claims",
+        "lines": 43
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/nfkd-shapes/clippy.toml",
+        "kind": "blob",
+        "oid": "f910e2c346ce457191f05c72691c765b744e267c",
+        "sha256": "bc65ea08da3135dc5455ad1f82ea2c5f7dbb95d52d143710a1d920fdeb210ecd",
+        "owner": "release",
+        "lines": 2
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/nfkd-shapes/src/main.rs",
+        "kind": "blob",
+        "oid": "177cc059a0467bf898c8fc6695362b7b31636d08",
+        "sha256": "5c008b173f0b50408e648992a13e43ae744a9090ff8d76731f651605f7f0fc26",
+        "owner": "protocol",
+        "lines": 141
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/src/gate_skip.rs",
+        "kind": "blob",
+        "oid": "3a8f8624eedf9a1f50349eb5d61a0ee17b11195b",
+        "sha256": "be617d5c2ddfb32404b6c34be1fdb2123f8e391a81c49697330b3121911260ea",
+        "owner": "protocol",
+        "lines": 117
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/src/macos_lint.rs",
+        "kind": "blob",
+        "oid": "d911caa43b58cf7827d38da096dc2bebd787ec3c",
+        "sha256": "4e902f68d5efec4ad9fff2a7c0e86a5e36ca219bd4b6263ece351dcf40e3988e",
+        "owner": "protocol",
+        "lines": 128
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/src/main.rs",
+        "kind": "blob",
+        "oid": "5b090c402cce4493c36ed555983711ba38d4c949",
+        "sha256": "fcc5e3096a44690c4a28a1902219b6d77732005d57c9ccb47ff70a0f0548b42f",
+        "owner": "protocol",
+        "lines": 165
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify/src/version.rs",
+        "kind": "blob",
+        "oid": "84050c0dcd06d293779adc589161c5ea77667de4",
+        "sha256": "40080cfb70c1a6811ca6d51a66d98bc5f89c10597923d502b24ba5b525dca169",
+        "owner": "protocol",
+        "lines": 98
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify2/Cargo.lock",
+        "kind": "blob",
+        "oid": "a0bc531dcc57af27a2dd5aafa81aeafe2894ed1c",
+        "sha256": "11d8d8431930b0b46bf82581d6462584a7e1278f020a2394f4511e9f659e3ff7",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify2/Cargo.toml",
+        "kind": "blob",
+        "oid": "985ffde165919d24a58a3f8b4f24245abf5aa540",
+        "sha256": "4df40b70eec8b11afcd0487ca99b871dcb945fd93ab4ba57731e69e211809a1e",
+        "owner": "release",
+        "lines": 25
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify2/README.md",
+        "kind": "blob",
+        "oid": "a2295d76318fb6ec6e41240d546c59296c2c8d1c",
+        "sha256": "424f694ab3b5aba770152582b8b8b5cbd924cc0fcce008f9f42ad2e60aa02b42",
+        "owner": "claims",
+        "lines": 36
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify2/clippy.toml",
+        "kind": "blob",
+        "oid": "f910e2c346ce457191f05c72691c765b744e267c",
+        "sha256": "bc65ea08da3135dc5455ad1f82ea2c5f7dbb95d52d143710a1d920fdeb210ecd",
+        "owner": "release",
+        "lines": 2
+      },
+      {
+        "path": "docs/audits/AUD-002-harnesses/verify2/src/main.rs",
+        "kind": "blob",
+        "oid": "e079be6daafbe39b19476e24b4ea5e7513cbc146",
+        "sha256": "631559612bbd92fbdf06f35cd0c9652f43e300a61b6387c35826b288af16c422",
+        "owner": "protocol",
+        "lines": 136
+      },
+      {
+        "path": "docs/audits/AUD-003-2026-11-01.json",
+        "kind": "blob",
+        "oid": "f52b05522ef3dbb30b1c2e58cc143fd5cd41a877",
+        "sha256": "f59a1628d01835a3b2879762fddaba414a78047a870ce57d3edc9818a6d88152",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-003-2026-11-01.md",
+        "kind": "blob",
+        "oid": "f1cb58df6893421ddbb72a8b038b40abf144142c",
+        "sha256": "34e3977346221c5f48428f72ebc6b93f49638336509e08f414f60eb2029a9ce5",
+        "owner": "claims",
+        "lines": 172
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/README.md",
+        "kind": "blob",
+        "oid": "079d74c2c1224eca92fd57f2aeba0ec04bdd9874",
+        "sha256": "80eb7543cce0079ec0e5c7787064aab724667a7ec6390238b2610fcc39451c0c",
+        "owner": "claims",
+        "lines": 12
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/fun/Cargo.lock",
+        "kind": "blob",
+        "oid": "51a2e66ca82146ee4f3356d57cb7c6879fc12867",
+        "sha256": "91ed83308f51453ced400cc4d6349351adf046a00fbc3ec5375c483dc7cbc3f3",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/fun/Cargo.toml",
+        "kind": "blob",
+        "oid": "ba625c3c43f92f2dbe34e1b5dc0190c9c7729dbc",
+        "sha256": "b1aa4e4eb04dc1acda862fdc0c6b1b7e58363e02f3f76381b76b8e1496bc725d",
+        "owner": "release",
+        "lines": 27
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/fun/README.md",
+        "kind": "blob",
+        "oid": "8e549d4d8ac648686cc63828b9d1d8e580452cbc",
+        "sha256": "5ab6ec4719b8f08037beab56a287248d34122dc3e73320a65176b48ec63306e8",
+        "owner": "claims",
+        "lines": 22
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/fun/clippy.toml",
+        "kind": "blob",
+        "oid": "f910e2c346ce457191f05c72691c765b744e267c",
+        "sha256": "bc65ea08da3135dc5455ad1f82ea2c5f7dbb95d52d143710a1d920fdeb210ecd",
+        "owner": "release",
+        "lines": 2
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/fun/src/main.rs",
+        "kind": "blob",
+        "oid": "75fd20c8b30fd64e2fa674b5d828bf70ce220d31",
+        "sha256": "ee4dbfa0827db4d3a85657fa1f0f0bd19ac23ed750ab82f23d0a857545e50269",
+        "owner": "claims",
+        "lines": 102
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/run-logged.sh",
+        "kind": "blob",
+        "oid": "fe231ca5e6ae97bf4de198393e3f588783ff553b",
+        "sha256": "0c2a8ecf5b4619871df07ef03adc8215adf8f46dcd928dd9d8726acb50c62a6d",
+        "owner": "claims",
+        "lines": 27
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/sec/README.md",
+        "kind": "blob",
+        "oid": "833afa2adc8c089653da13057efb925155905764",
+        "sha256": "ceb8f67480378ff9a13d3e871b9f29e68a4628206af8e75c3809b713032dce3d",
+        "owner": "claims",
+        "lines": 41
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/sec/gdb-hold.txt",
+        "kind": "blob",
+        "oid": "46fe11c3371b219f5f088fe4dbb913c57d8ebda4",
+        "sha256": "cd1717047cfbe7705f540d33d65b2ef0cb63b02f344abb5b937773d9714971e6",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/sec/probe-stack/Cargo.lock",
+        "kind": "blob",
+        "oid": "60ee5ab48155e227ec4a2f2cdf19a9db5b9d40c8",
+        "sha256": "f2d33604b7d3993180829e4cb328de035334cc996ae21d50ec1cff873383c964",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/sec/probe-stack/Cargo.toml",
+        "kind": "blob",
+        "oid": "e3179f94ae41a3b9fd9f2891d4954117634e61d2",
+        "sha256": "fc76e337e40409b563412d66deeb306b6265ffa239d817396b6e1eb557bed6bc",
+        "owner": "release",
+        "lines": 34
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/sec/probe-stack/rust-toolchain.toml",
+        "kind": "blob",
+        "oid": "0b8307a21c93e4335499c49321071e6c9353150e",
+        "sha256": "ca67e66659a82661386e5a08471c913cb8b3f7c7ce37592207d3f513589a41c2",
+        "owner": "release",
+        "lines": 3
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/sec/probe-stack/src/main.rs",
+        "kind": "blob",
+        "oid": "024ca4edde57f528ca5dd1dedecd229dcd6d5437",
+        "sha256": "581d0776b67c5f8b342f7e6ef13a84223d9379b3aadf44766890c76de44c6345",
+        "owner": "claims",
+        "lines": 559
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/sec/run-matrix.sh",
+        "kind": "blob",
+        "oid": "14bf7738314cb84166e30926cb82029ae10cb2e9",
+        "sha256": "70a4fa2e32fc301ae46d8b7edd3cd3102718558cffb8312dac36b9788573cccc",
+        "owner": "claims",
+        "lines": 23
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/sec/sec001-tried-fix.diff",
+        "kind": "blob",
+        "oid": "5e702cc192533827764dedebac008fc43070a075",
+        "sha256": "f934311aa13417fbe4a8faa08bf972c0c800248c14b1b3ad6c4f0c5b4ab3033a",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/skeptic-sec/probe-rounds/Cargo.lock",
+        "kind": "blob",
+        "oid": "1e5125d3107625749180a3663e1171e79dfaa4c2",
+        "sha256": "ad08a0669b3d5cf0b0d57bc54a57719d124389f6058c349f2a887a8dd80e5fb7",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/skeptic-sec/probe-rounds/Cargo.toml",
+        "kind": "blob",
+        "oid": "01e2e875c1ebf87cddf5e6ff574b978ae545d14a",
+        "sha256": "1cb7e8a42a1e133c4ef5c0a0ff1926076e3edb31d89688ee1c4d6afb05510c9c",
+        "owner": "release",
+        "lines": 24
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/skeptic-sec/probe-rounds/rust-toolchain.toml",
+        "kind": "blob",
+        "oid": "0b8307a21c93e4335499c49321071e6c9353150e",
+        "sha256": "ca67e66659a82661386e5a08471c913cb8b3f7c7ce37592207d3f513589a41c2",
+        "owner": "release",
+        "lines": 3
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/skeptic-sec/probe-rounds/src/main.rs",
+        "kind": "blob",
+        "oid": "584ac3de4f9eed104ce7e19d760bda8e70f855e5",
+        "sha256": "5cde0dbf484a6d6d682a5f29bfa5c6271db727a2a351b5e3b8caf22cb513e092",
+        "owner": "claims",
+        "lines": 167
+      },
+      {
+        "path": "docs/audits/AUD-003-harnesses/skeptic-sec/sec001-fix-with-stack-test.diff",
+        "kind": "blob",
+        "oid": "7b4d5acb14cc053b37a85bfd64688c04693a1c1d",
+        "sha256": "d053c1ee0affa30c542b7bd5517b71c03918150412ad9554b1482edff46fd1b5",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-004-2026-11-01.json",
+        "kind": "blob",
+        "oid": "56ade2906d324c9d17dc4078ec1e15e026296579",
+        "sha256": "01f19e3030bbbdede58c845b7e884b2d2a06ac2635c0d428c81ed8b186985fa9",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-004-2026-11-01.md",
+        "kind": "blob",
+        "oid": "545fe21c90d03d265a7a0361dd9f626c350d4055",
+        "sha256": "a4d36b2064489f419cc3fffb27b160dc6c0a09c4c63313035908069999419e51",
+        "owner": "claims",
+        "lines": 333
+      },
+      {
+        "path": "docs/audits/AUD-004-harnesses/Cargo.lock",
+        "kind": "blob",
+        "oid": "a7774786939e19c2b3a51aba8865812d1a5450bf",
+        "sha256": "4073ab64a8b1b159214644d2701d4ab7fb0e4858c95f30341e5014d4ff2b12e8",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-004-harnesses/Cargo.toml",
+        "kind": "blob",
+        "oid": "639a72dffe88a57140304adc21a3433d880fc32b",
+        "sha256": "8f250f986edb1ffc4d72fc04a7d8ea3039f929a18735ee052d4d209c98029a35",
+        "owner": "release",
+        "lines": 26
+      },
+      {
+        "path": "docs/audits/AUD-004-harnesses/README.md",
+        "kind": "blob",
+        "oid": "c6b823fe4eaa6ae59bdf83467fb0b0e34ffae1b0",
+        "sha256": "66c517da8b4d3a3df89191df5f3007beff89a440435e6bf07f04a2248e92c982",
+        "owner": "claims",
+        "lines": 49
+      },
+      {
+        "path": "docs/audits/AUD-004-harnesses/src/main.rs",
+        "kind": "blob",
+        "oid": "3d03d34aca127714dfad3097ab3178fb2d0166dc",
+        "sha256": "408e1f8b23c4cd112c9cbf624215e315e9eb44259515c57dcf520ecd5ec7a9eb",
+        "owner": "claims",
+        "lines": 37
+      },
+      {
+        "path": "docs/audits/AUD-004-harnesses/src/probe.rs",
+        "kind": "blob",
+        "oid": "abdf5a4635a5283bb823cda58d32ef40604db892",
+        "sha256": "2f268c408faeb5db8e3e2df7e3a727457138cc023dfd08007ce1aa99d5c62ad1",
+        "owner": "claims",
+        "lines": 53
+      },
+      {
+        "path": "docs/audits/AUD-004-harnesses/src/record.rs",
+        "kind": "blob",
+        "oid": "ceb34136f2ed8bfe974ae42623932d184f342798",
+        "sha256": "c7b2a292508c83cc8ff0b64d4b7e1cb152cda75dc70c20390dbf27aa0b5e3a19",
+        "owner": "claims",
+        "lines": 377
+      },
+      {
+        "path": "docs/audits/AUD-004-harnesses/src/registry.rs",
+        "kind": "blob",
+        "oid": "9318690bd61a4ee2866f4bf244e08c534332fcde",
+        "sha256": "d0f20de035ec229a6288bdf8b549092e68bdac3b73f57f98330bdeadc7de68d3",
+        "owner": "claims",
+        "lines": 79
+      },
+      {
+        "path": "docs/audits/AUD-004-harnesses/src/runner.rs",
+        "kind": "blob",
+        "oid": "4b17850b2a7aaea764eb2774bd205484db2ab1ce",
+        "sha256": "123e2ffcfe8f8a929fbd1596f5031d462fa9611217186240cc64af2842102bba",
+        "owner": "claims",
+        "lines": 87
+      },
+      {
+        "path": "docs/audits/AUD-005-2026-11-02.json",
+        "kind": "blob",
+        "oid": "ba45064b4d362fa2f691959ec569272d348b0c8b",
+        "sha256": "d0429e8a8d767be1c0218c416b78bea51111da85bb3d5d2a7e9d79baf7a67810",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-005-2026-11-02.md",
+        "kind": "blob",
+        "oid": "5bade699973fd5086163b831d4406216d7c8e053",
+        "sha256": "1f54e0da388fa591f99007c5a0cea54e1b7bfe49cfb04874737ed4cd31bf53fc",
+        "owner": "claims",
+        "lines": 259
+      },
+      {
+        "path": "docs/audits/AUD-005-harnesses/Cargo.lock",
+        "kind": "blob",
+        "oid": "f1d94e35b9e696f9751999a1f0c854c03534c764",
+        "sha256": "4c21793187c48cefbc52281fff421617995e0c4d5eba7233060f9438ff4fe2ef",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-005-harnesses/Cargo.toml",
+        "kind": "blob",
+        "oid": "d8188820c4fda3fb76e8f4a0a01ae35891be522f",
+        "sha256": "741ca880f58d3e0ffeae21852718fdb7c654b6eaab3c09f8ab7330e4de8c684e",
+        "owner": "release",
+        "lines": 26
+      },
+      {
+        "path": "docs/audits/AUD-005-harnesses/README.md",
+        "kind": "blob",
+        "oid": "04be9d6467624489bc8e05c8d72f12aadb524331",
+        "sha256": "f35c1956d614d792f65e75f87bc8d2e3cf62c2ac8cccee139e2cabec311fc581",
+        "owner": "claims",
+        "lines": 66
+      },
+      {
+        "path": "docs/audits/AUD-005-harnesses/src/main.rs",
+        "kind": "blob",
+        "oid": "23bbe7251527a2c1d7880ea733ffb61195fbf14a",
+        "sha256": "769d6690867b3fa666613772180c6175c2e490797eb662623bc95042e2ce528d",
+        "owner": "claims",
+        "lines": 35
+      },
+      {
+        "path": "docs/audits/AUD-005-harnesses/src/probe.rs",
+        "kind": "blob",
+        "oid": "89088a1df1ddcdd777cd17f1f5a1c6bfafe2ce88",
+        "sha256": "063508645d3bc22baa6ce50b8fae594740919da9f6f27df6e08881dea4e4a979",
+        "owner": "claims",
+        "lines": 240
+      },
+      {
+        "path": "docs/audits/AUD-005-harnesses/src/record.rs",
+        "kind": "blob",
+        "oid": "d4ecbfd9ad949a5215df06233913f56dc1f63725",
+        "sha256": "346854cdc0cedff436c27d10d9d3164882e52243059cf6b41657db09cd0d1aac",
+        "owner": "claims",
+        "lines": 317
+      },
+      {
+        "path": "docs/audits/AUD-005-harnesses/src/runner.rs",
+        "kind": "blob",
+        "oid": "1d12f03eeb282226addae0a14e293d096bc8d792",
+        "sha256": "b0e26b1c219356cdbdc9f032dbcc27b4f047fb9b7461c59242a8c670c14a3556",
+        "owner": "claims",
+        "lines": 87
+      },
+      {
+        "path": "docs/audits/AUD-006-2026-11-26.json",
+        "kind": "blob",
+        "oid": "2921d063f0071d1142bd6a12b1f4599e0ab51624",
+        "sha256": "f5030fd2b08f6f309dc925116856690a442662aa146f487b23becaab8bc753d4",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-006-2026-11-26.md",
+        "kind": "blob",
+        "oid": "c22994d5107237f9aab0396b7c0b12b2be6bb725",
+        "sha256": "d35867ec43da6b7d3bca96ead2cac2f789a3930f5aefc49af5a2cd26179170ee",
+        "owner": "claims",
+        "lines": 512
+      },
+      {
+        "path": "docs/audits/AUD-006-harnesses/README.md",
+        "kind": "blob",
+        "oid": "36d4918e03751dad67bf02682368912e93f1fe20",
+        "sha256": "33d5adadb3e5784a7652d0aaf5e2c1894f943fe3e60503b5769a764f8eb9b736",
+        "owner": "claims",
+        "lines": 9
+      },
+      {
+        "path": "docs/audits/AUD-006-harnesses/stack-need/Cargo.lock",
+        "kind": "blob",
+        "oid": "f36e847843dabc2014bf248b3a5155a9467fd27f",
+        "sha256": "84525d0ebb5a23f0008a92aa2ed2a8d3cd7bb5eee3372d57ac0736c7a5ffa7b3",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-006-harnesses/stack-need/Cargo.toml",
+        "kind": "blob",
+        "oid": "0f0003dc5af411351b1cce54ceeda801c598d535",
+        "sha256": "344e5ff0ea4809cb89141e382b70c4b6f46d88bdece37cf253c22a3b46a937ee",
+        "owner": "release",
+        "lines": 10
+      },
+      {
+        "path": "docs/audits/AUD-006-harnesses/stack-need/README.md",
+        "kind": "blob",
+        "oid": "6950ddca2e4f9193826fcf281d7cfabc176dab6d",
+        "sha256": "c0abe453340e2f82dbdbc68c59bcf0452072eb9d3fb4f22aa748e3b1d330125f",
+        "owner": "claims",
+        "lines": 20
+      },
+      {
+        "path": "docs/audits/AUD-006-harnesses/stack-need/src/main.rs",
+        "kind": "blob",
+        "oid": "d83b7ee41f25027e41245044e7590fc71021d01a",
+        "sha256": "392d5c0d2f9215e72d6842509a8925925b1f3ef468cc937a6cf09fbfa17ee876",
+        "owner": "claims",
+        "lines": 60
+      },
+      {
+        "path": "docs/audits/AUD-007-2026-11-26.json",
+        "kind": "blob",
+        "oid": "7a32960c54248253c195051b66f1c71185b59411",
+        "sha256": "f2274d5a839c23208f0fe05a2ee4f82e5b896a485398f33990f716458a66ef46",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-007-2026-11-26.md",
+        "kind": "blob",
+        "oid": "94ecf416328b006ec1bb1a1f9ed9eb0fedf45fbb",
+        "sha256": "c433f461cd3303509e509f2870e9a6c5031b782e957d2951761d85dbb4c652dd",
+        "owner": "claims",
+        "lines": 352
+      },
+      {
+        "path": "docs/audits/AUD-008-2026-11-26.json",
+        "kind": "blob",
+        "oid": "6ede3ef5b4c14ed64940cbf6187ffafd1f370e05",
+        "sha256": "60eeb52daff9d89c4764b60f2bfdcd14a03710aede1ed55bdbe567b5615a8513",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-008-2026-11-26.md",
+        "kind": "blob",
+        "oid": "53e1a7e76648c0f72c35826a3336f697e97fdcd1",
+        "sha256": "5dc2973f97a10ae3b958526353b62b9a473bf32ba94f6d3b02a9fa01d9bf2c7e",
+        "owner": "claims",
+        "lines": 190
+      },
+      {
+        "path": "docs/audits/AUD-009-2026-11-26.json",
+        "kind": "blob",
+        "oid": "a8200abdf5747435279d0feedfb47307763da193",
+        "sha256": "6fd5aca078023a6d57779f5d148573104f4c850888986f67b0b3e763cde8823d",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "docs/audits/AUD-009-2026-11-26.md",
+        "kind": "blob",
+        "oid": "8ed2f156186f8b7d48d723d50bd6752a5410a702",
+        "sha256": "e74b2e077aa69ff99bcd88bd80e6de63a6978cbd741c85be6f2feee6d0739f46",
+        "owner": "claims",
+        "lines": 200
+      },
+      {
+        "path": "docs/audits/README.md",
+        "kind": "blob",
+        "oid": "d55646eba4e83e57589b7a8257cb58c3acecf558",
+        "sha256": "003e19eca82b06ecdf9ef131e300d0a3b3146051bfd47b2253a5166ebd461b30",
+        "owner": "claims",
+        "lines": 25
+      },
+      {
+        "path": "docs/audits/TARGETS.md",
+        "kind": "blob",
+        "oid": "b4954695a09d7ccc455575a5578d27c677d4b4ce",
+        "sha256": "146f05f10e49b2354a70d978ada7e3dc5fd4700c3356c4cc717c385ca7e105ff",
+        "owner": "claims",
+        "lines": 58
+      },
+      {
+        "path": "docs/public-api.txt",
+        "kind": "blob",
+        "oid": "782e8d3ada93d34ebbced4d8942aa2aa7a9f110e",
+        "sha256": "38e3715f5b163ebacc0ea7a7cad5f2dafd689bf1b0b8b7acd08edfff2dd6e89b",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "dprint.json",
+        "kind": "blob",
+        "oid": "3343b92b9d5b9b8ee13b49351b0ea60ab79ed103",
+        "sha256": "f02eb7f6fa10c82e56547a38b3756a3b98eedf9e9b683c05fff3b1cd9783fe77",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "fuzz/.gitignore",
+        "kind": "blob",
+        "oid": "aac29ef89d26638a881b26a629bea4810e64e6a8",
+        "sha256": "e005979318db417d742efd014c6d72a7405128832d26e586fff772c031fc3445",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "fuzz/Cargo.lock",
+        "kind": "blob",
+        "oid": "87a7b5ea14127c8585f52325725b33d083f1a613",
+        "sha256": "db1e9ab3e6c214e3326a5bb52332e61226330a20735d8277c7ba6f56f459e573",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "fuzz/Cargo.toml",
+        "kind": "blob",
+        "oid": "7bc97f9d970133852ca864f3cf67ff5e6d1ac4fd",
+        "sha256": "799b54af5020a6664b637e4f10faf2bab9b6f3f528d1b69a2d658775c7ff301f",
+        "owner": "release",
+        "lines": 88
+      },
+      {
+        "path": "fuzz/clippy.toml",
+        "kind": "blob",
+        "oid": "5e4d2492a10083b36822a78243ac36cdd729c6e7",
+        "sha256": "3b2e7f88a20e629e2678d6e45a35a0cbe097d1c5b8c074319344012fc00444b6",
+        "owner": "release",
+        "lines": 1
+      },
+      {
+        "path": "fuzz/fuzz_targets/passphrase.rs",
+        "kind": "blob",
+        "oid": "511a0f2b404fa3d240bc47412be6cf4f1e3cb30c",
+        "sha256": "c84a16bd740f3310a797d98aeeb9ba3a08357f215ff5af5bf37f8f7159afa6de",
+        "owner": "coordinator",
+        "lines": 31
+      },
+      {
+        "path": "fuzz/fuzz_targets/password.rs",
+        "kind": "blob",
+        "oid": "da3fff4c38a546d9358e8451de633aaf07d474e2",
+        "sha256": "0470113fed782f7228fd48326f73f70f560d2655428956aa2600521bfbb3d172",
+        "owner": "coordinator",
+        "lines": 22
+      },
+      {
+        "path": "fuzz/fuzz_targets/password_check.rs",
+        "kind": "blob",
+        "oid": "2e6edbbb183c865c38f1d437052374639cc890af",
+        "sha256": "56d3f1f9a6e3f8da6e05cfe9c13f04e301b6a3c2395cd1e50396d87841dcb380",
+        "owner": "coordinator",
+        "lines": 79
+      },
+      {
+        "path": "fuzz/fuzz_targets/phrase.rs",
+        "kind": "blob",
+        "oid": "5e4e604db211426067e60e94333e9a065ed72d13",
+        "sha256": "302022463870eec11f64b69c71f8b7f2bfce733e3eb2d83199af6137e38efb7c",
+        "owner": "coordinator",
+        "lines": 62
+      },
+      {
+        "path": "fuzz/fuzz_targets/recovery.rs",
+        "kind": "blob",
+        "oid": "07607345b1266f7fbe3c65690c2c648a7c1f9977",
+        "sha256": "c8142f766e8de36c768eca0695dc4f60899ced651a8b7875402ff765300377c6",
+        "owner": "coordinator",
+        "lines": 155
+      },
+      {
+        "path": "fuzz/fuzz_targets/repair.rs",
+        "kind": "blob",
+        "oid": "188346e9b786410c52bf1f0d81e1a67b12f4c81e",
+        "sha256": "f0f03c3e43078a2a49ba1067dd335e5bbf1e237998c01b3fbb7931a833b9c496",
+        "owner": "coordinator",
+        "lines": 105
+      },
+      {
+        "path": "fuzz/src/lib.rs",
+        "kind": "blob",
+        "oid": "69b4f62d169eafe0516045cb1059b2a53e353966",
+        "sha256": "923473abbc29f548419424e60fc016a28739bd7d2a8a1678f04a69a9e4bb4301",
+        "owner": "coordinator",
+        "lines": 22
+      },
+      {
+        "path": "rust-toolchain.toml",
+        "kind": "blob",
+        "oid": "5ee50681f47bcec3a0d921db71103718a1543eaf",
+        "sha256": "dbe1e9ba885668d77181f3a5845b1eeacfda648c33b3a9b493399ca4f6c81d16",
+        "owner": "release",
+        "lines": 5
+      },
+      {
+        "path": "src/cipher.rs",
+        "kind": "blob",
+        "oid": "76e91b006b1248fc4c37c016a7fc0e05f1cb7a06",
+        "sha256": "6d00db058befef4b9fa6961c92ad04dd876b68978336486ef4361e050914941b",
+        "owner": "protocol",
+        "lines": 412
+      },
+      {
+        "path": "src/engine.rs",
+        "kind": "blob",
+        "oid": "033e7367d67b6416d294c2cd885fad9cf5c6525b",
+        "sha256": "aa5dbaf50989845e6f17197c9f44c4d5f2d3a3885785103ff3703d6cd3f2b786",
+        "owner": "protocol",
+        "lines": 36
+      },
+      {
+        "path": "src/engine/native.rs",
+        "kind": "blob",
+        "oid": "90424103e0647c8d9c6462f691f39c95d282f1d9",
+        "sha256": "3fcfd17de326d7e7c685d67a6598e4e5a234e05157380461247487b0d07ecce3",
+        "owner": "protocol",
+        "lines": 310
+      },
+      {
+        "path": "src/error.rs",
+        "kind": "blob",
+        "oid": "bcfcf8caad8e122abdf0ed7ee8e3d343f6f7e8c0",
+        "sha256": "d70cd33bb72132460e2ea75980667221296b9af1e6dc35b9cdfa69c1c21be6a7",
+        "owner": "coordinator",
+        "lines": 174
+      },
+      {
+        "path": "src/feistel.rs",
+        "kind": "blob",
+        "oid": "0578b7c5ede69a949b3ffcd61157bd0ac1eb0b05",
+        "sha256": "7a888537abc23222e8498bf6f5d590e38da94e3bfed497730c049d6a66b20b0c",
+        "owner": "protocol",
+        "lines": 552
+      },
+      {
+        "path": "src/lib.rs",
+        "kind": "blob",
+        "oid": "6add80f926f9cf0f7691d24a6cd239b6fcfa7a02",
+        "sha256": "1e8356e6fcbce43a3fc4e6c51893ee116f5b42bc47d7c1d590d325b0f0b163bf",
+        "owner": "coordinator",
+        "lines": 114
+      },
+      {
+        "path": "src/nfkd.rs",
+        "kind": "blob",
+        "oid": "95eceef017bd2cbfea40a6905c678429d36845ae",
+        "sha256": "ba749f3d55b0e69f69e489a0a49f1944caa91cd91d825a490e52c2ca8da1553b",
+        "owner": "coordinator",
+        "lines": 236
+      },
+      {
+        "path": "src/packing.rs",
+        "kind": "blob",
+        "oid": "e6013990494a3555bb71094fa06db2220c65c828",
+        "sha256": "a1f951ccb4aceabfed6e52e1b6be4f7c061ee016827ed257597386bdab6e7c06",
+        "owner": "protocol",
+        "lines": 175
+      },
+      {
+        "path": "src/password.rs",
+        "kind": "blob",
+        "oid": "5ab5e75ae717831b42279ef8360e44f574070730",
+        "sha256": "61bd3ffb95c8ef580802caa4a812a388eda90e5896919a0272c40e427b0b19f7",
+        "owner": "protocol",
+        "lines": 277
+      },
+      {
+        "path": "src/password_check.rs",
+        "kind": "blob",
+        "oid": "5817a8f20d953135185f16287c18253e775740b1",
+        "sha256": "868e715b64b726cf55ecbd762402d83ad5378be740c1c015b882caa2fcfbb66e",
+        "owner": "protocol",
+        "lines": 209
+      },
+      {
+        "path": "src/phrase.rs",
+        "kind": "blob",
+        "oid": "34c6d5e9721628f1e5c56e394d57564f8649375c",
+        "sha256": "211d45c47fa045571f45c909cba6eaaf9d8435313f1c251a7ff0d42a2174074d",
+        "owner": "protocol",
+        "lines": 411
+      },
+      {
+        "path": "src/protect.rs",
+        "kind": "blob",
+        "oid": "ba99c35a7369d57d626b9330bbd5387f3632e84d",
+        "sha256": "7bfd309d0a68b25ce7ac59ee028242d7d17bbd76977133623cd259d31c499f11",
+        "owner": "coordinator",
+        "lines": 11
+      },
+      {
+        "path": "src/recovery.rs",
+        "kind": "blob",
+        "oid": "ae41686a7116748d53f29d2f2bbd6f24a0f7273c",
+        "sha256": "a79c9bcdbd1312f63c603114662666f494c12de8a1a2e05fdfaaf8d723386724",
+        "owner": "protocol",
+        "lines": 386
+      },
+      {
+        "path": "src/repair.rs",
+        "kind": "blob",
+        "oid": "9fed93a633fe3f3d774e17b8ffb59194c18d58b0",
+        "sha256": "2b3facac1e505faf1b4e522847ad8d1282d51b9293d1b5811c178b1ab79e0cc5",
+        "owner": "coordinator",
+        "lines": 378
+      },
+      {
+        "path": "src/repair/code.rs",
+        "kind": "blob",
+        "oid": "52739cba3b18477012415dde07bc15255a88763e",
+        "sha256": "b9d7a9b97a66ca5b004433a8e4f69643c69986515796aff7b1de0761e5834b69",
+        "owner": "coordinator",
+        "lines": 168
+      },
+      {
+        "path": "src/same.rs",
+        "kind": "blob",
+        "oid": "07d8682a2656dd6b4b38b1f6f53aaf12a1521328",
+        "sha256": "c41b5e66549829e186f3d548a65ff400b7f592eeaedc7df8d0f16a13d29ebff9",
+        "owner": "coordinator",
+        "lines": 37
+      },
+      {
+        "path": "src/stack.rs",
+        "kind": "blob",
+        "oid": "cb6c7e6167bb7245fc14d7dd3cb9f53dcdd4c92d",
+        "sha256": "6de0cf5126922535214c923a0c7512376af70bbcfab9eb21733e6a690fa3b187",
+        "owner": "coordinator",
+        "lines": 12
+      },
+      {
+        "path": "src/suite.rs",
+        "kind": "blob",
+        "oid": "a74c896f52fcf737c3cab0cc91896ed531dc6681",
+        "sha256": "46b1ea46b846cb487a000c6ddd938296f0e3ad56865f2c3cc65b11308e2a1513",
+        "owner": "protocol",
+        "lines": 191
+      },
+      {
+        "path": "src/test_support.rs",
+        "kind": "blob",
+        "oid": "59d36f2972cd33bf118bbc6baccf72a76ef86c74",
+        "sha256": "eec75144b10d978da39c915be2447faa6c42c59925c8637438169fa0e6842176",
+        "owner": "protocol",
+        "lines": 89
+      },
+      {
+        "path": "src/wallet_check.rs",
+        "kind": "blob",
+        "oid": "abd7622663c0700494e5e55c5b8bd700a9e719e8",
+        "sha256": "3db2ca1ec0c50abceaab55e881d4e8c00c64e361b9a9e6560f7c589739e033dc",
+        "owner": "protocol",
+        "lines": 191
+      },
+      {
+        "path": "tests/fixtures/unicode18-ucd/NormalizationTest.txt",
+        "kind": "blob",
+        "oid": "730c1a013ac78f6a63118e670c72556d4f112eab",
+        "sha256": "25a50d816764b04abfb4a646d3eb2b2a803284c3873d9a06757b94fe4513dde3",
+        "owner": "coordinator",
+        "lines": null
+      },
+      {
+        "path": "tests/fixtures/unicode18-ucd/README.md",
+        "kind": "blob",
+        "oid": "de7b3313e3da70df07de325cbd41ee22acc97df9",
+        "sha256": "fa80951d6214e44a0bcbd29f491af44feb63d18b3732f943de78f24fde5bd7d6",
+        "owner": "coordinator",
+        "lines": 10
+      },
+      {
+        "path": "tests/fixtures/unicode18-ucd/SHA256SUMS",
+        "kind": "blob",
+        "oid": "8f4634ae1968ed5bdd646e375710359b6efac8ec",
+        "sha256": "917a0dd3aaa849e1159a8553d2f7f1ffc4568306ff3fcf28d9aac033faceb5b4",
+        "owner": "coordinator",
+        "lines": null
+      },
+      {
+        "path": "tests/full_cost.rs",
+        "kind": "blob",
+        "oid": "a7439d8c67ea128d3ce7ed02f900455e7a9ba3c7",
+        "sha256": "92358d592a0814e833272bb51045e2a7a7e5c9ccd8f6395936eb36f5458344aa",
+        "owner": "protocol",
+        "lines": 88
+      },
+      {
+        "path": "tests/isolation.rs",
+        "kind": "blob",
+        "oid": "470b0c6d2003caa602e8ce5f65fbb1470caca330",
+        "sha256": "49cfe4462a0c0e9b81fdf9ed440fce42a580b3dd28ae5dce79cbe5cd21ff8268",
+        "owner": "coordinator",
+        "lines": 740
+      },
+      {
+        "path": "tests/passwords.rs",
+        "kind": "blob",
+        "oid": "a32083817cc0314380c9e6abbf1c8fa15eb78937",
+        "sha256": "835ebabd307c514f251e1c75e336459f0f35eb449c31ca07b28a381addf731f3",
+        "owner": "protocol",
+        "lines": 107
+      },
+      {
+        "path": "tests/profiles.rs",
+        "kind": "blob",
+        "oid": "9643ccfa7d6396ac64790364f0ed9275a8b6fce6",
+        "sha256": "6d4a9e899ad6e742fd205e0c0b3ad5688eb4e5d5328ac2990cbe32370e711f80",
+        "owner": "protocol",
+        "lines": 227
+      },
+      {
+        "path": "tests/secret_memory.rs",
+        "kind": "blob",
+        "oid": "cc3ca9b2e99fe4c7bce0d397c786dd80c80b201f",
+        "sha256": "744fc2fd75fe3119fcdede946d790719aa746063992b7c3f68c64339f1518495",
+        "owner": "coordinator",
+        "lines": 382
+      },
+      {
+        "path": "tests/spec",
+        "kind": "commit",
+        "oid": "4535e3d9e62dd2979b2aee4d2a5233c93d2cc3ef",
+        "sha256": "134dd4250facdd9703bb9887b26c3b23c8ccdeebb803a038b42ed412791825e0",
+        "owner": "protocol",
+        "lines": null
+      },
+      {
+        "path": "tests/suite3.rs",
+        "kind": "blob",
+        "oid": "6a8d325d02d832ffbf29ca980f2e103cdbda7796",
+        "sha256": "7c519efef1e026ba4940a25c5cf8b16d5dbb9dd35ebbcf29738c62e8e1c217a5",
+        "owner": "protocol",
+        "lines": 120
+      },
+      {
+        "path": "tests/suite4.rs",
+        "kind": "blob",
+        "oid": "972e05ac429a23f96483826602605c88344f1053",
+        "sha256": "61374b53cea827d3d5b09aac3d3732904736004655f83ce0957bac8b59b784b1",
+        "owner": "protocol",
+        "lines": 98
+      },
+      {
+        "path": "tests/support/corpus.rs",
+        "kind": "blob",
+        "oid": "db1872eb48e2c75e9108ce399686df2809d11277",
+        "sha256": "96c5c1d988e98f2e9b97f36bd209c35068e7471c008a77a0662e75b6280c3bab",
+        "owner": "protocol",
+        "lines": 319
+      },
+      {
+        "path": "tests/vector_share/share.rs",
+        "kind": "blob",
+        "oid": "6c1bdd97827f7469d79763b4beb708be79880861",
+        "sha256": "91f02664a05f7829f0e4e3a48d43a1904540a1100ea3b9265c2a361ee489e578",
+        "owner": "protocol",
+        "lines": 17
+      },
+      {
+        "path": "vendor/eff-large-wordlist.md",
+        "kind": "blob",
+        "oid": "d0a1cdd4557b235d44e2a88d3bf1477e0fda9299",
+        "sha256": "5fadf2c0a6052117c6205dd4c0890a3ee395de2cc0188a5aa37682287fd97eea",
+        "owner": "claims",
+        "lines": 26
+      },
+      {
+        "path": "vendor/eff-large-wordlist/eff_large_wordlist.txt",
+        "kind": "blob",
+        "oid": "43f88a929ca6835602d6d090bbb8828ceddffe90",
+        "sha256": "addd35536511597a02fa0a9ff1e5284677b8883b83e986e43f15a3db996b903e",
+        "owner": "claims",
+        "lines": null
+      },
+      {
+        "path": "wasm/.gitignore",
+        "kind": "blob",
+        "oid": "b83d22266ac8aa2f8df2edef68082c789727841d",
+        "sha256": "306fd52e74fca6746e12acc750f232de15e71da917756a1270d74c91f5eb7368",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "wasm/Cargo.lock",
+        "kind": "blob",
+        "oid": "f2871d205def7e874761c902dca90f0fc1ad150d",
+        "sha256": "6d94afcca822cd337999dd10cc246151f3f19f4534364f7de9beccf0ee46bf88",
+        "owner": "release",
+        "lines": null
+      },
+      {
+        "path": "wasm/Cargo.toml",
+        "kind": "blob",
+        "oid": "4c4fa39194905eddad4af2e01dc041431f04238b",
+        "sha256": "129396ed873a3e96095344a5e32eaea2fcffbd1d174a090c6c8bd47b27e15e3a",
+        "owner": "release",
+        "lines": 36
+      },
+      {
+        "path": "wasm/src/lib.rs",
+        "kind": "blob",
+        "oid": "cae991f795a6d9bb889576822cc053c69221e4f8",
+        "sha256": "5a7ec401e3a114afee5e10b256ea339b88b6eccda225b964700fa6b1ab49ea3b",
+        "owner": "coordinator",
+        "lines": 128
+      },
+      {
+        "path": "xtask/Cargo.toml",
+        "kind": "blob",
+        "oid": "a97343a4a66694e1b98623486e1bdcf6040f2506",
+        "sha256": "0252d67f9ae6a4d4176351909926733b003745618aaf16ba8c51c5f6a24fb0c5",
+        "owner": "release",
+        "lines": 25
+      },
+      {
+        "path": "xtask/src/check.rs",
+        "kind": "blob",
+        "oid": "1c4b366a64e21177eec002a7d9d3a81058df6b96",
+        "sha256": "2b0908bebb167b6af7e12fe9ad0492725bfb548a88de107dc7e0f57bea601a9c",
+        "owner": "release",
+        "lines": 186
+      },
+      {
+        "path": "xtask/src/code_rules.rs",
+        "kind": "blob",
+        "oid": "c373b839eaf002df3a817feeb2298de82f54745c",
+        "sha256": "deff39a4768b09104125cd6caf094267de5a8852b02246ea2f92862bb6d7ec10",
+        "owner": "release",
+        "lines": 945
+      },
+      {
+        "path": "xtask/src/copies.rs",
+        "kind": "blob",
+        "oid": "99ab5be9b91a2c58e716fe28dbfa1a8a2130358a",
+        "sha256": "3aa09042236c43eb85e19fbf3e12e05dffd7f31b293b3f0c7131343590c44df2",
+        "owner": "release",
+        "lines": 520
+      },
+      {
+        "path": "xtask/src/copies/tokens.rs",
+        "kind": "blob",
+        "oid": "137be210fe8ae6f8148ac46b4481063550ba4a06",
+        "sha256": "fd4a2dbecaaa0fec1072a3a69e31230d1d41aa0019af5fe5839c80325985cd4a",
+        "owner": "release",
+        "lines": 366
+      },
+      {
+        "path": "xtask/src/main.rs",
+        "kind": "blob",
+        "oid": "77e7fccc6cc6a8db140a0354f9c1948534ecf343",
+        "sha256": "d81487934c03cf6696cc89dec9a4e84616ba3139313a58598a350683ed8655e5",
+        "owner": "release",
+        "lines": 78
+      },
+      {
+        "path": "xtask/src/public_api.rs",
+        "kind": "blob",
+        "oid": "bf99811470f9a6c0d45572ed3e882a9688107608",
+        "sha256": "76969aabb8f7006d665e7e8c26571caf85f503d51d83ab4a28f902037bb16b23",
+        "owner": "release",
+        "lines": 615
+      },
+      {
+        "path": "xtask/src/vendored.rs",
+        "kind": "blob",
+        "oid": "0280b346362cda7ae005730be4f182a21dc53219",
+        "sha256": "84d6557450fc7f12a3cc0c63422c083a7ce7737082993c0cd887a271588b3938",
+        "owner": "release",
+        "lines": 195
+      }
+    ],
+    "publicOperations": {
+      "Mhfe": [
+        "new",
+        "with_engine",
+        "engine",
+        "work_factor",
+        "encrypt",
+        "decrypt"
+      ],
+      "Argon2Engine": [
+        "argon2id"
+      ],
+      "NativeArgon2": [
+        "new",
+        "is_locked",
+        "is_out_of_dumps"
+      ],
+      "Phrase": [
+        "read",
+        "read_word",
+        "from_entropy",
+        "as_str",
+        "words",
+        "other_detected_lengths"
+      ],
+      "Password": [
+        "new",
+        "as_bytes"
+      ],
+      "Recovery": [
+        "suite",
+        "detected_lengths",
+        "readings"
+      ],
+      "Reading": [
+        "phrase",
+        "into_phrase",
+        "is_verified"
+      ],
+      "Suite": [
+        "id",
+        "of_container"
+      ],
+      "WorkFactor": [
+        "new",
+        "pim",
+        "memory_level",
+        "passes",
+        "memory_kib"
+      ],
+      "wallet_check::Seed": [
+        "derive",
+        "as_bytes",
+        "passes"
+      ],
+      "repair::Card": [
+        "new",
+        "as_str"
+      ],
+      "repair::Repaired": [
+        "of",
+        "container",
+        "changes"
+      ],
+      "repair::Change": [
+        "on_card",
+        "position",
+        "read",
+        "word"
+      ],
+      "password_check": [
+        "check_word"
+      ],
+      "password_check::Check": [
+        "of"
+      ]
+    },
+    "extraPublicSurface": [
+      "WorkFactor::MAX_PIM/MAX_MEMORY_LEVEL, Password::MAX_BYTES, Card::SIZES, password_check::EFF_WORDS",
+      "Public enum variants and fields, Default, Debug, Display and iteration",
+      "SPC Secret at the pinned integration boundary: with_capacity, locked, push, truncate, as_bytes, as_str, capacity, is_locked, is_out_of_dumps, is_out_of_children, zeroed, as_mut_bytes",
+      "SPC Isolation at the pinned integration boundary: enter, enter_with, enter_with_folders, enter_requiring, enter_requiring_process_wide, require, require_process_wide, has, outcome, measures; SecretError and native write_secret",
+      "Argon2Engine implementation, private unsafe Block cast, bare WASM checks export"
+    ],
+    "coverageLedger": [
+      {
+        "checkId": "CHECK-SEC-001",
+        "category": "SEC",
+        "logicalGroup": "Threat model and secret ownership",
+        "outcome": "passed",
+        "evidence": "Phrase, Password, engine, Seed and repair ownership traced from borrowed inputs to caller-owned outputs. Experimental cryptographic scope and platform boundaries checked."
+      },
+      {
+        "checkId": "CHECK-SEC-002",
+        "category": "SEC",
+        "logicalGroup": "Secret Vault, CSP, sandbox, and transport",
+        "outcome": "not-applicable",
+        "evidence": "The crate has no application vault, CSP, browser bridge or message channel."
+      },
+      {
+        "checkId": "CHECK-SEC-003",
+        "category": "SEC",
+        "logicalGroup": "Network egress and secret guards",
+        "outcome": "passed",
+        "evidence": "Production crate opens no network path. Process isolation re-exports and existing handle boundary are reviewed under SEC-008 and SEC-010."
+      },
+      {
+        "checkId": "CHECK-SEC-004",
+        "category": "SEC",
+        "logicalGroup": "Randomness, encryption, and authentication",
+        "outcome": "passed",
+        "evidence": "Suite 3/4 messages, geometry, masks, verifier domains, creation check and fixed points matched the pinned specification and fast transcript tests. Native Argon2 tag checked by public vectors. Random entropy is supplied by a caller."
+      },
+      {
+        "checkId": "CHECK-SEC-005",
+        "category": "SEC",
+        "logicalGroup": "Secret lifecycle and exceptional paths",
+        "outcome": "failed",
+        "evidence": "Reviewed native stack and allocations, WASM linear memory, callback state and explicit cleanup. AUD-007-SEC002 remains open in the pinned dependency. No all-target physical residue claim."
+      },
+      {
+        "checkId": "CHECK-SEC-006",
+        "category": "SEC",
+        "logicalGroup": "Browser injection, persistence, and sensitive APIs",
+        "outcome": "not-applicable",
+        "evidence": "No UI, DOM, script injection or storage. Bare WASM and its host boundary are reviewed under BLD-006."
+      },
+      {
+        "checkId": "CHECK-SEC-007",
+        "category": "SEC",
+        "logicalGroup": "Read-only guarantees and availability bounds",
+        "outcome": "failed",
+        "evidence": "Password limits and bounded repair widths hold. NFKD work is linear and sizing is checked, but representable allocation refusal remains AUD-006-API001."
+      },
+      {
+        "checkId": "CHECK-SEC-008",
+        "category": "SEC",
+        "logicalGroup": "Grants and mechanisms",
+        "outcome": "failed",
+        "evidence": "The grants ledger covers explicit caller grants, native effects, inherited handles, Windows order and CI privileges. The historical registry listener exceeds its fixture scope."
+      },
+      {
+        "checkId": "CHECK-FUN-001",
+        "category": "FUN",
+        "logicalGroup": "BIP39, entropy, and seed interpretation",
+        "outcome": "passed",
+        "evidence": "BIP39 entropy 16\u201332 bytes, 12\u201324 words, English abbreviations, checksum, Unicode/NFKD and PBKDF2 seed behavior matched tests and pinned specification."
+      },
+      {
+        "checkId": "CHECK-FUN-002",
+        "category": "FUN",
+        "logicalGroup": "HD derivation and every coin/profile",
+        "outcome": "not-applicable",
+        "evidence": "There is no HD master or child key derivation, address format or coin selector. The wallet check hashes the BIP39 seed."
+      },
+      {
+        "checkId": "CHECK-FUN-003",
+        "category": "FUN",
+        "logicalGroup": "BIP85, BIP38, messages, and Silent Payments",
+        "outcome": "not-applicable",
+        "evidence": "No BIP85, BIP38, messaging or Silent Payments implementation."
+      },
+      {
+        "checkId": "CHECK-FUN-004",
+        "category": "FUN",
+        "logicalGroup": "Scripts, descriptors, Miniscript, and multisig",
+        "outcome": "not-applicable",
+        "evidence": "No scripts, descriptors, multisig or Miniscript."
+      },
+      {
+        "checkId": "CHECK-FUN-005",
+        "category": "FUN",
+        "logicalGroup": "Transactions, PSBT version context, and commitments",
+        "outcome": "not-applicable",
+        "evidence": "No transaction or PSBT parser, signer or commitments."
+      },
+      {
+        "checkId": "CHECK-FUN-006",
+        "category": "FUN",
+        "logicalGroup": "Recovery and backup formats",
+        "outcome": "passed",
+        "evidence": "Packing, stated-length recovery, optional repair, password check and wallet check traced. The fast recorded-key corpus validates composition, and separate native Argon2 checks validate sampled tags. The ignored full-cost replay was not started."
+      },
+      {
+        "checkId": "CHECK-FUN-007",
+        "category": "FUN",
+        "logicalGroup": "Discovery, providers, proofs, and accounting",
+        "outcome": "not-applicable",
+        "evidence": "No account discovery, network providers or balance accounting."
+      },
+      {
+        "checkId": "CHECK-API-001",
+        "category": "API",
+        "logicalGroup": "Actual dependency call contracts",
+        "outcome": "passed",
+        "evidence": "Exact SPC/RSC crates and bridges reviewed. Argon2Engine, callback, ownership and compile-time target boundaries audited. Upstream limitations listed independently."
+      },
+      {
+        "checkId": "CHECK-API-002",
+        "category": "API",
+        "logicalGroup": "Async state, cancellation, and revisions",
+        "outcome": "passed",
+        "evidence": "Progress Breaks and late check errors traced. The synchronous API has no asynchronous or persistent state. Host callback result handling is explicitly caller-owned."
+      },
+      {
+        "checkId": "CHECK-API-003",
+        "category": "API",
+        "logicalGroup": "Public export schema and monetary fidelity",
+        "outcome": "not-applicable",
+        "evidence": "No monetary export schema or CSV/JSON file writer."
+      },
+      {
+        "checkId": "CHECK-API-004",
+        "category": "API",
+        "logicalGroup": "Encoding and import/export interoperability",
+        "outcome": "passed",
+        "evidence": "Native and bare WASM canonical BIP39, profile count and erasure validation cross-checked with public vectors. WASM has no native Argon2 engine."
+      },
+      {
+        "checkId": "CHECK-BLD-001",
+        "category": "BLD",
+        "logicalGroup": "Manifest, flags, and feature composition",
+        "outcome": "passed",
+        "evidence": "Workspace, root Cargo feature graph, separate fuzz and WASM packages, native-only engine, MSRV 1.99.0 and locked/toolchain builds checked."
+      },
+      {
+        "checkId": "CHECK-BLD-002",
+        "category": "BLD",
+        "logicalGroup": "Matrix depth and runtime sampling",
+        "outcome": "passed",
+        "evidence": "Exact 13/13 CI with per-job runtime counts. The target matrix labels lint, link, native and emulated results individually."
+      },
+      {
+        "checkId": "CHECK-BLD-003",
+        "category": "BLD",
+        "logicalGroup": "Lockfiles, source provenance, and licenses",
+        "outcome": "passed",
+        "evidence": "Three active lockfiles and pinned archives reconciled. RustSec of unchanged inputs and retained cargo-deny evidence confirmed. Historical harness graphs reviewed as historical inputs."
+      },
+      {
+        "checkId": "CHECK-BLD-004",
+        "category": "BLD",
+        "logicalGroup": "Canonical WASM and Docker bytes",
+        "outcome": "not-applicable",
+        "evidence": "This crate publishes no canonical Docker or browser distribution. Bare WASM check-module runtime is covered by BLD-006."
+      },
+      {
+        "checkId": "CHECK-BLD-005",
+        "category": "BLD",
+        "logicalGroup": "Artifacts, CI, and release workflows",
+        "outcome": "passed",
+        "evidence": "Package file check and publish dry run completed in exact CI. Permissions and graph checked, including separate full-cost workflow. 0.3.0 has no tag, package or attestation to verify."
+      },
+      {
+        "checkId": "CHECK-UI-001",
+        "category": "UI",
+        "logicalGroup": "Real files and representative viewports",
+        "outcome": "not-applicable",
+        "evidence": "No user interface or viewports in this library."
+      },
+      {
+        "checkId": "CHECK-UI-002",
+        "category": "UI",
+        "logicalGroup": "Navigation, inputs, and state preservation",
+        "outcome": "not-applicable",
+        "evidence": "No UI navigation, inputs or state persistence."
+      },
+      {
+        "checkId": "CHECK-UI-003",
+        "category": "UI",
+        "logicalGroup": "Secret visibility, help, QR, and accessibility",
+        "outcome": "not-applicable",
+        "evidence": "No GUI, QR output or accessibility surface. The usage example was reviewed as documentation."
+      },
+      {
+        "checkId": "CHECK-ARC-001",
+        "category": "ARC",
+        "logicalGroup": "Ownership, imports, and composition seams",
+        "outcome": "passed",
+        "evidence": "Ownership boundaries among cipher, engine, profiles, protection, tests and tooling traced. Re-exported dependency APIs reviewed at the integration boundary."
+      },
+      {
+        "checkId": "CHECK-ARC-002",
+        "category": "ARC",
+        "logicalGroup": "Dead code, duplication, and false positives",
+        "outcome": "passed",
+        "evidence": "The copies gate found no repetitions at its 50-token threshold across source and xtask. Shared fuzz generator and shared corpus helpers were inspected."
+      },
+      {
+        "checkId": "CHECK-ARC-003",
+        "category": "ARC",
+        "logicalGroup": "Comments, tests, and production-path fidelity",
+        "outcome": "passed",
+        "evidence": "All active fast checks passed and assert actual operation results. Stand-in key and full-cost test scopes are explicit. Prior short fuzz coverage failures and adverse origins are retained separately."
+      },
+      {
+        "checkId": "CHECK-ARC-004",
+        "category": "ARC",
+        "logicalGroup": "Workspace coding rules on the whole snapshot",
+        "outcome": "failed",
+        "evidence": "Actual manifests satisfy the current gate, and new tests for the three earlier forms pass. AUD-010-ARC001 remains open for other valid TOML syntax."
+      },
+      {
+        "checkId": "CHECK-DOC-001",
+        "category": "DOC",
+        "logicalGroup": "User-facing capability and safety descriptions",
+        "outcome": "failed",
+        "evidence": "README rare-verifier-match outcome conflicts with recovery length rules. Known upstream limitations and the experimental status are accurately disclosed."
+      },
+      {
+        "checkId": "CHECK-DOC-002",
+        "category": "DOC",
+        "logicalGroup": "Commands, metadata, links, and legal materials",
+        "outcome": "failed",
+        "evidence": "Links and package membership were checked. The adjacent dependency and Rust example target different public API versions, AUD-011-DOC004."
+      },
+      {
+        "checkId": "CHECK-DOC-003",
+        "category": "DOC",
+        "logicalGroup": "Audit records and evidence consistency",
+        "outcome": "failed",
+        "evidence": "Current exact scope and previous AUD-010 evidence separated. Historical privacy attribution remains tracked. This report adds a current finding-level follow-up register."
+      },
+      {
+        "checkId": "CHECK-DOC-004",
+        "category": "DOC",
+        "logicalGroup": "Claims per target",
+        "outcome": "passed",
+        "evidence": "Coverage inputs, unchanged library code and runner claims reconciled. Native, Windows, Apple, mobile and WebAssembly limits are separately stated."
+      },
+      {
+        "checkId": "CHECK-SEC-009",
+        "category": "SEC",
+        "logicalGroup": "Rust soundness on every target",
+        "outcome": "passed",
+        "evidence": "Production unsafe slice construction, test-only FFI/allocator operations and WASM export attribute reviewed. Miri reach and limitations are recorded under BLD-007."
+      },
+      {
+        "checkId": "CHECK-SEC-010",
+        "category": "SEC",
+        "logicalGroup": "Processes, IPC and the same-user attacker",
+        "outcome": "failed",
+        "evidence": "Native isolation tests backed by exact CI and local role outputs. Existing handles and the historical loopback registry scope are separately assessed."
+      },
+      {
+        "checkId": "CHECK-API-005",
+        "category": "API",
+        "logicalGroup": "Platform fallbacks and boundary inputs",
+        "outcome": "failed",
+        "evidence": "Checked pointer widths, errors and target fallbacks. AUD-006-API001 remains open for the pinned Secret allocation path. Mobile runtime and other architectural gaps are explicit."
+      },
+      {
+        "checkId": "CHECK-BLD-006",
+        "category": "BLD",
+        "logicalGroup": "Every target linked and run",
+        "outcome": "blocked",
+        "evidence": "Exact native CI, Wasmtime and local debug/release runs linked and executed within the ordinary scope. Clippy evidence on other target rows is reported by actual revision. One or more required lint receipts are from the previous revision only; see the matrix."
+      },
+      {
+        "checkId": "CHECK-BLD-007",
+        "category": "BLD",
+        "logicalGroup": "Dynamic analysis minimum",
+        "outcome": "blocked",
+        "evidence": "Portable Miri and fuzz results are recorded with their scope. Production mapping path is blocked in Miri by sigfillset. Full hosted fuzz receipts, corpus replay coverage and the production Miri path remain missing. The local campaign ended with the recorded 30-second cap."
+      }
+    ],
+    "variantSearch": [
+      {
+        "class": "Historical package and input identity",
+        "historicalFinding": "AUD-002 BLD/ARC and AUD-007-ARC006",
+        "assessment": "Compared vendored words, fixture revisions, lockfile archives and normalized Cargo output. Historical package wording remains AUD-011-DOC003."
+      },
+      {
+        "class": "Input size, parsing and allocation",
+        "historicalFinding": "AUD-002-API001, AUD-006-API001, AUD-006-ARC003",
+        "assessment": "Worked through entropy widths, loss marks, bounds and error ordering. Representable NFKD allocation remains open."
+      },
+      {
+        "class": "Secret copies and Debug",
+        "historicalFinding": "AUD-003 memory findings, AUD-006-SEC001, AUD-007-SEC001/SEC002, AUD-008-SEC001",
+        "assessment": "Checked payload access, caller-visible words, enums, error display, wipe-on-drop changes and callback output. RSC copy is still present. The README helper returns a Boolean."
+      },
+      {
+        "class": "Normalization and protocol compatibility",
+        "historicalFinding": "AUD-002 Unicode findings, AUD-007-DOC004",
+        "assessment": "Reviewed pre/post normalization and historical Unicode repertoire, BIP39 passphrase compatibility and pinned vectors."
+      },
+      {
+        "class": "Memory and namespace protection",
+        "historicalFinding": "AUD-006-ARC001, AUD-009-ARC001, AUD-009-DOC002",
+        "assessment": "Reviewed Linux PID and user namespace read-back, low lock limit outcomes, native allocation role counts and WebAssembly cleanup boundaries."
+      },
+      {
+        "class": "Constant-work comparison",
+        "historicalFinding": "AUD-007-SEC003",
+        "assessment": "Checked the production byte comparisons, password-check index path and example boundary. The audit does not claim an all-target codegen proof."
+      },
+      {
+        "class": "Fuzzer acceptance and failure paths",
+        "historicalFinding": "AUD-006-ARC003, AUD-007-ARC002/ARC003/ARC004, AUD-008-ARC001",
+        "assessment": "Review covers raw input and structured branches, chronological recovery decisions, repair bounds and shared generator failure."
+      },
+      {
+        "class": "Platform fallbacks",
+        "historicalFinding": "AUD-006-ARC004, AUD-007-ARC001",
+        "assessment": "Reviewed target cfgs and exact runner evidence. Mobile link-only status and host-specific WebAssembly limits remain explicit."
+      },
+      {
+        "class": "Manifest, public API and gate syntax",
+        "historicalFinding": "AUD-006-ARC002, AUD-007-ARC005, AUD-010-ARC001",
+        "assessment": "Checked actual manifests, negative gate cases, supported syntax variants and all public signatures. The dependency scanner still has uncovered forms."
+      },
+      {
+        "class": "Risk and use documentation",
+        "historicalFinding": "AUD-006-DOC001\u2013DOC007, AUD-007-DOC001\u2013DOC007, AUD-009-DOC001/DOC002",
+        "assessment": "Compared actual profile behavior, memory policy, release configuration, artifact source, API examples and the current index. New wording/version mismatches are retained."
+      },
+      {
+        "class": "Historical evidence and permissions",
+        "historicalFinding": "AUD-004-ARC001 and previous audit records",
+        "assessment": "Checked original snapshots, file-tree identities, escaped duplicate-key limitation and executed commands. New optional fixture scope issue is independently recorded."
+      }
+    ]
+  },
+  "checks": [
+    {
+      "name": "resume-build-short-password_check",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "+nightly-2026-11-13",
+        "fuzz",
+        "build",
+        "--fuzz-dir",
+        "fuzz",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "password_check"
+      ],
+      "startedAtUtc": "2026-11-26T19:51:03.217576+00:00",
+      "finishedAtUtc": "2026-11-26T19:52:52.243487+00:00",
+      "exitCode": 0,
+      "logSha256": "7cf5f539ea45052ecabbdc08cb73842ff57677bac9a881f7158c44cd3dd74450",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-build-short-password_check.log"
+    },
+    {
+      "name": "resume-build-short-repair",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "+nightly-2026-11-13",
+        "fuzz",
+        "build",
+        "--fuzz-dir",
+        "fuzz",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "repair"
+      ],
+      "startedAtUtc": "2026-11-26T19:50:31.817067+00:00",
+      "finishedAtUtc": "2026-11-26T19:50:33.838741+00:00",
+      "exitCode": 0,
+      "logSha256": "4fa22032b1f2054f12c99aab3f359ce718e26c31dc0886ef1dabdfeca6f4dca9",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-build-short-repair.log"
+    },
+    {
+      "name": "resume-check",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "xtask",
+        "check"
+      ],
+      "startedAtUtc": "2026-11-26T19:27:55.558876+00:00",
+      "finishedAtUtc": "2026-11-26T19:28:20.657813+00:00",
+      "exitCode": 0,
+      "logSha256": "348ebbcce0b8f1e2f28a1d5071d3a7a4d56a7c147134c15ac2338faf32bbfac7",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-check.log"
+    },
+    {
+      "name": "resume-fmt",
+      "command": [
+        "run-capped",
+        "--light",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "fmt",
+        "--all",
+        "--check"
+      ],
+      "startedAtUtc": "2026-11-26T19:27:55.170726+00:00",
+      "finishedAtUtc": "2026-11-26T19:27:55.541958+00:00",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-fmt.log"
+    },
+    {
+      "name": "resume-fuzz-fetch",
+      "command": [
+        "run-capped",
+        "--light",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "+nightly-2026-11-13",
+        "fetch",
+        "--locked",
+        "--offline",
+        "--manifest-path",
+        "fuzz/Cargo.toml"
+      ],
+      "startedAtUtc": "2026-11-26T19:29:03.433483+00:00",
+      "finishedAtUtc": "2026-11-26T19:29:03.777916+00:00",
+      "exitCode": 0,
+      "logSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-fuzz-fetch.log"
+    },
+    {
+      "name": "resume-fuzz-passphrase",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "+nightly-2026-11-13",
+        "fuzz",
+        "run",
+        "--fuzz-dir",
+        "fuzz",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "passphrase",
+        "/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-corpus/passphrase",
+        "--",
+        "-max_total_time=300",
+        "-rss_limit_mb=2000",
+        "-max_len=4096",
+        "-artifact_prefix=/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-artifacts/passphrase/"
+      ],
+      "startedAtUtc": "2026-11-26T19:40:35.526892+00:00",
+      "finishedAtUtc": "2026-11-26T19:45:38.527682+00:00",
+      "exitCode": 0,
+      "logSha256": "ac8674a9b5a9ce77b46b343f368ce302b5f6e449cf69294c23052c8c24927a96",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-fuzz-passphrase.log"
+    },
+    {
+      "name": "resume-fuzz-password",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "+nightly-2026-11-13",
+        "fuzz",
+        "run",
+        "--fuzz-dir",
+        "fuzz",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "password",
+        "/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-corpus/password",
+        "--",
+        "-max_total_time=300",
+        "-rss_limit_mb=2000",
+        "-max_len=4096",
+        "-artifact_prefix=/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-artifacts/password/"
+      ],
+      "startedAtUtc": "2026-11-26T19:35:33.116275+00:00",
+      "finishedAtUtc": "2026-11-26T19:40:35.506785+00:00",
+      "exitCode": 0,
+      "logSha256": "7ac452a8e8ad44b41a3e9d744d5f696ee934baca379dc6cd918f06190f3118c7",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-fuzz-password.log"
+    },
+    {
+      "name": "resume-fuzz-phrase",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "+nightly-2026-11-13",
+        "fuzz",
+        "run",
+        "--fuzz-dir",
+        "fuzz",
+        "--target",
+        "x86_64-unknown-linux-gnu",
+        "phrase",
+        "/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-corpus/phrase",
+        "--",
+        "-max_total_time=300",
+        "-rss_limit_mb=2000",
+        "-max_len=4096",
+        "-artifact_prefix=/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-artifacts/phrase/"
+      ],
+      "startedAtUtc": "2026-11-26T19:29:03.794470+00:00",
+      "finishedAtUtc": "2026-11-26T19:35:33.102225+00:00",
+      "exitCode": 0,
+      "logSha256": "fff2486ad86b783bd21fb4c597226db1d0646b4c20c81312698da3be81d350d0",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-fuzz-phrase.log"
+    },
+    {
+      "name": "resume-fuzz-short-password_check",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "5m",
+        "--",
+        "timeout",
+        "--signal=KILL",
+        "30s",
+        "/home/user/Documents/bip_tools/tmp/mhfe-core-aud011-resume/fuzz-target/x86_64-unknown-linux-gnu/release/password_check",
+        "/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-short-corpus/password_check",
+        "-max_total_time=28",
+        "-rss_limit_mb=2000",
+        "-max_len=4096",
+        "-artifact_prefix=/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-short-artifacts/password_check/"
+      ],
+      "startedAtUtc": "2026-11-26T19:52:52.259955+00:00",
+      "finishedAtUtc": "2026-11-26T19:53:21.587319+00:00",
+      "exitCode": 0,
+      "logSha256": "fa0301d980b126b83a2741754a212e15f5f8d0c2b06a63e4c5ff62372f07b785",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-fuzz-short-password_check.log"
+    },
+    {
+      "name": "resume-fuzz-short-repair",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "5m",
+        "--",
+        "timeout",
+        "--signal=KILL",
+        "30s",
+        "/home/user/Documents/bip_tools/tmp/mhfe-core-aud011-resume/fuzz-target/x86_64-unknown-linux-gnu/release/repair",
+        "/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-short-corpus/repair",
+        "-max_total_time=28",
+        "-rss_limit_mb=2000",
+        "-max_len=4096",
+        "-artifact_prefix=/home/user/Documents/bip_tools/mhfe_core/docs/audits/AUD-011-evidence/resume-short-artifacts/repair/"
+      ],
+      "startedAtUtc": "2026-11-26T19:50:33.854817+00:00",
+      "finishedAtUtc": "2026-11-26T19:51:03.200656+00:00",
+      "exitCode": 0,
+      "logSha256": "fc684b1e420d7b8a19fa0c7f7e76273d0fb2c3bd293555987fc6407581333ec0",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-fuzz-short-repair.log"
+    },
+    {
+      "name": "resume-release-tests",
+      "command": [
+        "run-capped",
+        "--mem",
+        "3G",
+        "--time",
+        "35m",
+        "--",
+        "cargo",
+        "test",
+        "--locked",
+        "--offline",
+        "--workspace",
+        "--release",
+        "--no-fail-fast"
+      ],
+      "startedAtUtc": "2026-11-26T19:28:20.675346+00:00",
+      "finishedAtUtc": "2026-11-26T19:28:44.562520+00:00",
+      "exitCode": 0,
+      "logSha256": "30a81223e4917215e164ef22fbf4f734b6d54664edd45779c16f427cb690f585",
+      "head": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "sourceManifestSha256": "50ac9776e97d3546ef4c0a628abe0529207b2e2590b0a768d58f5e928aeb443e",
+      "sourceInputsStable": true,
+      "outcome": "passed",
+      "evidence": "Local AUD-011-evidence/resume-release-tests.log"
+    }
+  ],
+  "unsafeLedger": [
+    {
+      "file": "src/engine/native.rs",
+      "line": 172,
+      "target": "all native targets",
+      "role": "typed Argon2 view",
+      "preconditions": "WorkArea bounds, alignment, unique borrow and initialized bytes. WorkArea remains the sole owner.",
+      "evidence": "Compile for each native target and exercise NativeArgon2 known tags and refusal",
+      "source": "unsafe { std::slice::from_raw_parts_mut(area.as_mut_ptr().cast::<Block>(), count) }"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 359,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "unsafe { libc::syscall(number, -1_i64, 0_i64, 0_i64, 0_i64, 0_i64, 0_i64) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 364,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "let attach = unsafe { libc::ptrace(libc::PTRACE_ATTACH, pid, 0_i64, 0_i64) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 369,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "let result = unsafe { libc::syscall(number, -1_i64, 0_i64, 0_i64, 0_i64) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 378,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "let abi = unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 395,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "let result = unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 409,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 435,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "unsafe { libc::syscall(libc::SYS_open, path.as_ptr(), libc::O_WRONLY, 0_i64) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 450,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "unsafe { libc::ioctl(target.as_raw_fd(), request.into(), ptr::null_mut::<u8>()) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 460,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 484,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "assert_eq!(unsafe { (libc::getuid(), libc::getgid()) }, (65534, 65534));"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 495,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "let allowed = unsafe { libc::unshare(libc::CLONE_NEWUSER | libc::CLONE_NEWNET) } == 0;"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 540,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "let opened = unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 551,
+      "target": "Linux test targets",
+      "role": "test-only isolation and terminal checks",
+      "preconditions": "Call-specific arguments, live buffers, owned pipes / descriptors, intentionally harmless refusal inputs. The role owns local public test resources.",
+      "evidence": "isolation custom runner on exact Linux CI",
+      "source": "unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 632,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "|access| unsafe { OpenProcess(access, 0, pid) },"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 635,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let snapshot = unsafe { CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 643,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let mut more = unsafe { Thread32First(snapshot, &mut entry) } != 0;"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 649,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "more = unsafe { Thread32Next(snapshot, &mut entry) } != 0;"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 652,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "unsafe { CloseHandle(snapshot) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 664,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "unsafe { OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES, &mut token) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 674,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let found = unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 683,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let adjusted = unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 687,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let error = unsafe { GetLastError() };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 689,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "unsafe { CloseHandle(token) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 702,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let thread = unsafe { OpenThread(THREAD_QUERY_LIMITED_INFORMATION, 0, id) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 704,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let error = unsafe { GetLastError() };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 716,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "expect_refused(&format!(\"thread {id}\"), &refused_rights, |access| unsafe {"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 720,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "unsafe { CloseHandle(thread) };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 729,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let error = unsafe { GetLastError() };"
+    },
+    {
+      "file": "tests/isolation.rs",
+      "line": 732,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "unsafe { CloseHandle(handle) };"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 33,
+      "target": "all test targets",
+      "role": "test-only GlobalAlloc",
+      "preconditions": "Original System ownership and matching layout remain unchanged.",
+      "evidence": "secret_memory custom runner",
+      "source": "unsafe impl GlobalAlloc for Counting {"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 34,
+      "target": "all test targets",
+      "role": "test-only GlobalAlloc",
+      "preconditions": "Original System ownership and matching layout remain unchanged.",
+      "evidence": "secret_memory custom runner",
+      "source": "unsafe fn alloc(&self, layout: Layout) -> *mut u8 {"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 37,
+      "target": "all test targets",
+      "role": "test-only GlobalAlloc",
+      "preconditions": "Original System ownership and matching layout remain unchanged.",
+      "evidence": "secret_memory custom runner",
+      "source": "unsafe { System.alloc(layout) }"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 40,
+      "target": "all test targets",
+      "role": "test-only GlobalAlloc",
+      "preconditions": "Original System ownership and matching layout remain unchanged.",
+      "evidence": "secret_memory custom runner",
+      "source": "unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 42,
+      "target": "all test targets",
+      "role": "test-only GlobalAlloc",
+      "preconditions": "Original System ownership and matching layout remain unchanged.",
+      "evidence": "secret_memory custom runner",
+      "source": "unsafe { System.dealloc(ptr, layout) }"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 159,
+      "target": "Unix test targets",
+      "role": "test-only memory protection queries",
+      "preconditions": "Writable initialized structs, full mapping lengths and valid handles. Measurements and limits live on the expected child or page.",
+      "evidence": "secret_memory custom runner and platform CI",
+      "source": "let size = unsafe { libc::sysconf(libc::_SC_PAGESIZE) };"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 171,
+      "target": "Unix test targets",
+      "role": "test-only memory protection queries",
+      "preconditions": "Writable initialized structs, full mapping lengths and valid handles. Measurements and limits live on the expected child or page.",
+      "evidence": "secret_memory custom runner and platform CI",
+      "source": "let read = unsafe { libc::getrlimit(libc::RLIMIT_MEMLOCK, &mut limit) };"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 292,
+      "target": "Unix test targets",
+      "role": "test-only memory protection queries",
+      "preconditions": "Writable initialized structs, full mapping lengths and valid handles. Measurements and limits live on the expected child or page.",
+      "evidence": "secret_memory custom runner and platform CI",
+      "source": "let page = unsafe {"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 305,
+      "target": "Unix test targets",
+      "role": "test-only memory protection queries",
+      "preconditions": "Writable initialized structs, full mapping lengths and valid handles. Measurements and limits live on the expected child or page.",
+      "evidence": "secret_memory custom runner and platform CI",
+      "source": "unsafe {"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 330,
+      "target": "Unix test targets",
+      "role": "test-only memory protection queries",
+      "preconditions": "Writable initialized structs, full mapping lengths and valid handles. Measurements and limits live on the expected child or page.",
+      "evidence": "secret_memory custom runner and platform CI",
+      "source": "let page = unsafe { libc::sysconf(libc::_SC_PAGESIZE) } as u64;"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 339,
+      "target": "Unix test targets",
+      "role": "test-only memory protection queries",
+      "preconditions": "Writable initialized structs, full mapping lengths and valid handles. Measurements and limits live on the expected child or page.",
+      "evidence": "secret_memory custom runner and platform CI",
+      "source": "assert_eq!(unsafe { libc::setrlimit(libc::RLIMIT_MEMLOCK, &limit) }, 0);"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 372,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "let read = unsafe {"
+    },
+    {
+      "file": "tests/secret_memory.rs",
+      "line": 380,
+      "target": "Windows test targets",
+      "role": "test-only handles, privilege and working-set checks",
+      "preconditions": "Owned live handles or documented pseudo-handles, pinned structs and explicit closes. Child processes stay scoped to test roles.",
+      "evidence": "native MSVC and GNU isolation tests and secret_memory",
+      "source": "read && unsafe { page.VirtualAttributes.Flags } & VALID_AND_LOCKED == VALID_AND_LOCKED"
+    },
+    {
+      "file": "wasm/src/lib.rs",
+      "line": 121,
+      "target": "wasm32-unknown-unknown",
+      "role": "test-module export attribute",
+      "preconditions": "One C ABI scalar return in this independent module. No borrowed host pointer or memory dereference.",
+      "evidence": "28 profile checks in pinned Wasmtime",
+      "source": "#[unsafe(no_mangle)]"
+    },
+    {
+      "file": "wasm/src/lib.rs",
+      "line": 122,
+      "target": "wasm32-unknown-unknown",
+      "role": "test-module export attribute",
+      "preconditions": "One C ABI scalar return in this independent module. No borrowed host pointer or memory dereference.",
+      "evidence": "28 profile checks in pinned Wasmtime",
+      "source": "pub extern \"C\" fn checks() -> u32 {"
+    }
+  ],
+  "environment": {
+    "host": "Linux 7.0.0-44-generic x86_64",
+    "rust": "1.99.1 (58cf8f9c3)",
+    "nightly": "nightly-2026-11-13 (8eb778d04)",
+    "cargoFuzz": "0.13.2",
+    "dprint": "0.63.0",
+    "wasmtimeCI": "49.0.2",
+    "localRecordSha256": "181f5c54c179e04075a5af8b770ca30bcd1c2cfded54fc7498bb4d7929651eb3"
+  },
+  "findings": [
+    {
+      "id": "AUD-011-SEC001",
+      "category": "SEC",
+      "kind": "finding",
+      "title": "Historical registry can serve files outside its synthetic fixture directory",
+      "severity": "low",
+      "status": "open",
+      "releaseBlocking": false,
+      "affectedFiles": [
+        "docs/audits/AUD-002-harnesses/skeptic-bld-republish/src/registry.rs:62"
+      ],
+      "reproduction": "Static control-flow review of the raw request-to-file path at the committed snapshot. No requests were sent.",
+      "expected": "The local fixture service can open only its explicitly served synthetic corpus files.",
+      "observed": "Request handling rejects parent components but does not verify that the path is relative and resolves inside the fixture directory before it reads a file.",
+      "impact": "On Unix, an unauthenticated same-machine client can reach the temporary listener while the optional historical harness is running and may receive files readable by its process. The library and release package do not contain the listener.",
+      "evidence": "The checks and resulting filesystem join in registry.rs were independently traced. The separate build harness is not affected by the same path form.",
+      "recommendedFix": "Serve an explicit allowlist of fixture paths from owned bytes rather than arbitrary request-mapped filesystem paths.",
+      "requiredVerification": "Verify ordinary Cargo fixture requests and reject non-allowlisted targets using synthetic fixtures only.",
+      "relatedFindings": []
+    },
+    {
+      "id": "AUD-011-DOC001",
+      "category": "DOC",
+      "kind": "finding",
+      "title": "README assigns the absence of a short reading to a verifier match",
+      "severity": "low",
+      "status": "open",
+      "releaseBlocking": false,
+      "affectedFiles": [
+        "README.md:60",
+        "src/recovery.rs:69",
+        "src/recovery.rs:136"
+      ],
+      "reproduction": "Read the wrong-password overview against the detected-length decision table and pinned specification.",
+      "expected": "Describe the common no-match result separately from the rare chance match.",
+      "observed": "The wording attaches no short reading to a chance verifier pass. Recovery returns a matching short reading and labels the verifier match. On zero matches a stated short length is refused, and an unstated length can yield an unverified 24-word reading.",
+      "impact": "A reader could misunderstand what a verifier match or a surviving short reading means when recovering a backup. Runtime code and its detailed docs agree with the specification.",
+      "evidence": "Three reviewers independently compared the README, source and recovery rules. The suite tests exercise both branches.",
+      "recommendedFix": "Separate the zero-match and rare-match cases and retain the distinction between a verifier match and wallet identification.",
+      "requiredVerification": "Cross-check wording against the match, no-match, different-length and ambiguous recovery cases.",
+      "relatedFindings": [
+        "AUD-007-DOC003"
+      ]
+    },
+    {
+      "id": "AUD-011-DOC002",
+      "category": "DOC",
+      "kind": "finding",
+      "title": "Historical public audit records retain private decision attribution",
+      "severity": "low",
+      "status": "open",
+      "releaseBlocking": false,
+      "affectedFiles": [
+        "docs/audits/README.md:18",
+        "docs/audits/AUD-002-2026-10-27.md:513",
+        "docs/audits/AUD-002-2026-10-27.json"
+      ],
+      "reproduction": "Inspect the historical narrative, JSON and index against Report privacy in the workspace audit rules.",
+      "expected": "Record technical decisions, evidence and dispositions without attributing them to a person or private conversation.",
+      "observed": "The tracked documents attribute technical acceptances and internal decisions to a requester and refer to private conversations. Their details are not repeated here.",
+      "impact": "The current public record retains unnecessary personal attribution. The technical decisions, findings and evidence can remain intact when that attribution is removed.",
+      "evidence": "The index and the Markdown and JSON record were compared with the current explicit privacy rule.",
+      "recommendedFix": "Apply authorized privacy redaction that preserves the original technical conclusions, evidence and dispositions.",
+      "requiredVerification": "Verify both report formats and the index for attribution and confirm preserved technical evidence.",
+      "relatedFindings": []
+    },
+    {
+      "id": "AUD-011-DOC003",
+      "category": "DOC",
+      "kind": "finding",
+      "title": "Historical package checker overstates its commit-blob comparison",
+      "severity": "low",
+      "status": "open",
+      "releaseBlocking": false,
+      "affectedFiles": [
+        "docs/audits/AUD-002-harnesses/build/README.md:50",
+        "docs/audits/AUD-002-harnesses/build/src/package_reproducible.rs:185",
+        "docs/audits/AUD-002-harnesses/build/src/package_reproducible.rs:207"
+      ],
+      "reproduction": "Compare promised blob coverage with the generated-file branches of blobs_match.",
+      "expected": "Distinguish archived byte equality and generated-file membership from comparison to source Git blobs.",
+      "observed": "The guide and success text say every packaged file equals its commit blob. The normalized Cargo.toml and Cargo VCS metadata are skipped by this comparison. The separate archive comparison covers their bytes.",
+      "impact": "Readers can infer that generated metadata was validated against the source commit by a check that only compares other files. The historical byte-reproducibility result remains separate.",
+      "evidence": "Static inspection of the stated contract, loop and status output.",
+      "recommendedFix": "Qualify the old check as blob equality for tracked source material and list the generated-file exceptions.",
+      "requiredVerification": "Reconcile documented checks, file membership and output with the exact comparison branches.",
+      "relatedFindings": []
+    },
+    {
+      "id": "AUD-011-DOC004",
+      "category": "DOC",
+      "kind": "finding",
+      "title": "README dependency and neighboring example use different APIs",
+      "severity": "low",
+      "status": "open",
+      "releaseBlocking": false,
+      "affectedFiles": [
+        "README.md:76",
+        "README.md:93",
+        "CHANGELOG.md:26",
+        "v0.2.0:src/cipher.rs:73",
+        "v0.2.0:src/cipher.rs:132"
+      ],
+      "reproduction": "Compare the adjacent dependency snippet and Rust example with the API at v0.2.0 and the current manifest.",
+      "expected": "The example compiles for its stated version, or the documentation explicitly pairs the example with its intended unreleased version.",
+      "observed": "The dependency snippet selects 0.2. In v0.2.0 (d203948833d16399a163a89db546b92448c5b212), encrypt and decrypt return Phrase and Recovery after the Result is unwrapped. The README matches ControlFlow::Continue as in unreleased 0.3.0.",
+      "impact": "Copying the dependency and example together yields a Rust type error at both matches. No defect in either library version follows from the mixed instructions.",
+      "evidence": "Exact tagged public signatures and current signatures were read independently. The release tag and package identity were verified by the release review.",
+      "recommendedFix": "Use an example for 0.2 or label the unreleased 0.3 API example with the dependency source that provides it.",
+      "requiredVerification": "Compile the presented example with the exact dependency described immediately above it.",
+      "relatedFindings": []
+    }
+  ],
+  "observations": [],
+  "informationalNotes": [
+    "AUD-004-ARC001 already records the narrow historical verification contracts. verify2 uses mtimes and untracked paths, so a deleted tracked path is not checked. Its diff digest is only printed. The old JSON checker compares raw key spelling, so escape-equivalent keys are outside its check. Neither limitation establishes that an old recorded verdict was wrong. The current report uses the complete tracked inventory and decoded-key validation.",
+    "AUD-010 is retained as the uncommitted review of 00c070c. Its command outputs were checked separately from its prose. The cited semver tool skipped all 260 checks on the version transition. Its Miri harness models an aligned cast and does not execute the production WorkArea path. Its code generation log records compilation. These results are not stronger evidence of semantic compatibility or optimizer behavior.",
+    "password_check::Check and repair::Change return words deliberately requested by their callers. The output ownership boundary in SECURITY.md applies to those values. No extra hidden payload leak was established by this review.",
+    "Only the optional historical registry uses the affected listener. Its sibling build harness strips all leading Unix separators, so the same absolute-path issue does not apply there.",
+    "The specification test submodule is a pinned input. Relevant protocol text, manifests and public vectors are reconciled at the gitlink. The rest of that separate repository is not a second audit scope."
+  ],
+  "remediation": [
+    {
+      "id": "AUD-006-SEC001",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Local repair arrays and protection storage are explicitly wiped. Native and bare-WASM tests pass, with the separate RSC copy retained as AUD-007-SEC002."
+    },
+    {
+      "id": "AUD-006-API001",
+      "status": "open",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "The size refusal and documentation hold. Representable allocation refusal still terminates in SPC 0.2.0."
+    },
+    {
+      "id": "AUD-006-BLD001",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "The active graphs have aligned security dependencies and the three RustSec scopes were checked against identical lockfiles."
+    },
+    {
+      "id": "AUD-006-ARC001",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Isolation uses the first PID and user namespace distinction. The actual role checks pass on native Linux and CI."
+    },
+    {
+      "id": "AUD-006-ARC002",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Code-rules reviews fuzz Rust while excluding generated builds/corpora. The exact gate and unit tests pass."
+    },
+    {
+      "id": "AUD-006-ARC003",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Recovery and passphrase entries exist, and their input and outcome assertions were read."
+    },
+    {
+      "id": "AUD-006-ARC004",
+      "status": "deferred",
+      "fixCommit": null,
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Android and iOS device lint/link passed, but device/emulator runtime and the simulator remain uncovered."
+    },
+    {
+      "id": "AUD-006-DOC001",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "SECURITY describes observable memory and timing settings."
+    },
+    {
+      "id": "AUD-006-DOC002",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "32651c2 added the index and contents list. bd41e4d completed the two-column table. The README distinguishes local checks from hosted CI."
+    },
+    {
+      "id": "AUD-006-DOC003",
+      "status": "verified",
+      "fixCommit": "06d7d00dbd4cb0accf13dfd6ed5f46059d6ded84",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Current README and coverage report attribute their figures to 1fe8761."
+    },
+    {
+      "id": "AUD-006-DOC004",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Current AGENTS references the matrix, fuzzing and release workflow correctly."
+    },
+    {
+      "id": "AUD-006-DOC005",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "SECURITY describes separate read-only package, attestation, and draft-job grants."
+    },
+    {
+      "id": "AUD-006-DOC006",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Changelog separates library and repository changes."
+    },
+    {
+      "id": "AUD-006-DOC007",
+      "status": "verified",
+      "fixCommit": "32651c2eaf540c647bd93c91a6932638accdc9c5",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "SECURITY reports up to 144 KiB on measured Linux x86-64 and qualifies unmeasured systems."
+    },
+    {
+      "id": "AUD-007-SEC001",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Word indices for checks use protected Secret storage and check_word borrows the array. Native fast tests and bare-WASM check-word vectors passed."
+    },
+    {
+      "id": "AUD-007-SEC002",
+      "status": "open",
+      "fixCommit": null,
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "RSC 0.2.0 lane tail still owns a Copy value with no explicit wipe. No physical residue claim across targets."
+    },
+    {
+      "id": "AUD-007-SEC003",
+      "status": "verified",
+      "fixCommit": "ed770a113637724e26b0850962b22719b4ed936e",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "ctutils comparison now replaces hand-built early termination prevention. Fresh functional tests passed. Older helper exploration is a separate configuration and this audit does not re-establish every optimized comparison path."
+    },
+    {
+      "id": "AUD-007-ARC001",
+      "status": "verified",
+      "fixCommit": "0ad43e6e1f7c52836a689728cd2aa11abc7cf71c",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Bare Wasm 28/28 in exact CI, with separately recorded WASI and browser gaps."
+    },
+    {
+      "id": "AUD-007-ARC002",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Recovery fuzzer checks rejected counts, verifier mismatch, ordering and original short length inclusion."
+    },
+    {
+      "id": "AUD-007-ARC003",
+      "status": "verified",
+      "fixCommit": "0ad43e6e1f7c52836a689728cd2aa11abc7cf71c",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Structured password-check fuzz cases assert success, erasure and mismatch candidates, plus pinned vectors."
+    },
+    {
+      "id": "AUD-007-ARC004",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Shared phrase_of generator centralizes admitted sizes and refuses silent valid-input construction failure."
+    },
+    {
+      "id": "AUD-007-ARC005",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Public API gate parses continued attributes and rejects unsupported forms. Exact host result lists 22 items and its gate tests passed."
+    },
+    {
+      "id": "AUD-007-ARC006",
+      "status": "verified",
+      "fixCommit": "0ad43e6e1f7c52836a689728cd2aa11abc7cf71c",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Mandatory vendored row and digest, no silent empty directory acceptance. Gate and refusal tests passed."
+    },
+    {
+      "id": "AUD-007-DOC001",
+      "status": "verified",
+      "fixCommit": "0ad43e6e1f7c52836a689728cd2aa11abc7cf71c",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "All six targets and the bare-WASM runner appear in TARGETS.md."
+    },
+    {
+      "id": "AUD-007-DOC002",
+      "status": "verified",
+      "fixCommit": "0ad43e6e1f7c52836a689728cd2aa11abc7cf71c",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Documentation example checks the required outcome before host secret input."
+    },
+    {
+      "id": "AUD-007-DOC003",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Statistical checks and wallet identification clarified in API/security text. A subsequent README edit introduces the narrower wording regression AUD-011-DOC001."
+    },
+    {
+      "id": "AUD-007-DOC004",
+      "status": "verified",
+      "fixCommit": "0ad43e6e1f7c52836a689728cd2aa11abc7cf71c",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Seed::derive documents the older Unicode compatibility boundary."
+    },
+    {
+      "id": "AUD-007-DOC005",
+      "status": "verified",
+      "fixCommit": "0ad43e6e1f7c52836a689728cd2aa11abc7cf71c",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Packaged README references unavailable files by project URL. Exact package job passed."
+    },
+    {
+      "id": "AUD-007-DOC006",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "README contains index and primary guide links, two-column contents and audit history."
+    },
+    {
+      "id": "AUD-007-DOC007",
+      "status": "verified",
+      "fixCommit": "0ad43e6e1f7c52836a689728cd2aa11abc7cf71c",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Audit record distinguishes the measured source from later documentation. Latest measurements are labeled separately."
+    },
+    {
+      "id": "AUD-008-SEC001",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "ed770a1 removed plaintext printing and bd41e4d completed exact-length selection. The README helper accepts typed Phrase and Password references and returns only a Boolean, with host duties in the separate rustdoc example."
+    },
+    {
+      "id": "AUD-008-BLD001",
+      "status": "verified",
+      "fixCommit": "ed770a113637724e26b0850962b22719b4ed936e",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "WASM graph and three RustSec steps checked; exact dependency inputs unchanged after the passing RustSec run."
+    },
+    {
+      "id": "AUD-008-ARC001",
+      "status": "verified",
+      "fixCommit": "bd41e4db89b3473b9b5126825c06d01772d541ee",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "A constructor error on valid-length synthetic entropy terminates the fuzz run instead of skipping the case."
+    },
+    {
+      "id": "AUD-009-ARC001",
+      "status": "verified",
+      "fixCommit": "7e7e3f9af75ea659caa9082dcc416031e5a7562b",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Unit tests assert allocator protection according to policy rather than assuming all pages are locked. Exact host debug, release and CI tests pass."
+    },
+    {
+      "id": "AUD-009-DOC001",
+      "status": "verified",
+      "fixCommit": "7e7e3f9af75ea659caa9082dcc416031e5a7562b",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "AGENTS and audit.yml describe three lockfiles."
+    },
+    {
+      "id": "AUD-009-DOC002",
+      "status": "verified",
+      "fixCommit": "7e7e3f9af75ea659caa9082dcc416031e5a7562b",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Wasm stack and process end wording distinguishes instance lifetime and physical wiping, and states possible overflow effects."
+    },
+    {
+      "id": "AUD-010-ARC001",
+      "status": "open",
+      "fixCommit": "1fe87612b259f9acd8bf7a7b824b20d438cc6297",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "The three originally tested forms are handled and their regression test passed. Valid TOML literal-string versions, quoted dependency keys and braces inside comments still evade the simplified parser. This is the same gate defect class. Current manifests comply."
+    },
+    {
+      "id": "AUD-010-DOC001",
+      "status": "verified",
+      "fixCommit": "1fe87612b259f9acd8bf7a7b824b20d438cc6297",
+      "verificationCommit": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Repair scratch commentary now distinguishes local fixed arrays, native clearing, and the documented 0.2.0 upstream copy. Read together with SECURITY.md target limits."
+    }
+  ],
+  "limitations": [
+    "Ordinary audit of mhfe_core. No full-cost Argon2 vector replay, publish action, tagged package or attestation verification for 0.3.0. The full-cost test remained ignored by the fast suites.",
+    "Miri reaches nine syscall-free tests in each retained aliasing run. Native Secret construction hits unsupported libc::sigfillset. The isolated cast model cannot establish the production allocator path. No all-target timing or complete memory-residue proof.",
+    "The mobile rows are compilation evidence only, and the iOS simulator has no native execution. Bare WebAssembly runs in Wasmtime. A browser application, its CSP and its engine are separate scopes.",
+    "Upstream protection and Reed\u2013Solomon code were reviewed at the exact pinned integration boundaries. Pinned dependency hashes and tests are not a complete audit of those repositories.",
+    "The 28 historical harness lockfiles received source/cache integrity review where archives existed. Fresh RustSec coverage is scoped to the three active unchanged lockfiles.",
+    "Historical harness source was reviewed, preserving its original evidence and inputs. Historical probes that use obsolete checkouts, external processes, credentials, or mutable caches were not started.",
+    "The 96.84 percent coverage is retained from the documented 1fe8761 measurement. Its log and row totals were reconciled, and the final commit changes documentation only. The run does not have an independent contemporaneous input hash.",
+    "The exact CI does not execute a RustSec workflow because dependencies did not change. All three active manifests, locks and the audit workflow are byte-identical to the passing RustSec snapshot. Neither that result nor archive hashes exclude future advisories.",
+    "Report status reflects confirmed defects in required checks. The new findings are Low and non-blocking individually, and none demonstrates a break in production encryption or recovery.",
+    "Three five-minute attempts completed before the local limit changed. Recovery was interrupted and contributes only its last observed counter. Repair and password_check ran with a hard 30-second process cap. Missing hosted extended fuzz, corpus minimization and coverage remain explicit gaps."
+  ],
+  "grants": [
+    {
+      "location": "src/cipher.rs",
+      "grant": "Caller engine and progress callbacks",
+      "purpose": "Supply Argon2 and observe or cancel operations",
+      "admits": "The caller engine receives protocol password and salt bytes. The unchecked-container callback sees a candidate before its creation check.",
+      "narrowestForm": "Narrow borrowed slices and explicit callback scopes",
+      "whyNoNarrower": "The host owns the engine and must withhold candidate output until the check returns Continue.",
+      "order": "Admit \u2192 forward rounds \u2192 unchecked callback \u2192 independent recovery check \u2192 return.",
+      "findingId": null
+    },
+    {
+      "location": "src/nfkd.rs; src/protect.rs; src/stack.rs",
+      "grant": "SPC pages and stack clearing",
+      "purpose": "Retain and wipe buffers, minimize temporary native stack residue",
+      "admits": "Lock and exclusion can be refused. Existing host snapshots and WebAssembly residue lie outside the clearing range.",
+      "narrowestForm": "Precise buffers and native best-effort overwrite",
+      "whyNoNarrower": "Keep bounded payload ownership, report lock/exclusion and preserve caller responsibility.",
+      "order": "Normalize into exact Secret; clear stack after the body.",
+      "findingId": "AUD-006-API001"
+    },
+    {
+      "location": "src/engine/native.rs:166",
+      "grant": "Exclusive Block view over WorkArea",
+      "purpose": "Native Argon2id aligned contiguous working memory",
+      "admits": "Alignment and lifetime rely on the pinned allocator. Host-sized WorkArea can exhaust memory.",
+      "narrowestForm": "One slice cast inside a small helper",
+      "whyNoNarrower": "The typed view and original allocation are never aliased.",
+      "order": "Allocate \u2192 borrow for engine \u2192 wipe on normal return/refusal.",
+      "findingId": null
+    },
+    {
+      "location": "src/protect.rs; SPC 0.2.0 Unix backend",
+      "grant": "Opt-in native process isolation",
+      "purpose": "Constrain external reading, process effects and later handle acquisition",
+      "admits": "Inherited descriptors, unprivileged namespace availability and system read-back limit guarantees. Existing processes and threads are outside a current-thread-only application.",
+      "narrowestForm": "Enter before secrets and thread creation, inspect outcomes and close unneeded handles",
+      "whyNoNarrower": "The crate keeps initialization and host permissions under caller ownership.",
+      "order": "On Linux call before the first Secret and engine threads. Constrain namespaces, read-back and restrictions before the secret work.",
+      "findingId": null
+    },
+    {
+      "location": "SPC 0.2.0 os/windows.rs:309",
+      "grant": "Windows DACL, restricted job and low integrity",
+      "purpose": "Restrict peer process/thread access and child/UI effects",
+      "admits": "Pre-existing handles and privileged peers remain relevant. Low-labelled directories are still writable. Windows can hide threads in the post-lowering census.",
+      "narrowestForm": "Apply DACL and defaults before lowering integrity, then require relevant confirmed outcomes",
+      "whyNoNarrower": "Existing handles cannot be revoked reliably by the application, and no-network requires a suitable container token.",
+      "order": "WER and mitigations \u2192 job \u2192 open token \u2192 process and default DACL \u2192 thread census and DACL \u2192 low integrity \u2192 evidence and post-lowering census. Isolation is not atomic during startup.",
+      "findingId": null
+    },
+    {
+      "location": "src/protect.rs; wasm/src/lib.rs",
+      "grant": "WASM host and linear memory",
+      "purpose": "Run profiles in a portable engine",
+      "admits": "The instance and the engine owner can observe memory. No protected-stack or native isolation grant.",
+      "narrowestForm": "Caller-owned engine with explicit data flow",
+      "whyNoNarrower": "The test export has no input pointer or FFI memory access.",
+      "order": "Build publicly pinned vector module \u2192 invoke checks \u2192 count 28.",
+      "findingId": null
+    },
+    {
+      "location": ".github/workflows/ci.yml; audit.yml; vectors.yml; release.yml",
+      "grant": "GitHub contents read and runner install authority",
+      "purpose": "Check out code and install pinned toolchains and tools",
+      "admits": "Build scripts and compiler plugins run on the runner. MinGW installation uses sudo on a disposable runner.",
+      "narrowestForm": "Read-only workflow token and credentials not persisted",
+      "whyNoNarrower": "The CI build requires dependencies and host linker tools.",
+      "order": "Checkout \u2192 verify tools \u2192 checks/package \u2192 transfer artifacts.",
+      "findingId": null
+    },
+    {
+      "location": ".github/workflows/release.yml:97",
+      "grant": "Attestation write and OIDC identity",
+      "purpose": "Bind package bytes to trusted workflow",
+      "admits": "The job can attest another subject if its inputs are substituted.",
+      "narrowestForm": "Separate job scopes and named package artifact",
+      "whyNoNarrower": "Write permission used by the attestation action only.",
+      "order": "Build and fuzz prerequisite \u2192 package \u2192 attest.",
+      "findingId": null
+    },
+    {
+      "location": ".github/workflows/release.yml:120",
+      "grant": "Contents write",
+      "purpose": "Publish a draft release record",
+      "admits": "A token of this scope can also change other repository contents.",
+      "narrowestForm": "Separate draft job with no project execution",
+      "whyNoNarrower": "GitHub has no narrower token scope for the release creation call.",
+      "order": "Attest \u2192 download package/notes \u2192 draft. Full-cost vectors are a separate publication condition.",
+      "findingId": null
+    },
+    {
+      "location": "docs/audits/AUD-002-harnesses/skeptic-bld-republish/src/registry.rs:25",
+      "grant": "Unauthenticated loopback fixture server",
+      "purpose": "Provide Cargo a synthetic sparse registry",
+      "admits": "Clients in the same machine can reach the service, currently outside the intended fixture scope.",
+      "narrowestForm": "Serve an allowlist of in-memory synthetic fixture bytes",
+      "whyNoNarrower": "No arbitrary filesystem access is necessary to test Cargo caching.",
+      "order": "Listener starts before Cargo requests and ends with the harness process.",
+      "findingId": "AUD-011-SEC001"
+    }
+  ],
+  "procedureHashes": {
+    "FULL_AUDIT_GUIDE_V2.md": "a1d9b30c3b6cbe0cb1bb597652993380b06c65b8bedaef5c82ce23fb73933b44",
+    "AUDIT_STANDARD.md": "cb022824fb61bba3a59c5bf138f533aaffb0796f34476a54286a21236685ef4d",
+    "AUDIT_TEMPLATE.md": "6dc3bcf05df0f058ec39eee4b528c8a49b2b1044e5c42a71f0845fb62c504e0d",
+    "audit-report.schema.json": "49360df3a7e8e39657e10270f76f47bee5a1801f8e76941536415f35c0376fe5",
+    "audit-report-rust.schema.json": "9a3c9114d1d4a2aa0eedb874b73186e583de898d712dcdb009b328287f7c3600",
+    "TARGETS.md": "146f05f10e49b2354a70d978ada7e3dc5fd4700c3356c4cc717c385ca7e105ff"
+  },
+  "targetMatrix": [
+    {
+      "package": "mhfe-core + xtask",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "native Linux x86-64",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679358. Fresh cargo xtask check, 105 core and 62 xtask checks. CI verifies an independent hosted run.",
+      "checks": "Fresh cargo xtask check, 105 core and 62 xtask checks. CI verifies an independent hosted run."
+    },
+    {
+      "package": "mhfe-core + xtask",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "release",
+      "features": "manifest defaults",
+      "environment": "native Linux x86-64",
+      "required": true,
+      "clippy": "not-run",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Fresh release suite, 105 core and 62 xtask checks. Retained release lint belongs to prior snapshot. Retained Clippy at 00c070c: local AUD-010-evidence SHA-256 022b6716b692d1a87acd4a78b557b033bf6d1b62792284c6cde0383116f804d4.",
+      "checks": "Fresh release suite, 105 core and 62 xtask checks. Retained release lint belongs to prior snapshot.",
+      "retainedClippy": {
+        "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+        "logSha256": "022b6716b692d1a87acd4a78b557b033bf6d1b62792284c6cde0383116f804d4",
+        "scope": "Unchanged library/build inputs and lockfile. The runtime source diff contains comments only. This does not cover changed xtask code."
+      }
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-unknown-linux-gnu",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "native Ubuntu ARM64",
+      "required": true,
+      "clippy": "not-run",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679565. 105 checks. Warnings are fatal in CI, which does not run Clippy on this row. Retained Clippy at 00c070c: local AUD-010-evidence SHA-256 c89422049308f6dd170d47d50102ed42f34868ebc69a8cb25b3b09d49c69eda9.",
+      "checks": "105 checks. Warnings are fatal in CI, which does not run Clippy on this row.",
+      "retainedClippy": {
+        "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+        "logSha256": "c89422049308f6dd170d47d50102ed42f34868ebc69a8cb25b3b09d49c69eda9",
+        "scope": "Unchanged library/build inputs and lockfile. The runtime source diff contains comments only. This does not cover changed xtask code."
+      }
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-apple-darwin",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "native macOS ARM64",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679474. 101 checks and two hardened-runtime isolation checks. Clippy in iOS job 140124679301.",
+      "checks": "101 checks and two hardened-runtime isolation checks. Clippy in iOS job 140124679301."
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-apple-darwin",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "native macOS Intel",
+      "required": true,
+      "clippy": "not-run",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679689. 101 checks and two hardened-runtime isolation checks. Retained Clippy at 00c070c: local AUD-010-evidence SHA-256 f9e98fc811b49c678676cd94f3cb96b309256ffda7335e9eb20e844555b7ca67.",
+      "checks": "101 checks and two hardened-runtime isolation checks.",
+      "retainedClippy": {
+        "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+        "logSha256": "f9e98fc811b49c678676cd94f3cb96b309256ffda7335e9eb20e844555b7ca67",
+        "scope": "Unchanged library/build inputs and lockfile. The runtime source diff contains comments only. This does not cover changed xtask code."
+      }
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-pc-windows-msvc",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "native Windows MSVC",
+      "required": true,
+      "clippy": "not-run",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679367. 102 checks, including restricted process and thread handles. Retained Clippy at 00c070c: local AUD-010-evidence SHA-256 9ee6326b3f64f639f5582b61faa66544c540cfc9affb079178d58689b48a7ac3.",
+      "checks": "102 checks, including restricted process and thread handles.",
+      "retainedClippy": {
+        "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+        "logSha256": "9ee6326b3f64f639f5582b61faa66544c540cfc9affb079178d58689b48a7ac3",
+        "scope": "Unchanged library/build inputs and lockfile. The runtime source diff contains comments only. This does not cover changed xtask code."
+      }
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-pc-windows-gnu",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "native Windows GNU and MinGW cross-build",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679471. 102 native checks. Linux MinGW Clippy and link in job 140124678946.",
+      "checks": "102 native checks. Linux MinGW Clippy and link in job 140124678946."
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-linux-android",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "NDK API 26 cross-build",
+      "required": false,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679304. Device or emulator execution is missing.",
+      "checks": "Device or emulator execution is missing."
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-linux-android",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "NDK API 26 cross-build",
+      "required": false,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679192. Device or emulator execution is missing.",
+      "checks": "Device or emulator execution is missing."
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-apple-ios",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "Xcode device cross-build",
+      "required": false,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-run",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679301. Signed application on a device was not run.",
+      "checks": "Signed application on a device was not run."
+    },
+    {
+      "package": "mhfe-core",
+      "target": "aarch64-apple-ios-sim",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "iOS simulator",
+      "required": false,
+      "clippy": "not-run",
+      "link": "not-run",
+      "run": "not-run",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Simulator is absent from exact CI. Retained cross-target lint exists. Retained Clippy at 00c070c: local AUD-010-evidence SHA-256 870d7fec77a255bf694206ef931ee226f1fe8e22868399bfb2c9c041bb03cafd.",
+      "checks": "Simulator is absent from exact CI. Retained cross-target lint exists.",
+      "retainedClippy": {
+        "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+        "logSha256": "870d7fec77a255bf694206ef931ee226f1fe8e22868399bfb2c9c041bb03cafd",
+        "scope": "Unchanged library/build inputs and lockfile. The runtime source diff contains comments only. This does not cover changed xtask code."
+      }
+    },
+    {
+      "package": "mhfe-core",
+      "target": "wasm32-unknown-unknown",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "bare WebAssembly library build",
+      "required": false,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "not-applicable",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679391. Exact root library build and Clippy. Executable profile harness is the next row.",
+      "checks": "Exact root library build and Clippy. Executable profile harness is the next row."
+    },
+    {
+      "package": "mhfe-core-wasm-checks",
+      "target": "wasm32-unknown-unknown",
+      "profile": "release",
+      "features": "manifest defaults",
+      "environment": "Wasmtime 49.0.2",
+      "required": true,
+      "clippy": "not-run",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679391. 28/28 profile checks. CI Clippy is debug; retained release lint is at the prior code-identical snapshot. Retained Clippy at 00c070c: local AUD-010-evidence SHA-256 d5657efb91056c85d4aff7fc532b8187ed5aa4d5da924e33315ad42fc2bef9cd.",
+      "checks": "28/28 profile checks. CI Clippy is debug; retained release lint is at the prior code-identical snapshot.",
+      "retainedClippy": {
+        "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+        "logSha256": "d5657efb91056c85d4aff7fc532b8187ed5aa4d5da924e33315ad42fc2bef9cd",
+        "scope": "Unchanged library/build inputs and lockfile. The runtime source diff contains comments only. This does not cover changed xtask code."
+      }
+    },
+    {
+      "package": "mhfe-core",
+      "target": "wasm32-wasip1",
+      "profile": "debug",
+      "features": "manifest defaults",
+      "environment": "Wasmtime 49.0.2, test-only WASI",
+      "required": true,
+      "clippy": "not-run",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679391. 92 checks, including no-op isolation; no native Argon2 or OS assertions. Retained Clippy at 00c070c: local AUD-010-evidence SHA-256 069cdc900031b64bcf71eeae506c0fed81fb0e32333ac20d42e764190a313d8b.",
+      "checks": "92 checks, including no-op isolation; no native Argon2 or OS assertions.",
+      "retainedClippy": {
+        "revision": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+        "logSha256": "069cdc900031b64bcf71eeae506c0fed81fb0e32333ac20d42e764190a313d8b",
+        "scope": "Unchanged library/build inputs and lockfile. The runtime source diff contains comments only. This does not cover changed xtask code."
+      }
+    },
+    {
+      "package": "mhfe-core",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "debug, MSRV Rust 1.99.0",
+      "features": "manifest defaults",
+      "environment": "native Ubuntu",
+      "required": false,
+      "clippy": "not-applicable",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Exact CI https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569/job/140124679333. 105 core checks at the minimum declared Rust version.",
+      "checks": "105 core checks at the minimum declared Rust version."
+    },
+    {
+      "package": "mhfe-core-fuzz phrase",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "nightly-2026-11-13 ASan",
+      "features": "manifest defaults",
+      "environment": "native Linux fuzzing",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Fuzz gate lint in exact CI. Runtime disposition completed original budget. Longer checks belong to hosted CI/CD.",
+      "checks": "Fuzz gate lint in exact CI. Runtime disposition completed original budget. Longer checks belong to hosted CI/CD."
+    },
+    {
+      "package": "mhfe-core-fuzz password",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "nightly-2026-11-13 ASan",
+      "features": "manifest defaults",
+      "environment": "native Linux fuzzing",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Fuzz gate lint in exact CI. Runtime disposition completed original budget. Longer checks belong to hosted CI/CD.",
+      "checks": "Fuzz gate lint in exact CI. Runtime disposition completed original budget. Longer checks belong to hosted CI/CD."
+    },
+    {
+      "package": "mhfe-core-fuzz passphrase",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "nightly-2026-11-13 ASan",
+      "features": "manifest defaults",
+      "environment": "native Linux fuzzing",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Fuzz gate lint in exact CI. Runtime disposition completed original budget. Longer checks belong to hosted CI/CD.",
+      "checks": "Fuzz gate lint in exact CI. Runtime disposition completed original budget. Longer checks belong to hosted CI/CD."
+    },
+    {
+      "package": "mhfe-core-fuzz recovery",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "nightly-2026-11-13 ASan",
+      "features": "manifest defaults",
+      "environment": "native Linux fuzzing",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "blocked",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Fuzz gate lint in exact CI. Runtime disposition interrupted. Longer checks belong to hosted CI/CD.",
+      "checks": "Fuzz gate lint in exact CI. Runtime disposition interrupted. Longer checks belong to hosted CI/CD."
+    },
+    {
+      "package": "mhfe-core-fuzz repair",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "nightly-2026-11-13 ASan",
+      "features": "manifest defaults",
+      "environment": "native Linux fuzzing",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Fuzz gate lint in exact CI. Runtime disposition completed bounded run. Longer checks belong to hosted CI/CD.",
+      "checks": "Fuzz gate lint in exact CI. Runtime disposition completed bounded run. Longer checks belong to hosted CI/CD."
+    },
+    {
+      "package": "mhfe-core-fuzz password_check",
+      "target": "x86_64-unknown-linux-gnu",
+      "profile": "nightly-2026-11-13 ASan",
+      "features": "manifest defaults",
+      "environment": "native Linux fuzzing",
+      "required": true,
+      "clippy": "passed",
+      "link": "passed",
+      "run": "passed",
+      "revision": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "evidence": "Fuzz gate lint in exact CI. Runtime disposition completed bounded run. Longer checks belong to hosted CI/CD.",
+      "checks": "Fuzz gate lint in exact CI. Runtime disposition completed bounded run. Longer checks belong to hosted CI/CD."
+    }
+  ],
+  "fuzz": [
+    {
+      "target": "phrase",
+      "executions": 337983,
+      "elapsedReported": 301,
+      "thermalPauses": 0,
+      "runComplete": true,
+      "fullBudgetEstablished": true,
+      "status": "completed original budget",
+      "logSha256": "fff2486ad86b783bd21fb4c597226db1d0646b4c20c81312698da3be81d350d0",
+      "artifactSha256": "f8c2a65e226044fcc362f808fef62ab58edf5edd0fa3911eea601660481571cf",
+      "last": "#337983\tDONE   cov: 673 ft: 1852 corp: 358/28Kb lim: 1360 exec/s: 1122 rss: 299Mb"
+    },
+    {
+      "target": "password",
+      "executions": 15509217,
+      "elapsedReported": 301,
+      "thermalPauses": 0,
+      "runComplete": true,
+      "fullBudgetEstablished": true,
+      "status": "completed original budget",
+      "logSha256": "7ac452a8e8ad44b41a3e9d744d5f696ee934baca379dc6cd918f06190f3118c7",
+      "artifactSha256": "7ca47e4254785909ab0ea8c0676782bf9f62a35b6b6f922b1b689a2c7754c3c7",
+      "last": "#15509217\tDONE   cov: 2180 ft: 8227 corp: 4677/320Kb lim: 4096 exec/s: 51525 rss: 711Mb"
+    },
+    {
+      "target": "passphrase",
+      "executions": 65911,
+      "elapsedReported": 301,
+      "thermalPauses": 0,
+      "runComplete": true,
+      "fullBudgetEstablished": true,
+      "status": "completed original budget",
+      "logSha256": "ac8674a9b5a9ce77b46b343f368ce302b5f6e449cf69294c23052c8c24927a96",
+      "artifactSha256": "b5edaaa0da1649760d890a2f062ee9d4f0c4736db6422d3af0fa46b2754caf40",
+      "last": "#65911\tDONE   cov: 757 ft: 1827 corp: 124/5499b lim: 269 exec/s: 218 rss: 80Mb"
+    },
+    {
+      "target": "recovery",
+      "executions": 235152,
+      "elapsedReported": null,
+      "thermalPauses": 0,
+      "runComplete": false,
+      "fullBudgetEstablished": false,
+      "status": "interrupted",
+      "logSha256": "a08be1285b4c4a99245fd55321be2800a8b57436fb239096a9e26eac8579867a",
+      "artifactSha256": "d3c4ca5540a3eaa22f5031b75a1e125763dd912c27437e659194388e6418f208",
+      "last": null
+    },
+    {
+      "target": "repair",
+      "executions": 112453,
+      "elapsedReported": 29,
+      "thermalPauses": 0,
+      "runComplete": true,
+      "fullBudgetEstablished": false,
+      "status": "completed bounded run",
+      "logSha256": "fc684b1e420d7b8a19fa0c7f7e76273d0fb2c3bd293555987fc6407581333ec0",
+      "artifactSha256": "a9fd9689ffc2e714528a3a4d19c2423775b5dac37d87a5794bd58ebb7d815c20",
+      "last": "#112453\tDONE   cov: 1210 ft: 3113 corp: 364/12303b lim: 389 exec/s: 3877 rss: 224Mb"
+    },
+    {
+      "target": "password_check",
+      "executions": 166189,
+      "elapsedReported": 29,
+      "thermalPauses": 0,
+      "runComplete": true,
+      "fullBudgetEstablished": false,
+      "status": "completed bounded run",
+      "logSha256": "fa0301d980b126b83a2741754a212e15f5f8d0c2b06a63e4c5ff62372f07b785",
+      "artifactSha256": "6f1eb5571a8805ee0886f24779dcdfcfc8ebfe84561912998281a952661b5874",
+      "last": "#166189\tDONE   cov: 330 ft: 763 corp: 61/2118b lim: 1390 exec/s: 5730 rss: 182Mb"
+    }
+  ],
+  "githubEvidence": {
+    "45882399569": {
+      "conclusion": "success",
+      "headSha": "aeefbdf70b43a9e889245e9312cd91599c18945d",
+      "url": "https://github.com/hobby-eng/mhfe_core/actions/runs/45882399569",
+      "logSha256": "d7de7b10dfd4ae9284757415cc95f64556f01f73cdf4bd4da8c2f493058ce93d",
+      "testsByJobStep": {
+        "msrv / Run the fast tests on the minimum Rust": 105,
+        "checks / Run the fast checks": 167,
+        "native (windows-latest) / Run the fast tests": 102,
+        "wasm / Run the tests": 92,
+        "native (windows-latest, x86_64-pc-windows-gnu) / Run the fast tests": 102,
+        "native (macos-latest) / Run the fast tests": 101,
+        "native (macos-latest) / Run the isolation tests under the hardened runtime": 2,
+        "native (ubuntu-24.04-arm) / Run the fast tests": 105,
+        "native (macos-15-intel) / Run the fast tests": 101,
+        "native (macos-15-intel) / Run the isolation tests under the hardened runtime": 2
+      },
+      "customTestRoles": {
+        "msrv / Run the fast tests on the minimum Rust": [
+          "test an isolated thread is refused what the filter names and keeps what it needs ... ok",
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok",
+          "test encoding a password and deriving a seed take nothing from the heap ... ok",
+          "test a secret lies on pages kept out of swap and core dumps ... ok",
+          "test a secret works under every lock limit and says whether it is locked ... ok",
+          "test the work area lies on pages of its own, locked where the limit allows ... ok",
+          "test six hundred secrets made one after another each report their core-dump exclusion ... ok"
+        ],
+        "checks / Run the fast checks": [
+          "test an isolated thread is refused what the filter names and keeps what it needs ... ok",
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok",
+          "test encoding a password and deriving a seed take nothing from the heap ... ok",
+          "test a secret lies on pages kept out of swap and core dumps ... ok",
+          "test a secret works under every lock limit and says whether it is locked ... ok",
+          "test the work area lies on pages of its own, locked where the limit allows ... ok",
+          "test six hundred secrets made one after another each report their core-dump exclusion ... ok"
+        ],
+        "native (windows-latest) / Run the fast tests": [
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok",
+          "test encoding a password and deriving a seed take nothing from the heap ... ok",
+          "test a secret lies on pages kept out of swap and core dumps ... ok",
+          "test the work area lies on pages of its own, locked where the limit allows ... ok",
+          "test six hundred secrets made one after another each report their core-dump exclusion ... ok"
+        ],
+        "wasm / Run the tests": [
+          "test WebAssembly applies nothing and says so ... ok",
+          "test six hundred secrets made one after another each report their core-dump exclusion ... ok"
+        ],
+        "native (windows-latest, x86_64-pc-windows-gnu) / Run the fast tests": [
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok",
+          "test encoding a password and deriving a seed take nothing from the heap ... ok",
+          "test a secret lies on pages kept out of swap and core dumps ... ok",
+          "test the work area lies on pages of its own, locked where the limit allows ... ok",
+          "test six hundred secrets made one after another each report their core-dump exclusion ... ok"
+        ],
+        "native (macos-latest) / Run the fast tests": [
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok",
+          "test encoding a password and deriving a seed take nothing from the heap ... ok",
+          "test the work area lies on pages of its own, locked where the limit allows ... ok",
+          "test six hundred secrets made one after another each report their core-dump exclusion ... ok"
+        ],
+        "native (macos-latest) / Run the isolation tests under the hardened runtime": [
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok"
+        ],
+        "native (ubuntu-24.04-arm) / Run the fast tests": [
+          "test an isolated thread is refused what the filter names and keeps what it needs ... ok",
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok",
+          "test encoding a password and deriving a seed take nothing from the heap ... ok",
+          "test a secret lies on pages kept out of swap and core dumps ... ok",
+          "test a secret works under every lock limit and says whether it is locked ... ok",
+          "test the work area lies on pages of its own, locked where the limit allows ... ok",
+          "test six hundred secrets made one after another each report their core-dump exclusion ... ok"
+        ],
+        "native (macos-15-intel) / Run the fast tests": [
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok",
+          "test encoding a password and deriving a seed take nothing from the heap ... ok",
+          "test the work area lies on pages of its own, locked where the limit allows ... ok",
+          "test six hundred secrets made one after another each report their core-dump exclusion ... ok"
+        ],
+        "native (macos-15-intel) / Run the isolation tests under the hardened runtime": [
+          "test a process of one thread is isolated as a whole ... ok",
+          "test a secret is written after the buffered public output ... ok"
+        ]
+      }
+    },
+    "45859679583": {
+      "conclusion": "success",
+      "headSha": "00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72",
+      "url": "https://github.com/hobby-eng/mhfe_core/actions/runs/45859679583",
+      "logSha256": "091e0dbed8c0dc90539141e577e12ff0d2f00c6857901df5dcb26ddd66342076",
+      "unchangedInputs": {
+        "Cargo.lock": "a24487158cc0d2228a3a0dc99021034bc2d018903e7d69ef936585ec4797f8fa",
+        "fuzz/Cargo.lock": "db1e9ab3e6c214e3326a5bb52332e61226330a20735d8277c7ba6f56f459e573",
+        "wasm/Cargo.lock": "6d94afcca822cd337999dd10cc246151f3f19f4534364f7de9beccf0ee46bf88",
+        "Cargo.toml": "d372d6382dd8fc87985b5eadbabaa0de9851274d86dd2b909587320f8a6a3153",
+        "fuzz/Cargo.toml": "799b54af5020a6664b637e4f10faf2bab9b6f3f528d1b69a2d658775c7ff301f",
+        "wasm/Cargo.toml": "129396ed873a3e96095344a5e32eaea2fcffbd1d174a090c6c8bd47b27e15e3a",
+        ".github/workflows/audit.yml": "56cc7aac2b9d5b36321ece985b3fa86f971de17810584b96a781b7a997a89cc0"
+      }
+    }
+  },
+  "completedUtc": "2026-11-26T19:54:01.709365+00:00"
+}

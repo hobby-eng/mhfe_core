@@ -23,3 +23,57 @@ in this repository's history.
 | AUD-007 | 2026-11-26 | `main` at `06d7d00dbd4cb0accf13dfd6ed5f46059d6ded84` (unreleased 0.3.0) | Full audit by Codex under procedure version 2: sixteen Low findings. FAIL. Fixed in `0ad43e6` but for the copy that reed-solomon-core 0.2.0 leaves (AUD-007-SEC002), open until that crate's next release | [Report](AUD-007-2026-11-26.md), [JSON](AUD-007-2026-11-26.json); the auditor's runners stayed local |
 | AUD-008 | 2026-11-26 | `core-0.3` at `0ad43e6e1f7c52836a689728cd2aa11abc7cf71c` | Second Codex round: one Medium (the README example could print both phrases) and two Low findings, with AUD-007's open items. FAIL. Fixed in `ed770a1` and `bd41e4d` | [Report](AUD-008-2026-11-26.md), [JSON](AUD-008-2026-11-26.json); the auditor's runners stayed local |
 | AUD-009 | 2026-11-26 | `core-0.3` at `bd41e4db89b3473b9b5126825c06d01772d541ee` | Third and last Codex round: three Low findings, among them unit tests that expected locked pages where the lock limit refused them. FAIL. Fixed in `7e7e3f9`; AUD-007-SEC002 and AUD-006-API001 stay open until the next releases of reed-solomon-core and secret-protection-core | [Report](AUD-009-2026-11-26.md), [JSON](AUD-009-2026-11-26.json); the auditor's runners stayed local |
+| AUD-010 | 2026-11-26 | `main` at `00c070ce20fdf7dc4d0ffaba9c1f8a9f07ae4b72` (unreleased 0.3.0) | Independent full audit under procedure version 2 after AUD-007 through AUD-009: AUD-009's three findings verified fixed at `7e7e3f9`; two new Low non-blocking findings (`xtask code-rules` Cargo dependency parser gaps and a stale WebAssembly wiping comment in `src/repair/code.rs`) and two informational documentation observations; AUD-007-SEC002 and AUD-006-API001 remain open upstream and AUD-006-ARC004 deferred. All 6 fuzz targets passed 30.99–37.99 s AddressSanitizer runs (`1,635,317` runs, 0 crashes) and `audit-probes` passed Miri under strict provenance and Tree Borrows. INCOMPLETE: full-crate Miri is blocked by `secret-protection-core` system calls and the 300 s fuzzing budget was not run. Its text also states facts that its evidence and the reviewed commit contradict; its findings and coverage measurement hold | [Report](AUD-010-2026-11-26.md), [JSON](AUD-010-2026-11-26.json), [harnesses](AUD-010-harnesses/README.md), [corrections](AUD-010-corrections.md) |
+| AUD-011 | 2026-11-26 | `main` at `aeefbdf70b43a9e889245e9312cd91599c18945d` (unreleased 0.3.0) | Full ordinary audit of 264 entries and 45 public callables. 5 new Low findings, no new release blocker. 13/13 exact CI jobs, native debug and release checks and source-bound dynamic evidence. FAIL under V2; upstream items and parser gate remain open. | [Report](AUD-011-2026-11-26.md), [JSON](AUD-011-2026-11-26.json), [commands](AUD-011-harnesses/README.md) |
+
+Documentation-only privacy amendment of 2026-11-26 (AUD-011-DOC002): AUD-002's report, its JSON and its row above state decisions without naming who took them or where. Findings, statuses, results, counts, hashes and times are unchanged; the recorded command lines keep their text. The inventory of AUD-004 gives the SHA-256 of AUD-002's files as they were at its own reviewed commit.
+
+## Remediation status
+
+Current evidence from [AUD-011](AUD-011-2026-11-26.md). Earlier reports preserve their snapshot and verdict. This table follows the current findings from AUD-006 onward.
+
+| Finding ID | Status | Fix commit | Verification commit | Evidence |
+| --- | --- | --- | --- | --- |
+| AUD-006-SEC001 | verified | `32651c2` | `aeefbdf` | Local repair arrays and protection storage are explicitly wiped. Native and bare-WASM tests pass, with the separate RSC copy retained as AUD-007-SEC002. |
+| AUD-006-API001 | open | `32651c2` | `aeefbdf` | The size refusal and documentation hold. Representable allocation refusal still terminates in SPC 0.2.0. |
+| AUD-006-BLD001 | verified | `32651c2` | `aeefbdf` | The active graphs have aligned security dependencies and the three RustSec scopes were checked against identical lockfiles. |
+| AUD-006-ARC001 | verified | `32651c2` | `aeefbdf` | Isolation uses the first PID and user namespace distinction. The actual role checks pass on native Linux and CI. |
+| AUD-006-ARC002 | verified | `32651c2` | `aeefbdf` | Code-rules reviews fuzz Rust while excluding generated builds/corpora. The exact gate and unit tests pass. |
+| AUD-006-ARC003 | verified | `32651c2` | `aeefbdf` | Recovery and passphrase entries exist, and their input and outcome assertions were read. |
+| AUD-006-ARC004 | deferred | — | `aeefbdf` | Android and iOS device lint/link passed, but device/emulator runtime and the simulator remain uncovered. |
+| AUD-006-DOC001 | verified | `32651c2` | `aeefbdf` | SECURITY describes observable memory and timing settings. |
+| AUD-006-DOC002 | verified | `bd41e4d` | `aeefbdf` | 32651c2 added the index and contents list. bd41e4d completed the two-column table. The README distinguishes local checks from hosted CI. |
+| AUD-006-DOC003 | verified | `06d7d00` | `aeefbdf` | Current README and coverage report attribute their figures to 1fe8761. |
+| AUD-006-DOC004 | verified | `32651c2` | `aeefbdf` | Current AGENTS references the matrix, fuzzing and release workflow correctly. |
+| AUD-006-DOC005 | verified | `32651c2` | `aeefbdf` | SECURITY describes separate read-only package, attestation, and draft-job grants. |
+| AUD-006-DOC006 | verified | `32651c2` | `aeefbdf` | Changelog separates library and repository changes. |
+| AUD-006-DOC007 | verified | `32651c2` | `aeefbdf` | SECURITY reports up to 144 KiB on measured Linux x86-64 and qualifies unmeasured systems. |
+| AUD-007-SEC001 | verified | `bd41e4d` | `aeefbdf` | Word indices for checks use protected Secret storage and check_word borrows the array. Native fast tests and bare-WASM check-word vectors passed. |
+| AUD-007-SEC002 | open | — | `aeefbdf` | RSC 0.2.0 lane tail still owns a Copy value with no explicit wipe. No physical residue claim across targets. |
+| AUD-007-SEC003 | verified | `ed770a1` | `aeefbdf` | ctutils comparison now replaces hand-built early termination prevention. Fresh functional tests passed. Older helper exploration is a separate configuration and this audit does not re-establish every optimized comparison path. |
+| AUD-007-ARC001 | verified | `0ad43e6` | `aeefbdf` | Bare Wasm 28/28 in exact CI, with separately recorded WASI and browser gaps. |
+| AUD-007-ARC002 | verified | `bd41e4d` | `aeefbdf` | Recovery fuzzer checks rejected counts, verifier mismatch, ordering and original short length inclusion. |
+| AUD-007-ARC003 | verified | `0ad43e6` | `aeefbdf` | Structured password-check fuzz cases assert success, erasure and mismatch candidates, plus pinned vectors. |
+| AUD-007-ARC004 | verified | `bd41e4d` | `aeefbdf` | Shared phrase_of generator centralizes admitted sizes and refuses silent valid-input construction failure. |
+| AUD-007-ARC005 | verified | `bd41e4d` | `aeefbdf` | Public API gate parses continued attributes and rejects unsupported forms. Exact host result lists 22 items and its gate tests passed. |
+| AUD-007-ARC006 | verified | `0ad43e6` | `aeefbdf` | Mandatory vendored row and digest, no silent empty directory acceptance. Gate and refusal tests passed. |
+| AUD-007-DOC001 | verified | `0ad43e6` | `aeefbdf` | All six targets and the bare-WASM runner appear in TARGETS.md. |
+| AUD-007-DOC002 | verified | `0ad43e6` | `aeefbdf` | Documentation example checks the required outcome before host secret input. |
+| AUD-007-DOC003 | verified | `bd41e4d` | `aeefbdf` | Statistical checks and wallet identification clarified in API/security text. A subsequent README edit introduces the narrower wording regression AUD-011-DOC001. |
+| AUD-007-DOC004 | verified | `0ad43e6` | `aeefbdf` | Seed::derive documents the older Unicode compatibility boundary. |
+| AUD-007-DOC005 | verified | `0ad43e6` | `aeefbdf` | Packaged README references unavailable files by project URL. Exact package job passed. |
+| AUD-007-DOC006 | verified | `bd41e4d` | `aeefbdf` | README contains index and primary guide links, two-column contents and audit history. |
+| AUD-007-DOC007 | verified | `0ad43e6` | `aeefbdf` | Audit record distinguishes the measured source from later documentation. Latest measurements are labeled separately. |
+| AUD-008-SEC001 | verified | `bd41e4d` | `aeefbdf` | ed770a1 removed plaintext printing and bd41e4d completed exact-length selection. The README helper accepts typed Phrase and Password references and returns only a Boolean, with host duties in the separate rustdoc example. |
+| AUD-008-BLD001 | verified | `ed770a1` | `aeefbdf` | WASM graph and three RustSec steps checked; exact dependency inputs unchanged after the passing RustSec run. |
+| AUD-008-ARC001 | verified | `bd41e4d` | `aeefbdf` | A constructor error on valid-length synthetic entropy terminates the fuzz run instead of skipping the case. |
+| AUD-009-ARC001 | verified | `7e7e3f9` | `aeefbdf` | Unit tests assert allocator protection according to policy rather than assuming all pages are locked. Exact host debug, release and CI tests pass. |
+| AUD-009-DOC001 | verified | `7e7e3f9` | `aeefbdf` | AGENTS and audit.yml describe three lockfiles. |
+| AUD-009-DOC002 | verified | `7e7e3f9` | `aeefbdf` | Wasm stack and process end wording distinguishes instance lifetime and physical wiping, and states possible overflow effects. |
+| AUD-010-ARC001 | verified | `1fe8761`, `a32583e` | `a32583e` | The gate reads `[dependencies.<name>]` tables, headers with comments, inline tables over several lines, literal strings, quoted and dotted keys, a brace in a comment and spaces in a header; its test `every_form_of_a_dependency_is_read` and `cargo xtask check` pass. |
+| AUD-010-DOC001 | verified | `1fe8761` | `aeefbdf` | Repair scratch commentary now distinguishes local fixed arrays, native clearing, and the documented 0.2.0 upstream copy. Read together with SECURITY.md target limits. |
+| AUD-011-SEC001 | fixed | `a32583e` | — | The registry serves a request only when every component of its path is a plain name below its folder, so an absolute or climbing path is refused. The harness builds and passes Clippy; its Cargo run was not repeated. |
+| AUD-011-DOC001 | verified | `a32583e` | `a32583e` | The README gives the usual result of a wrong password (no reading of the phrase's length, at most an unverified 24-word one) apart from a chance match, a wrong phrase that proves no wallet, as `src/recovery.rs` and the specification's length rules have it. |
+| AUD-011-DOC002 | verified | `a32583e` | `a32583e` | AUD-002's report, JSON and index row name no one for a decision; hashes, finding IDs and statuses, numbers, dates and times compare equal to the previous text, and the JSON passes the shared schema. |
+| AUD-011-DOC003 | verified | `a32583e` | `a32583e` | The guide and the output of `package-reproducible` name the normalized `Cargo.toml` and `.cargo_vcs_info.json` as left out of the blob comparison and covered by the byte comparison of the two packages. |
+| AUD-011-DOC004 | verified | `a32583e` | `a32583e` | The README pairs its example with the unreleased 0.3.0 API and the dependency that builds it, and says what 0.2 returns instead. |
