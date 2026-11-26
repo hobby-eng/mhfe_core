@@ -100,8 +100,8 @@ lints and the fast tests of the CI's main job on one computer; the other targets
 and the package check run in CI. The full-cost vectors take hours:
 `cargo test --locked --release --test full_cost -- --ignored --nocapture`.
 
-The last coverage measurement, of commit `129736e` on 2026-11-25, ran 104 checks on Linux x86-64
-and covered **97.09%** of the measured source lines (2,403 of 2,475).
+The last coverage measurement, of commit `32651c2` on 2026-11-26, ran 104 checks on Linux x86-64
+and covered **97.02%** of the measured source lines (2,279 of 2,349).
 [Coverage report](docs/COVERAGE.md)
 
 ## Licence
