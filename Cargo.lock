@@ -235,6 +235,7 @@ dependencies = [
  "argon2",
  "bip39",
  "blake2",
+ "ctutils",
  "hmac",
  "libc",
  "rayon",

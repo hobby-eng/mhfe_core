@@ -12,8 +12,8 @@
   holds on the stack before it returns, and the password check wipes the indexes it is given.
 - `wallet_check::Seed::derive` returns a `Result`: `Error::PassphraseTooLong` refuses a passphrase
   whose NFKD is longer than any buffer of the system can be, counted before anything is written.
-- The verifier, the wallet check's digest and the cipher's states are compared in a time that
-  depends on their length alone.
+- The verifier, the wallet check's digest and the cipher's states are compared with ctutils, in a
+  time that depends on their length alone.
 - A call that clears the stack needs up to 144 KiB of free stack, the repair calls the most, as
   reed-solomon-core clears inside them too.
 - `wallet_check::draw` is gone: the crate draws no new seed phrases. A host that draws a phrase
@@ -99,7 +99,8 @@
   under `cfg_attr`; the vendored gate refuses a document that records no digest.
 - The recovery fuzz target checks every answer against the specification's length rules, and the
   password-check target checks made passwords with an erased or a wrong word.
-- The RustSec check reads the fuzz targets' lockfile too.
+- The RustSec check reads the lockfiles of the fuzz targets and of the WebAssembly checks too;
+  both lockfiles hold the versions of the crate's own.
 
 ## 0.2.0 (2026-11-01)
 

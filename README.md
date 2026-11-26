@@ -82,21 +82,23 @@ duties a program has, such as isolating itself and asking for the password twice
 use std::ops::ControlFlow;
 use mhfe_core::{Mhfe, Password, Phrase, Suite, WorkFactor};
 
-fn round_trip(phrase: &Phrase, password: &Password) -> Result<(), mhfe_core::Error> {
+/// Whether `phrase` comes back from its container; `None` if a callback stopped.
+fn round_trip(phrase: &Phrase, password: &Password) -> Result<Option<bool>, mhfe_core::Error> {
     let mut cipher = Mhfe::new(WorkFactor::default())?; // 2 GiB, a minute or two a call
     let go = &mut |_, _| ControlFlow::Continue(());
     let checked = &mut |_: &Phrase| ControlFlow::Continue(());
     let ControlFlow::Continue(container) =
         cipher.encrypt(phrase, password, Suite::TwentyFourWords, go, checked)?
     else {
-        return Ok(());
+        return Ok(None);
     };
     let ControlFlow::Continue(recovery) = cipher.decrypt(&container, password, None, None, go)?
     else {
-        return Ok(());
+        return Ok(None);
     };
-    assert_eq!(recovery.readings(None)?[0].phrase().as_str(), phrase.as_str());
-    Ok(())
+    // The reading of the length the owner knows, compared without showing either phrase.
+    let readings = recovery.readings(Some(phrase.words()))?;
+    Ok(Some(readings.first().is_some_and(|reading| reading.phrase().as_str() == phrase.as_str())))
 }
 ```
 
@@ -134,8 +136,9 @@ and covered **97.02%** of the measured source lines (2,279 of 2,349).
 
 ## Audits
 
-Every audit of the crate is in the [audit records](https://github.com/hobby-eng/mhfe_core/blob/main/docs/audits/README.md),
-with its findings and their fixes. They are reviews of the code made with AI models; no independent
+Every audit of the crate is in the
+[audit records](https://github.com/hobby-eng/mhfe_core/blob/main/docs/audits/README.md), with its
+findings and their fixes. They are reviews of the code made with AI models; no independent
 person has reviewed the code or the construction yet.
 
 ## Licence

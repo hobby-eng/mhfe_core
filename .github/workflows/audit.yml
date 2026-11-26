@@ -1,8 +1,8 @@
 name: RustSec audit
 
-# Cargo.lock and the fuzz targets' fuzz/Cargo.lock against the RustSec advisory database, on a
-# change of the dependencies and once a week. Follows mhfe's .github/workflows/audit.yml: a change
-# goes to both.
+# Cargo.lock, the fuzz targets' fuzz/Cargo.lock and the WebAssembly checks' wasm/Cargo.lock
+# against the RustSec advisory database, on a change of the dependencies and once a week. Follows
+# mhfe's .github/workflows/audit.yml: a change goes to both.
 on:
   # Branches only, as for CI: a release tag adds nothing to check.
   push:
@@ -12,6 +12,8 @@ on:
       - Cargo.lock
       - fuzz/Cargo.toml
       - fuzz/Cargo.lock
+      - wasm/Cargo.toml
+      - wasm/Cargo.lock
       - .github/workflows/audit.yml
   pull_request:
     paths:
@@ -19,6 +21,8 @@ on:
       - Cargo.lock
       - fuzz/Cargo.toml
       - fuzz/Cargo.lock
+      - wasm/Cargo.toml
+      - wasm/Cargo.lock
       - .github/workflows/audit.yml
   schedule:
     - cron: "17 4 * * 1"
@@ -48,3 +52,8 @@ jobs:
         with:
           createIssues: false
           workingDirectory: fuzz
+      - name: Audit wasm/Cargo.lock against RustSec
+        uses: actions-rust-lang/audit@72c09e02f132669d52284a3323acdb503cfc1a24 # v1.2.7
+        with:
+          createIssues: false
+          workingDirectory: wasm

@@ -41,6 +41,8 @@ Direct dependencies, each for one need:
 - `unicode-normalization` 0.1.26, `(MIT OR Apache-2.0) AND Unicode-3.0`: the NFKD of a password
   and a passphrase, with Unicode 18.0.0's tables.
 - `zeroize` 1.9.2, `Apache-2.0 OR MIT`: wiping.
+- `ctutils` 0.4.6, `Apache-2.0 OR MIT`: comparisons of bytes derived from a secret in constant
+  time. `digest` already brings it, so it adds no code.
 - `secret-protection-core` 0.2.0, `MIT OR Apache-2.0`: the memory pages of secrets and of the
   Argon2id work area, the isolation of the process, the secret writer and the clearing of stacks.
 - `reed-solomon-core` 0.2.0, `MIT OR Apache-2.0`: the Reed–Solomon code of the repair words.
@@ -52,7 +54,7 @@ Crates they bring in:
 - `CC0-1.0`: `bitcoin_hashes` 0.14.101, `hex-conservative` 0.2.3.
 - `MIT OR Apache-2.0`, or the same two in the other order: `arrayvec` 0.7.8, `base64ct` 1.8.3,
   `block-buffer` 0.12.1, `cfg-if` 1.0.5, `cmov` 0.5.4, `cpufeatures` 0.3.1, `crossbeam-deque` 0.8.8,
-  `crossbeam-epoch` 0.9.21, `crossbeam-utils` 0.8.23, `crypto-common` 0.2.2, `ctutils` 0.4.6,
+  `crossbeam-epoch` 0.9.21, `crossbeam-utils` 0.8.23, `crypto-common` 0.2.2,
   `digest` 0.11.3, `either` 1.19.0, `enumflags2` 0.7.12 (on Linux), `hybrid-array` 0.4.15,
   `landlock` 0.4.8 (on Linux), `libc` 0.2.191 (on Unix systems), `rayon-core` 1.13.0, `thiserror`
   2.0.21 (on Linux), `typenum` 1.20.1, `windows-link` 0.2.1 and `windows-sys` 0.61.2 (on Windows).

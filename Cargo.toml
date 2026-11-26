@@ -32,6 +32,8 @@ sha2 = { version = "0.11", default-features = false, features = ["zeroize"] }
 # which 0.1.26 holds and a later 0.1.x may replace.
 unicode-normalization = { version = ">=0.1.26, <0.1.27", default-features = false }
 zeroize = "1.9"
+# Comparisons of bytes derived from a secret in constant time; digest already brings it.
+ctutils = "0.4"
 # Pages for secrets and for the work area of Argon2id, the isolation of the process, the secret
 # writer and the clearing of stacks after secret work: `protect` passes its `Secret`,
 # `SecretError`, `Isolation` and `write_secret` on. Exact, not a caret: the safety of every secret

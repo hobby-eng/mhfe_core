@@ -1,18 +1,20 @@
-//! Comparisons of bytes derived from a secret in a time that depends on their length alone: every
-//! byte is read, with no exit at the first difference, and the difference passes through
-//! `black_box`, so that the compiler can neither stop the loop early nor turn it into a branch on
-//! each byte. Lengths are public here.
+//! Comparisons of bytes derived from a secret in constant time, by RustCrypto's `ctutils`, whose
+//! comparisons are built on the `cmov` crate's predication: no exit at the first difference and no
+//! branch on a byte. Lengths are public here.
 
-use std::hint::black_box;
+use ctutils::CtEq;
 
 /// Whether `a` and `b` hold the same bytes.
 pub(crate) fn same(a: &[u8], b: &[u8]) -> bool {
-    a.len() == b.len() && black_box(a.iter().zip(b).fold(0, |acc, (x, y)| acc | (x ^ y))) == 0
+    a.ct_eq(b).to_bool()
 }
 
 /// Whether every byte of `bytes` is zero.
 pub(crate) fn all_zero(bytes: &[u8]) -> bool {
-    black_box(bytes.iter().fold(0, |acc, byte| acc | byte)) == 0
+    bytes
+        .iter()
+        .fold(ctutils::Choice::TRUE, |zero, byte| zero & byte.ct_eq(&0))
+        .to_bool()
 }
 
 #[cfg(test)]

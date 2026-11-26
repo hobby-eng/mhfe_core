@@ -280,6 +280,7 @@ dependencies = [
  "argon2",
  "bip39",
  "blake2",
+ "ctutils",
  "hmac",
  "rayon",
  "reed-solomon-core",
