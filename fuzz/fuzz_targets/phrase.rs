@@ -1,6 +1,8 @@
 //! Any text read as a phrase, as a person writes one down: a phrase that is read gives a canonical
 //! text that reads back as the same phrase, with as many words as it says, and a token read as a
-//! word reads as that word again.
+//! word reads as that word again. Input with its first byte at 0x80 or more is a phrase instead,
+//! written as a person may write it: each word in upper or lower case, cut to its first four letters
+//! or more, between runs of spaces, tabs and line breaks; it reads as the phrase itself.
 #![no_main]
 #![allow(
     clippy::unwrap_used,
@@ -11,7 +13,39 @@
 use libfuzzer_sys::fuzz_target;
 use mhfe_core::Phrase;
 
+/// The entropy lengths of the phrases of 12 to 24 words.
+const ENTROPY_BYTES: [usize; 5] = [16, 20, 24, 28, 32];
+/// What may stand between two words.
+const SPACES: [&str; 4] = [" ", "  ", "\t", "\r\n"];
+
+/// A phrase from `data` written as a person may write it: it must read as itself.
+fn written(shape: u8, data: &[u8]) {
+    let entropy_bytes = ENTROPY_BYTES[usize::from(shape) % ENTROPY_BYTES.len()];
+    let Some((entropy, styles)) = data.split_at_checked(entropy_bytes) else {
+        return;
+    };
+    let phrase = Phrase::from_entropy(entropy).unwrap();
+    let mut text = String::new();
+    for (index, word) in phrase.as_str().split(' ').enumerate() {
+        let style = styles.get(index).copied().unwrap_or(0);
+        let kept = (4 + usize::from(style & 3)).min(word.len());
+        let word = &word[..kept];
+        if style & 4 == 0 {
+            text.push_str(word);
+        } else {
+            text.push_str(&word.to_uppercase());
+        }
+        text.push_str(SPACES[usize::from(style >> 3) % SPACES.len()]);
+    }
+    assert_eq!(Phrase::read(&text).unwrap().as_str(), phrase.as_str());
+}
+
 fuzz_target!(|data: &[u8]| {
+    if let Some((&shape, rest)) = data.split_first()
+        && shape >= 0x80
+    {
+        return written(shape, rest);
+    }
     let Ok(text) = std::str::from_utf8(data) else {
         return;
     };

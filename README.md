@@ -16,15 +16,15 @@
 
 <p align="center">
   <sub>The penguin lives in the cold, like the backups MHFE is made for. It holds a
-    steel backup with 24 words and waddles from side to side, much as a Feistel network swaps its two
-    halves in every round.</sub>
+    steel backup with 24 words and waddles from side to side, much as a Feistel network swaps its
+    two halves in every round.</sub>
 </p>
 
-A seed phrase is the whole wallet: anyone who reads it can take the funds. So it has to be hidden, or
-learned by heart word by word, for as long as the wallet lives. MHFE, Memory-Hard Feistel Encryption
-for BIP39 mnemonics, changes what you have to protect. You remember a password, and you keep a
-container on the usual paper or metal backup. The container is itself a valid BIP39 phrase, so it
-fits the same backup, and reading or photographing it does not reveal your phrase.
+A seed phrase is the whole wallet: anyone who reads it can take the funds. So it has to be hidden,
+or learned by heart word by word, for as long as the wallet lives. MHFE, Memory-Hard Feistel
+Encryption for BIP39 mnemonics, changes what you have to protect. You remember a password, and you
+keep a container on the usual paper or metal backup. The container is itself a valid BIP39 phrase,
+so it fits the same backup, and reading or photographing it does not reveal your phrase.
 
 It still has to stay private: whoever has it can try passwords. That is why every guess is made
 expensive: twelve rounds of Argon2id, 2 GiB of memory and a minute or two each by default. You pay
@@ -36,6 +36,18 @@ the published [MHFE specification](https://github.com/hobby-eng/mhfe-spec) 0.7.0
 not depend on this code: any program that follows the specification opens the same containers.
 
 > **Experimental.** The construction has not been reviewed by independent cryptographers.
+
+The [documentation index](https://github.com/hobby-eng/mhfe_core/blob/main/docs/README.md) lists
+the documents of the repository; the [API documentation](https://docs.rs/mhfe-core) is the guide
+most readers need first.
+
+## Contents
+
+- [What it does](#what-it-does)
+- [Using it](#using-it)
+- [Security](#security)
+- [Testing](#testing)
+- [Licence](#licence)
 
 ## What it does
 
@@ -83,8 +95,9 @@ trustworthy. What this covers on each system, and what it does not, is in
 ## Testing
 
 Clone with `git clone --recurse-submodules`: the test vectors come from the specification's
-repository. `cargo test --locked` runs the fast tests, and `cargo xtask check` runs everything CI
-checks on one computer. The full-cost vectors take hours:
+repository. `cargo test --locked` runs the fast tests, and `cargo xtask check` runs the gates, the
+lints and the fast tests of the CI's main job on one computer; the other targets, the minimum Rust
+and the package check run in CI. The full-cost vectors take hours:
 `cargo test --locked --release --test full_cost -- --ignored --nocapture`.
 
 The last coverage measurement, of commit `129736e` on 2026-11-25, ran 104 checks on Linux x86-64

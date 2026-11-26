@@ -40,7 +40,7 @@ jobs:
           set -euo pipefail
           # The fuzz workspace's own lockfile, unchanged: cargo-fuzz has no --locked of its own.
           cargo +nightly-2026-11-13 fetch --locked --manifest-path fuzz/Cargo.toml
-          targets=$(sed -n '/^\[\[bin\]\]$/,/^path/ s/^name = "\(.*\)"$/\1/p' fuzz/Cargo.toml)
+          targets=$(cargo +nightly-2026-11-13 fuzz list --fuzz-dir fuzz)
           test -n "$targets"
           for target in $targets; do
             cargo +nightly-2026-11-13 fuzz run --fuzz-dir fuzz --target x86_64-unknown-linux-gnu \

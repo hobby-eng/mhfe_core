@@ -25,7 +25,7 @@
 //! a secret past the standard library's output buffer. In a native build, after each call that
 //! computes with a secret, but [`repair::Repaired::changes`] and those of [`protect`] and the
 //! engine, the crate overwrites 128 KiB of the stack below the caller's frame, so such a call needs
-//! about 140 KiB of free stack: on a smaller thread stack, such as musl's default of 128 KiB, it
+//! up to 144 KiB of free stack: on a smaller thread stack, such as musl's default of 128 KiB, it
 //! ends the process. WebAssembly leaves the stack as it is, as a stack that runs over there has no
 //! guard page; its buffers are still wiped when dropped.
 //!

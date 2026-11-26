@@ -3,11 +3,13 @@
 //! step of 1, so that g(x) = (x + alpha)(x + alpha^2)...(x + alpha^k).
 //!
 //! The word numbers, and every value computed from them, are held in fixed arrays on the stack,
-//! never on the heap, and the profile's public functions but `Repaired::changes` clear the stack
-//! after them (`stack::cleared`); the calls of reed-solomon-core clear it too, through the same
-//! secret-protection-core, and wipe their working room.
+//! never on the heap, each wiped when it goes out of use, as in WebAssembly nothing clears the
+//! stack. In a native build the profile's public functions but `Repaired::changes` also clear the
+//! stack after them (`stack::cleared`), and the calls of reed-solomon-core clear it too, through the
+//! same secret-protection-core, and wipe their working room.
 
 use reed_solomon_core::{CyclicWords, Field};
+use zeroize::Zeroizing;
 
 use super::Card;
 use crate::packing::STATE_WORDS;
@@ -49,11 +51,11 @@ fn with_code<T>(data: usize, parity: usize, work: impl FnOnce(&CyclicWords<'_>) 
     reason = "word numbers are below 2,048, elements of GF(2^11), and the counts are the code's"
 )]
 pub(super) fn parity(data: &[u16], parity: &mut [u16]) {
-    let mut sources = [[0u8; 2]; MAX_SYMBOLS];
+    let mut sources = Zeroizing::new([[0u8; 2]; MAX_SYMBOLS]);
     for (bytes, symbol) in sources.iter_mut().zip(data) {
         *bytes = symbol.to_be_bytes();
     }
-    let mut outputs = [[0u8; 2]; MAX_PARITY];
+    let mut outputs = Zeroizing::new([[0u8; 2]; MAX_PARITY]);
     let mut remainder = [0u16; MAX_PARITY];
     let k = parity.len();
     with_code(data.len(), k, |code| {
@@ -66,8 +68,8 @@ pub(super) fn parity(data: &[u16], parity: &mut [u16]) {
         )
     })
     .expect("a card's data is a word of the code");
-    for (symbol, bytes) in parity.iter_mut().zip(outputs) {
-        *symbol = u16::from_be_bytes(bytes);
+    for (symbol, bytes) in parity.iter_mut().zip(outputs.iter()) {
+        *symbol = u16::from_be_bytes(*bytes);
     }
 }
 

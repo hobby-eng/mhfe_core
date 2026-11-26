@@ -1,0 +1,10 @@
+[package]
+name = "aud006-stack-need"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+mhfe-core = { path = "../../../.." }
+
+[workspace]

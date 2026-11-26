@@ -2,16 +2,16 @@
 
 ## Unreleased
 
+### Library
+
 - The repair words are computed and repaired by reed-solomon-core 0.2.0, the same code over
   GF(2^11) with the first root alpha and a step of 1: cards and repairs are unchanged. Its decoder
   finds wrong words algebraically, where the crate's own tried every set of places, which took a
   time that depended on where the damage was; the field's tables are no longer on the heap.
-- The release workflow packages the crate in a job that can neither write nor sign. Only the
-  attestation and the release draft hold those rights, and they run no code of the repository.
-- Four fuzz targets read what a person gives the crate: a phrase, a password, a container with its
-  card, and a password under the password-check profile; the release workflow runs each for 90
-  seconds before it packages a tag. CI also runs the tests on Intel macOS and on Windows with the
-  GNU toolchain, and on macOS the isolation tests again under the hardened runtime.
+- In WebAssembly, where nothing clears the stack, the repair profile wipes the word numbers it
+  holds on the stack before it returns.
+- A call that clears the stack needs up to 144 KiB of free stack, the repair calls the most, as
+  reed-solomon-core clears inside them too.
 - `wallet_check::draw` is gone: the crate draws no new seed phrases. A host that draws a phrase
   until it passes the wallet check does so itself and checks it with `Seed::passes`.
 - A cancelled operation is no longer an error: `Mhfe::encrypt` and `Mhfe::decrypt` return
@@ -78,6 +78,18 @@
 - In WebAssembly nothing clears the stack after a call: a stack that runs over there has no guard
   page. What a computation leaves on it stays in the instance's memory until it is overwritten or
   the instance ends. Buffers are still wiped when they are dropped.
+
+### Repository
+
+- The release workflow packages the crate in a job that can neither write nor sign. Only the
+  attestation and the release draft hold those rights, and they run no code of the repository.
+- Fuzz targets read what a person gives the crate: a phrase, a password, a passphrase, a container
+  with its card, a recovered state with a stated length, and a password under the password-check
+  profile. The release workflow runs each for 90 seconds before it packages a tag.
+- CI runs the tests on Intel macOS.
+- CI runs the tests on Windows with the GNU toolchain.
+- On macOS, CI runs the isolation tests again under the hardened runtime.
+- The RustSec check reads the fuzz targets' lockfile too.
 
 ## 0.2.0 (2026-11-01)
 

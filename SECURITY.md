@@ -29,8 +29,9 @@ library does not: when it reads or writes a phrase or computes a seed, its inter
 on the stack. So every round, and every public function that computes with a secret, overwrites 128
 KiB of the stack below its frame when it is done. The exceptions are `Repaired::changes` and the
 functions of `protect` and the engine. How deep these calls write has not been measured, so this is
-best effort. Such a call needs about 140 KiB of free stack: on a smaller thread stack, such as
-musl's default of 128 KiB, it ends the process. In WebAssembly nothing is overwritten, as a stack
+best effort. Such a call needs up to 144 KiB of free stack, the repair calls the most, as
+reed-solomon-core clears inside them too: on a smaller thread stack, such as musl's default of 128
+KiB, it ends the process. In WebAssembly nothing is overwritten, as a stack
 that runs over there has no guard page and would write into other memory: what these functions
 leave stays in the instance's memory until later calls overwrite it or the host ends the instance.
 
@@ -73,6 +74,12 @@ reference implementation's error numbers, never text that was passed in.
 - Free memory. `NativeArgon2::new` reserves the work area without estimating what is free, and a
   reservation the system grants can still end the process when it is used (overcommit, the
   out-of-memory or low-memory killer, jetsam). The program checks free memory first.
+- The settings of an operation. While Argon2id runs, another process can see how much memory the
+  process uses, on Linux in `/proc/PID/status` even when it cannot read the memory itself, and from
+  it the memory level; the time each round takes then gives the PIM. The specification lets the
+  settings be kept secret like part of the password; such a secret holds only while no other process
+  watches the computer, or where the system hides other processes' details, as Linux's `hidepid`
+  does.
 
 ## Each system
 
@@ -126,3 +133,14 @@ operating system are secret-protection-core's, each with its own such comment.
 If the system refuses Argon2's memory, or a call asks for more than was reserved, the library
 reports `Error::OutOfMemory`. Any other Argon2 failure is `Error::Argon2Failed`, with an error
 number from the list of the reference Argon2 code.
+
+## Release workflow
+
+A version tag runs the fast checks and the fuzz targets, then three jobs with the rights each needs
+and no more. The package job builds and checks the package with read access only; its check runs
+the build scripts of the crate and its dependencies, so it chooses the bytes that are attested. The
+attestation job holds `id-token: write` and `attestations: write`, with which it could also sign
+another file of this repository, and runs no code of the repository. The draft job holds
+`contents: write`, with which it could also push to a branch or move a tag or a release, and runs
+only `gh` on the files the package job made. No narrower token scope exists for either; the
+maintainer checks the tag's signature, the package and its attestation before publishing.

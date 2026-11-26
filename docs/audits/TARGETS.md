@@ -4,9 +4,9 @@ What each target is for the crate, and how CI and an audit check it, beyond the 
 guide, version 2, whose section 17, "Rust crates and native targets", applies here. The audit
 reconciles this file with `rust-toolchain.toml`, the workflows
 [ci.yml](../../.github/workflows/ci.yml), [vectors.yml](../../.github/workflows/vectors.yml),
-[audit.yml](../../.github/workflows/audit.yml) and [release.yml](../../.github/workflows/release.yml),
-and the [README](../../README.md), and reports a mismatch. A report records the SHA-256 of this
-file.
+[audit.yml](../../.github/workflows/audit.yml) and
+[release.yml](../../.github/workflows/release.yml), and the [README](../../README.md), and reports a
+mismatch. A report records the SHA-256 of this file.
 
 ## Target matrix
 
@@ -26,6 +26,8 @@ stay apart. A result belongs to the report, never to this file.
 | `aarch64-linux-android` | Built and linted; no runner tests it | Optional until a runner exists | Clippy; the tests built | A device or emulator with an app's threads. |
 | `x86_64-linux-android` | Built and linted; no runner tests it | Optional until a runner exists | Clippy; the tests built | An emulator. |
 | `aarch64-apple-ios` | Built and linted; no runner tests it | Optional until a runner exists | Clippy; the tests built | A signed test app on a device. |
+| `aarch64-apple-ios-sim` | Not built yet: the simulator of the iOS row, for apps tested there | Optional until CI runs it | None | The iOS simulator on a macOS runner, for the cases of the device row it can show. |
+| `x86_64-unknown-linux-gnu`, fuzzing | Test only | Required | `release.yml`: each fuzz target for 90 seconds with `nightly-2026-11-13`, cargo-fuzz 0.13.2 and AddressSanitizer | Native Linux: the fuzz targets of `fuzz/` with their own lockfile, which must stay unchanged. |
 
 Not built: 32-bit native targets, where the native engine does not compile, as suite 3 needs at
 least 2 GiB; musl; and big-endian Linux.
@@ -50,6 +52,7 @@ least 2 GiB; musl; and big-endian Linux.
 
 ## Permanent gaps
 
-The Android and iOS runs until a runner exists for them, `wasm32-unknown-unknown` in a browser
-engine, which only a program built on the crate runs, and the Intel macOS run if GitHub stops
-offering an Intel macOS runner.
+The Android and iOS runs: a hosted runner can run an Android emulator and the iOS simulator, which
+CI does not do yet, and an Android app process or a signed iOS app on a device, which no runner
+offers; `wasm32-unknown-unknown` in a browser engine, which only a program built on the crate runs,
+and the Intel macOS run if GitHub stops offering an Intel macOS runner.

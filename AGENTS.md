@@ -15,6 +15,9 @@ records this crate's releases. `tests/fixtures/unicode18-ucd/` is Unicode's
 
 - Toolchain: Rust 1.99.1 from `rust-toolchain.toml`, and dprint 0.63.0 for the Markdown, JSON,
   TOML and YAML (CORE-21), with the plugins and their SHA-256 that `dprint.json` pins. No Node.js.
+  The fuzz targets in `fuzz/`, a workspace with its own lockfile, run with `nightly-2026-11-13` and
+  cargo-fuzz 0.13.2: `cargo +nightly-2026-11-13 fuzz run --fuzz-dir fuzz <target>`. Their
+  libfuzzer-sys compiles libFuzzer, so `cargo xtask check`, which lints them, needs a C++ compiler.
 - Tools (TOOL-01): the `xtask` crate of the workspace, run as `cargo xtask <task>`; it is not part
   of the package. Every new tool, gate or check is a task there, in Rust.
 - Fast gates (CORE-43), as CI runs them: `cargo xtask check`.
@@ -29,8 +32,9 @@ records this crate's releases. `tests/fixtures/unicode18-ucd/` is Unicode's
   `cargo test --locked --release --test full_cost -- --ignored --nocapture`, shared among
   processes with `MHFE_VECTOR_SHARE=k/n`.
 - Workflows: `.github/workflows/ci.yml` (every push), `vectors.yml` (on request and on version
-  tags), `release.yml` (version tags; it calls ci.yml and drafts the release), `audit.yml` (RustSec,
-  when Cargo.toml or Cargo.lock changes, weekly and on request).
+  tags), `release.yml` (version tags; it calls ci.yml, runs each fuzz target for 90 seconds and
+  drafts the release), `audit.yml` (RustSec for both lockfiles, when a manifest or a lockfile
+  changes, weekly and on request).
 
 On the development computer, builds, tests and Clippy run through a memory guard,
 `../tmp/memguard.sh <command>`: a local tool, not part of this repository.
@@ -40,7 +44,6 @@ On the development computer, builds, tests and Clippy run through a memory guard
 An audit, a review of findings or a remediation follow-up of this repository follows the workspace's
 audit procedure in `../.github/audits/`: `FULL_AUDIT_GUIDE_V2.md` (the checks and their order;
 section 17 for Rust crates and every target they are built for), `AUDIT_STANDARD.md`,
-`AUDIT_TEMPLATE.md` and `audit-report.schema.json`. Section 17 asks for `docs/audits/TARGETS.md`
-with the targets, their runners and the fuzzing budgets; until this repository has one, the audit
-derives the targets as section 17.3 says and records the missing file. Reports, their JSON twins and
-their harnesses stay in this repository's `docs/audits/`.
+`AUDIT_TEMPLATE.md` and `audit-report.schema.json`. `docs/audits/TARGETS.md` lists the targets,
+their runners and the fuzzing budgets that section 17 asks for. Reports, their JSON twins and their
+harnesses stay in this repository's `docs/audits/`.

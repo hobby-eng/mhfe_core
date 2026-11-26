@@ -7,8 +7,8 @@
 //! - TOOL-02: a shell script starts with `#!/usr/bin/env bash` and `set -euo pipefail`.
 //! - A reason on every lint exception: Rust's `allow` and `expect` carry `reason = "..."`.
 //! - CORE-25: the published library uses carets except for CARGO_EXCEPTIONS; repository tools
-//!   require exact versions. Cargo.lock is the one lockfile (TOOL-05). RUST-01: every Cargo.toml
-//!   has its lints table.
+//!   require exact versions. Cargo.lock is the root workspace's lockfile (TOOL-05); the fuzz
+//!   targets keep their own (RUST-18). RUST-01: every Cargo.toml has its lints table.
 //! - TOOL-01: the repository's tools are `cargo xtask` tasks, so it holds no Node.js script and no
 //!   Node.js tooling (package.json, its lockfiles, .node-version).
 //! - CORE-19 for this crate: the library describes this crate, never a program built on it or an
@@ -27,12 +27,17 @@ use std::path::Path;
 
 use crate::Failure;
 
-/// Folders not read: Git's, the builds', the corpora, the specification's repository and the
-/// vendored trees, which are data here, and the audit records, which are frozen.
-const SKIPPED: [&str; 7] = [
+/// Folders not read: Git's, the builds', the fuzzers' corpora, findings and coverage, the test
+/// corpora, the specification's repository and the vendored trees, which are data here, and the
+/// audit records, which are frozen.
+const SKIPPED: [&str; 11] = [
     ".git",
     "node_modules",
     "target",
+    "fuzz/target",
+    "fuzz/corpus",
+    "fuzz/artifacts",
+    "fuzz/coverage",
     "docs/audits",
     "tests/fixtures",
     "tests/spec",
@@ -41,11 +46,12 @@ const SKIPPED: [&str; 7] = [
 const MOST_LINES: usize = 800;
 /// The files whose lines of code CORE-15 counts: a file by its path from the root, or a folder by
 /// its path with a final slash.
-const COUNTED: [&str; 5] = [
+const COUNTED: [&str; 6] = [
     "build.rs",
     "src/",
     "tests/",
     "xtask/src/",
+    "fuzz/fuzz_targets/",
     ".github/workflows/",
 ];
 
@@ -586,8 +592,8 @@ fn is_caret(requirement: &str) -> bool {
     matches!(version_numbers(requirement), Some(1..=3))
 }
 
-/// TOOL-01 and TOOL-05 for the files at the repository's root, `names`: Cargo.lock is the one
-/// lockfile, and a Rust repository holds no Node.js tooling.
+/// TOOL-01 and TOOL-05 for the files at the repository's root, `names`: Cargo.lock is the root
+/// workspace's lockfile, and a Rust repository holds no Node.js tooling.
 fn check_root_files(names: &[String], problems: &mut Vec<String>) {
     if !names.iter().any(|name| name == "Cargo.lock") {
         problems.push("Cargo.lock is missing".to_owned());

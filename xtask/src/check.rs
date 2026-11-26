@@ -1,8 +1,9 @@
 //! The fast checks of the repository, which CI's `checks` job runs on every push (CORE-43), run as
 //! `cargo xtask check`: the gates, then every fast test (the isolation and secret-memory tests and
 //! the unit tests of this crate's gates among them), stopping at the first failure. Needs the
-//! pinned Rust toolchain with its wasm32 target and dprint, which formats the Markdown, JSON, TOML
-//! and YAML with the plugins that dprint.json pins. No full-cost Argon2id runs here: vectors.yml
+//! pinned Rust toolchain with its wasm32 target, dprint, which formats the Markdown, JSON, TOML
+//! and YAML with the plugins that dprint.json pins, and a C++ compiler, with which libfuzzer-sys
+//! builds libFuzzer when the fuzz targets are linted. No full-cost Argon2id runs here: vectors.yml
 //! runs tests/full_cost.rs.
 
 use std::env;

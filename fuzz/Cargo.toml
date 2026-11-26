@@ -10,10 +10,13 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "=0.4.10"
 mhfe-core = { path = ".." }
-# The NFKD a password's encoding must equal, from the tables the crate pins.
+# The NFKD a password's encoding and a passphrase must equal, from the tables the crate pins.
 unicode-normalization = "=0.1.26"
+# The BIP39 seed the wallet check's seed must equal.
+bip39 = "=3.0.0"
 
-# Text read as a phrase: what is read reads back as itself.
+# Text read as a phrase, and phrases written as a person may write them: what is read reads back
+# as itself.
 [[bin]]
 name = "phrase"
 path = "fuzz_targets/phrase.rs"
@@ -25,6 +28,23 @@ bench = false
 [[bin]]
 name = "password"
 path = "fuzz_targets/password.rs"
+test = false
+doc = false
+bench = false
+
+# Text as a passphrase: the seed is bip39's of its NFKD.
+[[bin]]
+name = "passphrase"
+path = "fuzz_targets/passphrase.rs"
+test = false
+doc = false
+bench = false
+
+# Containers decrypted with a stand-in engine and read with any stated length: each reading reads
+# back and is verified exactly when its verifier matched.
+[[bin]]
+name = "recovery"
+path = "fuzz_targets/recovery.rs"
 test = false
 doc = false
 bench = false

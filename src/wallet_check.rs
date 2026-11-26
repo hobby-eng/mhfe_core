@@ -49,8 +49,9 @@ pub struct Seed {
 impl Seed {
     /// The BIP39 seed of `phrase` with `passphrase`, which is used in Unicode 18.0.0 NFKD: any
     /// passphrase, the empty one included, without the limits of an MHFE password. Its NFKD takes
-    /// time and memory linear in its length, so a host bounds a passphrase it reads from a file or
-    /// the clipboard.
+    /// time and memory linear in its length, and one whose NFKD the memory cannot hold, never more
+    /// than 2 GiB in WebAssembly, ends the program, as a `Secret` that cannot be made does: a host
+    /// bounds a passphrase it reads from a file or the clipboard.
     pub fn derive(phrase: &Phrase, passphrase: &str) -> Self {
         stack::cleared(|| Self::of(phrase, &Nfkd::of(passphrase).write()))
     }

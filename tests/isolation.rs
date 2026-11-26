@@ -74,6 +74,9 @@ fn child(role: &str) -> Child {
 /// outside. On Windows, where the isolation holds for every thread, it starts a thread before the
 /// call and one after, which wait with it. On Windows and macOS it runs Argon2id after the call.
 fn isolated() {
+    // Read before the isolation moves the process into a user namespace of its own.
+    #[cfg(target_os = "linux")]
+    linux::first_user_namespace();
     #[cfg(windows)]
     waiting_thread();
     let isolation = Isolation::enter();
@@ -206,13 +209,16 @@ fn hardened() -> bool {
 
 /// Another program of the same user cannot read the memory of the isolated process.
 fn cannot_be_read_from_outside(pid: u32) {
+    // In a user namespace that its user owns, the test holds the rights to read a process of it.
     #[cfg(target_os = "linux")]
-    assert_eq!(
-        std::fs::File::open(format!("/proc/{pid}/mem"))
-            .err()
-            .map(|error| error.kind()),
-        Some(std::io::ErrorKind::PermissionDenied)
-    );
+    if linux::first_user_namespace() {
+        assert_eq!(
+            std::fs::File::open(format!("/proc/{pid}/mem"))
+                .err()
+                .map(|error| error.kind()),
+            Some(std::io::ErrorKind::PermissionDenied)
+        );
+    }
     #[cfg(windows)]
     windows::cannot_be_opened(pid);
     #[cfg(not(any(target_os = "linux", windows)))]
@@ -495,13 +501,25 @@ mod linux {
         }
     }
 
-    /// Other programs cannot read the memory: confirmed in the first PID namespace, unknown in a
-    /// nested one, such as a container's, where a tracer outside it would be invisible.
+    /// Whether the program started in the first user namespace: read once, before the isolation
+    /// moves the process into one of its own.
+    pub(super) fn first_user_namespace() -> bool {
+        static FIRST: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+        *FIRST.get_or_init(|| {
+            fs::read_link("/proc/self/ns/user")
+                .is_ok_and(|link| link.as_os_str() == "user:[4026531837]")
+        })
+    }
+
+    /// Other programs cannot read the memory: confirmed in the first PID namespace of a program
+    /// started in the first user namespace, unknown in a nested one, such as a container's, where a
+    /// tracer outside it would be invisible, or in a user namespace that its user owns, where any
+    /// process of that user may attach.
     fn memory_reading_as_reported(isolation: Isolation) {
         use secret_protection_core::{Outcome, Protection};
         let first_namespace = fs::read_link("/proc/self/ns/pid")
             .is_ok_and(|link| link.as_os_str() == "pid:[4026531836]");
-        let expected = if first_namespace {
+        let expected = if first_namespace && first_user_namespace() {
             Outcome::Confirmed
         } else {
             Outcome::Unknown

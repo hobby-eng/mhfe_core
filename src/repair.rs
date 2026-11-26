@@ -30,6 +30,8 @@ mod code;
 
 use std::fmt;
 
+use zeroize::Zeroizing;
+
 use crate::phrase::{self, WORD_COUNTS};
 use crate::protect::Secret;
 use crate::{Phrase, stack};
@@ -59,12 +61,12 @@ impl Card {
             if !Self::SIZES.contains(&words) {
                 return Err(Error::CardWordCount { words });
             }
-            let mut data = [0u16; MAX_SYMBOLS];
+            let mut data = Zeroizing::new([0u16; MAX_SYMBOLS]);
             for (symbol, number) in data.iter_mut().zip(container.mnemonic().word_indices()) {
                 // A word number, below 2,048.
                 *symbol = number as u16;
             }
-            let mut parity = [0u16; MAX_PARITY];
+            let mut parity = Zeroizing::new([0u16; MAX_PARITY]);
             let parity = &mut parity[..words];
             code::parity(&data[..container.words()], parity);
             let list = parity.iter().map(|&number| phrase::word(number));
@@ -125,8 +127,8 @@ impl Repaired {
                 return Err(Error::CardWordCount { words: card_words });
             }
             let tokens = written.split_whitespace().chain(card.split_whitespace());
-            let mut received = [0u16; MAX_SYMBOLS];
-            let mut unreadable = [0usize; MAX_SYMBOLS];
+            let mut received = Zeroizing::new([0u16; MAX_SYMBOLS]);
+            let mut unreadable = Zeroizing::new([0usize; MAX_SYMBOLS]);
             let mut erased = 0;
             for (position, token) in tokens.enumerate() {
                 match phrase::number_of(token) {
@@ -139,7 +141,7 @@ impl Repaired {
             }
             let symbols = words + card_words;
             let (received, unreadable) = (&received[..symbols], &unreadable[..erased]);
-            let mut corrected = [0u16; MAX_SYMBOLS];
+            let mut corrected = Zeroizing::new([0u16; MAX_SYMBOLS]);
             let corrected = &mut corrected[..symbols];
             if !code::repair(received, unreadable, card_words, corrected) {
                 return Err(Error::NotPossible);
