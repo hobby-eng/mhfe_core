@@ -515,11 +515,36 @@ fn is_continuation(line: &str) -> bool {
 fn check_cargo_requirements(path: &str, manifest: &str, problems: &mut Vec<String>) {
     let library = path == PUBLISHED_LIBRARY_MANIFEST;
     let mut in_dependencies = false;
-    for line in manifest.split('\n') {
+    // The crate of a `[dependencies.<name>]` table, whose `version` key is its requirement.
+    let mut table = None;
+    let mut lines = manifest.split('\n');
+    while let Some(line) = lines.next() {
+        let line = line.trim();
         if line.starts_with('[') {
-            in_dependencies = line.ends_with("dependencies]");
+            let header = line.split('#').next().unwrap_or_default().trim_end();
+            in_dependencies = header.ends_with("dependencies]");
+            table = dependency_table(header);
+            continue;
         }
-        let Some((name, requirement)) = cargo_dependency(line) else {
+        // An inline table may run over several lines: it is read whole.
+        let mut entry = line.to_owned();
+        if entry.contains('{') && !entry.contains('}') {
+            for next in lines.by_ref() {
+                entry.push(' ');
+                entry.push_str(next.trim());
+                if next.contains('}') {
+                    break;
+                }
+            }
+        }
+        let dependency = match table {
+            Some(name) => cargo_dependency(&entry)
+                .filter(|(key, _)| *key == "version")
+                .map(|(_, requirement)| (name, requirement)),
+            None if in_dependencies => cargo_dependency(&entry),
+            None => None,
+        };
+        let Some((name, requirement)) = dependency else {
             continue;
         };
         let allowed = if library {
@@ -527,7 +552,7 @@ fn check_cargo_requirements(path: &str, manifest: &str, problems: &mut Vec<Strin
         } else {
             is_exact(requirement)
         };
-        if in_dependencies && !allowed {
+        if !allowed {
             let policy = if library {
                 "a caret requirement"
             } else {
@@ -538,6 +563,14 @@ fn check_cargo_requirements(path: &str, manifest: &str, problems: &mut Vec<Strin
             ));
         }
     }
+}
+
+/// The crate a `[dependencies.<name>]` header names, under any kind or target of dependencies.
+fn dependency_table(header: &str) -> Option<&str> {
+    let inner = header.strip_prefix('[')?.strip_suffix(']')?;
+    let (kind, name) = inner.rsplit_once('.')?;
+    kind.ends_with("dependencies")
+        .then(|| name.trim_matches(['"', '\'']))
 }
 
 /// A full exact Cargo comparator, including a prerelease or build suffix when present.
@@ -822,6 +855,21 @@ mod tests {
             check_cargo_requirements("xtask/Cargo.toml", &manifest, &mut problems);
             assert!(problems.is_empty(), "{version}");
         }
+    }
+
+    #[test]
+    fn dependency_tables_commented_headers_and_multiline_tables_are_read() {
+        let manifest = "[dependencies] # the crate's own\na = \"*\"\n[dependencies.b]\n\
+                        version = \"*\"\nfeatures = [\"x\"]\n\
+                        [target.'cfg(unix)'.dependencies.c]\nversion = \"=1.2.3\"\n\
+                        [dependencies]\nd = {\n  version = \"*\",\n  default-features = false\n}\n\
+                        e = { path = \"e\" }\n[package]\nversion = \"0.1.0\"\n";
+        let refused = |name: &str| {
+            format!("xtask/Cargo.toml: {name} = \"*\" is not an exact version (CORE-25)")
+        };
+        let mut problems = Vec::new();
+        check_cargo_requirements("xtask/Cargo.toml", manifest, &mut problems);
+        assert_eq!(problems, [refused("a"), refused("b"), refused("d")]);
     }
 
     #[test]

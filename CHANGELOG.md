@@ -109,6 +109,8 @@
   both lockfiles hold the versions of the crate's own.
 - The tests of the operations no longer expect a secret's pages to be locked, which depends on the
   lock limit; `tests/secret_memory.rs` checks locking against that limit.
+- The code-rules gate reads every form of a dependency in `Cargo.toml`: a `[dependencies.<name>]`
+  table, a header with a comment, and an inline table over several lines.
 
 ## 0.2.0 (2026-11-01)
 

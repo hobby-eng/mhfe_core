@@ -2,11 +2,12 @@
 //! whose 2,048 elements are the word numbers of the BIP39 list, with the first root alpha and a
 //! step of 1, so that g(x) = (x + alpha)(x + alpha^2)...(x + alpha^k).
 //!
-//! The word numbers, and every value computed from them, are held in fixed arrays on the stack,
-//! never on the heap, each wiped when it goes out of use, as in WebAssembly nothing clears the
-//! stack. In a native build the profile's public functions but `Repaired::changes` also clear the
-//! stack after them (`stack::cleared`), and the calls of reed-solomon-core clear it too, through the
-//! same secret-protection-core, and wipe their working room.
+//! The word numbers, and the values this crate computes from them, are held in fixed arrays on the
+//! stack, never on the heap, each wiped when it goes out of use, as in WebAssembly nothing clears
+//! the stack; reed-solomon-core 0.2.0 leaves one more copy of a word number unwiped, as SECURITY.md
+//! says. In a native build the profile's public functions but `Repaired::changes` also clear the
+//! stack after them (`stack::cleared`), and the calls of reed-solomon-core clear it too, through
+//! the same secret-protection-core, and wipe their working room.
 
 use reed_solomon_core::{CyclicWords, Field};
 use zeroize::Zeroizing;

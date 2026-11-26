@@ -59,7 +59,8 @@ settings, it gives you the phrase back.
 
 There are two kinds of container. The usual one always has 24 words, whatever the length of your
 phrase, and for a phrase of 12 to 21 words it tells a wrong password almost always: a wrong one
-passes its check only by chance, about once in 2^32 at worst. A 24-word phrase has no such check.
+passes its check only by chance, about once in 2^32 at worst, and then no reading of the phrase's
+length comes back, at most a 24-word one marked as not verified. A 24-word phrase has no such check.
 The other kind keeps the length of your phrase, so it fits a backup made for that length, but a
 wrong password then gives another valid phrase with no warning.
 
