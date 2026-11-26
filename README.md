@@ -74,13 +74,10 @@ computation starts.
 
 ```toml
 [dependencies]
-mhfe-core = "0.2"
+mhfe-core = "0.3"
 ```
 
 The line above names the latest release; the changelog lists what the repository has added since.
-The example below already uses the next release's API, 0.3.0, which is not published yet: until
-then it builds with `mhfe-core = { git = "https://github.com/hobby-eng/mhfe_core" }`, and with
-0.2, `encrypt` and `decrypt` return the container and the recovery themselves.
 
 A container of a phrase, and the phrase back, in short (the API documentation's example adds the
 duties a program has, such as isolating itself and asking for the password twice):

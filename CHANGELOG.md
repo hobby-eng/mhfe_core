@@ -1,6 +1,8 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 (2026-11-26)
+
+Same specification 0.7.0, same containers, readings, repair words and check words as 0.2.0.
 
 ### Library
 
