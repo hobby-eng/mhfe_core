@@ -24,8 +24,9 @@ ordinary memory: `tests/secret_memory.rs` counts the heap allocations while this
 none. Each typed word is read into an 8-byte buffer on the stack, which is wiped afterwards, and a
 longer word is refused without being copied. Repair words are computed on the stack too.
 reed-solomon-core 0.2.0 makes one more copy of a word number in a step of its arithmetic and does
-not wipe it; it lies on the stack that the call clears afterwards, and in WebAssembly it stays like
-the rest. A later release of that crate is to remove it.
+not wipe it. Where the compiled code keeps it was not measured: a native build's clearing of the
+stack covers it only if it lies there, and WebAssembly clears nothing. A later release of that
+crate is to remove it.
 
 The `blake2`, `hmac` and `sha2` libraries wipe their internal state when they finish. The `bip39`
 library does not: when it reads or writes a phrase or computes a seed, its intermediate values stay
@@ -36,9 +37,10 @@ best effort. Such a call needs more than 128 KiB of free stack: the four measure
 for a phrase, a password, a card and a repair, in release and debug builds, took up to 144 KiB, the
 repair calls the most, as reed-solomon-core clears inside them too. Other systems were not
 measured. On a smaller thread stack, such as musl's default of 128 KiB, it ends the process. In
-WebAssembly nothing is overwritten, as a stack that runs over there has no guard page and would
-write into other memory: what these functions leave stays in the instance's memory until later
-calls overwrite it or the host ends the instance.
+WebAssembly nothing is overwritten, as clearing could run past the stack's end: with rustc's
+default layout, where the stack comes first in linear memory, that traps, and with another layout
+it would write into other data. What these functions leave stays in the instance's memory until
+later calls overwrite it or the host ends the instance.
 
 Argon2id runs on four threads of the engine's own, the lanes and the first and last hash, so the
 caller's stack stays out of it. RustCrypto's `argon2` keeps H0, its hashes and the blocks of its

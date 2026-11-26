@@ -265,7 +265,7 @@ mod tests {
         // The BIP39 vector 7f…7f.
         let legal = Phrase::from_entropy(&[0x7f; 32]).unwrap();
         assert!(legal.as_str().starts_with("legal winner thank year"));
-        assert_eq!(legal.text.is_locked(), cfg!(any(unix, windows)));
+        // Locking depends on the lock limit, which tests/secret_memory.rs checks.
         for bytes in [0, 15, 17, 33] {
             assert_eq!(
                 Phrase::from_entropy(&vec![0; bytes]).unwrap_err(),

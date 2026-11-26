@@ -33,8 +33,8 @@ records this crate's releases. `tests/fixtures/unicode18-ucd/` is Unicode's
   processes with `MHFE_VECTOR_SHARE=k/n`.
 - Workflows: `.github/workflows/ci.yml` (every push), `vectors.yml` (on request and on version
   tags), `release.yml` (version tags; it calls ci.yml, runs each fuzz target for 90 seconds and
-  drafts the release), `audit.yml` (RustSec for both lockfiles, when a manifest or a lockfile
-  changes, weekly and on request).
+  drafts the release), `audit.yml` (RustSec for the three lockfiles, the crate's, `fuzz/` and
+  `wasm/`, when a manifest or a lockfile changes, weekly and on request).
 
 On the development computer, builds, tests and Clippy run through a memory guard,
 `../tmp/memguard.sh <command>`: a local tool, not part of this repository.

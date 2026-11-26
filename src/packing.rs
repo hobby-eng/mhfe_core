@@ -142,7 +142,7 @@ mod tests {
     #[test]
     fn the_state_is_packed_into_a_secret_and_read_in_place() {
         let state = pack(&entropy(20));
-        assert_eq!(state.is_locked(), cfg!(any(unix, windows)));
+        // Locking depends on the lock limit, which tests/secret_memory.rs checks.
         let reading = unpack(state.as_bytes(), 15).unwrap();
         assert_eq!(
             reading.as_ptr(),

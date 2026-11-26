@@ -28,8 +28,7 @@
 //! more than 128 KiB of free stack: the four measured on Linux x86-64, for a phrase, a password, a
 //! card and a repair, took up to 144 KiB, and other systems were not measured. On a smaller thread
 //! stack, such as musl's default of 128 KiB, it ends the process. WebAssembly leaves the stack as
-//! it is, as a stack that runs over there has no guard page; its buffers are still wiped when
-//! dropped.
+//! it is, as clearing could run past its end; its buffers are still wiped when dropped.
 //!
 //! The construction is experimental and has not been independently reviewed.
 //!

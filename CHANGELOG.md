@@ -107,6 +107,8 @@
   password-check target checks made passwords with an erased or a wrong word.
 - The RustSec check reads the lockfiles of the fuzz targets and of the WebAssembly checks too;
   both lockfiles hold the versions of the crate's own.
+- The tests of the operations no longer expect a secret's pages to be locked, which depends on the
+  lock limit; `tests/secret_memory.rs` checks locking against that limit.
 
 ## 0.2.0 (2026-11-01)
 

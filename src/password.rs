@@ -266,7 +266,7 @@ mod tests {
     fn the_password_is_held_in_a_secret_of_its_own_size() {
         let password = Password::new("public test password").unwrap();
         assert_eq!(password.encoded.capacity(), 20);
-        assert_eq!(password.encoded.is_locked(), cfg!(any(unix, windows)));
+        // Locking depends on the lock limit, which tests/secret_memory.rs checks.
     }
 
     #[test]
